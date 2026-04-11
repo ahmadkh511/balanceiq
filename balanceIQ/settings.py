@@ -1,5 +1,3 @@
-
-
 from pathlib import Path
 import os
 import logging
@@ -171,9 +169,9 @@ SITE_URL = 'http://localhost:8000'  # غير هذا الرابط حسب إعدا
 
 # إعدادات إضافية لضمان عمل روابط إعادة تعيين كلمة المرور
 # إعدادات إضافية لضمان عمل روابط إعادة تعيين كلمة المرور
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '192.168.1.108']  # تم استبدال النطاق بالـ IP
+#ALLOWED_HOSTS = ['localhost', '127.0.0.1', '192.168.1.108']  # تم استبدال النطاق بالـ IP
 
-
+ALLOWED_HOSTS = ['*']
 
 
 
