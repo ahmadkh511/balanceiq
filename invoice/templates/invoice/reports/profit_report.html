@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="fas fa-chart-line ml-2"></i> تقرير الأرباح والخسائر</h5>
+        </div>
+        <div class="card-body">
+            <!-- نموذج اختيار الفترة -->
+            <form method="GET" class="row g-3 mb-4">
+                <div class="col-md-3">
+                    <label class="form-label">من تاريخ</label>
+                    <input type="date" name="start_date" class="form-control" value="{{ start_date }}" required>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">إلى تاريخ</label>
+                    <input type="date" name="end_date" class="form-control" value="{{ end_date }}" required>
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-calculator ml-1"></i> حساب الأرباح
+                    </button>
+                </div>
+            </form>
+
+            {% if show_results %}
+            <hr>
+            <h6 class="text-muted">النتائج للفترة من <b>{{ start_date }}</b> إلى <b>{{ end_date }}</b></h6>
+            
+            <div class="row mt-4">
+                <!-- قسم المبيعات -->
+                <div class="col-md-6">
+                    <div class="card bg-light">
+                        <div class="card-header">المبيعات</div>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span>إجمالي المبيعات:</span>
+                                <strong>{{ total_sales|floatformat:2 }}</strong>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span>تكلفة البضائع المباعة:</span>
+                                <strong class="text-danger">({{ total_cost|floatformat:2 }})</strong>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between list-group-item-success">
+                                <span><b>مجمل الربح:</b></span>
+                                <b>{{ gross_profit|floatformat:2 }}</b>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- قسم المصاريف والصافي -->
+                <div class="col-md-6">
+                    <div class="card bg-light">
+                        <div class="card-header">المصاريف والصافي</div>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span>الخصومات الممنوحة:</span>
+                                <span>{{ total_sales_discount|floatformat:2 }}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span>المصاريف والسحوبات:</span>
+                                <strong class="text-danger">({{ total_expenses|floatformat:2 }})</strong>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between {% if net_profit >= 0 %}list-group-item-success{% else %}list-group-item-danger{% endif %}">
+                                <span><b>صافي الربح / الخسارة:</b></span>
+                                <h4 class="mb-0">{{ net_profit|floatformat:2 }}</h4>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            {% elif request.GET.start_date %}
+                <div class="alert alert-warning mt-3">لا توجد بيانات في هذه الفترة.</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

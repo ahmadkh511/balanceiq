@@ -1,0 +1,394 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    /* === إعدادات عامة === */
+    body {
+        background-color: #f4f6f9;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .compact-container {
+        padding: 1.5rem;
+        max-width: 1600px; /* عرض أوسع لاستغلال الشاشة */
+        margin: 0 auto;
+    }
+
+    /* === رأس الصفحة (مدمج) === */
+    .compact-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .header-title h1 {
+        font-size: 1.5rem;
+        color: #2c3e50;
+        margin: 0;
+        font-weight: 700;
+    }
+
+    .header-title span {
+        color: #7f8c8d;
+        font-size: 0.9rem;
+    }
+
+    .toolbar {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+    }
+
+    .search-input-compact {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 0.6rem 1rem 0.6rem 2.5rem;
+        width: 250px;
+        transition: all 0.2s;
+        background-color: #fff;
+    }
+
+    .search-input-compact:focus {
+        border-color: #3498db;
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        outline: none;
+    }
+
+    .search-wrapper {
+        position: relative;
+    }
+
+    .search-wrapper i {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #bdc3c7;
+    }
+
+    .btn-add-compact {
+        background-color: #3498db;
+        color: white;
+        padding: 0.6rem 1.25rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: background 0.2s;
+        white-space: nowrap;
+    }
+
+    .btn-add-compact:hover {
+        background-color: #2980b9;
+        color: white;
+    }
+
+    /* === بطاقة الجدول === */
+    .table-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+        overflow: hidden;
+    }
+
+    /* === الجدول المدمج === */
+    .compact-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: right;
+    }
+
+    .compact-table thead th {
+        background-color: #fbfbfb;
+        color: #7f8c8d;
+        font-weight: 600;
+        font-size: 0.85rem;
+        padding: 0.8rem 1rem;
+        border-bottom: 2px solid #f1f1f1;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .compact-table tbody tr {
+        border-bottom: 1px solid #f1f1f1;
+        transition: background 0.15s;
+    }
+
+    .compact-table tbody tr:hover {
+        background-color: #fafafa;
+    }
+
+    .compact-table tbody td {
+        padding: 0.75rem 1rem;
+        vertical-align: middle;
+        font-size: 0.95rem;
+        color: #34495e;
+    }
+
+    /* === عناصر داخل الجدول === */
+    .img-thumb {
+        width: 40px;
+        height: 40px;
+        border-radius: 6px;
+        object-fit: cover;
+        background: #f8f9fa;
+        border: 1px solid #eee;
+    }
+
+    .no-img-icon {
+        width: 40px;
+        height: 40px;
+        background: #f8f9fa;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #bdc3c7;
+        border: 1px solid #eee;
+    }
+
+    .product-name-cell {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    /* شارات المخزون (صغيرة) */
+    .badge-sm {
+        padding: 0.3rem 0.6rem;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    .bg-low { background-color: #ffebee; color: #c62828; }
+    .bg-med { background-color: #fff8e1; color: #f57f17; }
+    .bg-high { background-color: #e8f5e9; color: #2e7d32; }
+    .bg-info-soft { background-color: #e3f2fd; color: #1565c0; }
+
+    /* أزرار الإجراءات (مدمجة) */
+    .actions-cell {
+        white-space: nowrap;
+    }
+
+    .btn-icon-sm {
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        line-height: 32px;
+        text-align: center;
+        border-radius: 6px;
+        color: #95a5a6;
+        background: transparent;
+        border: 1px solid transparent;
+        display: inline-block;
+        margin: 0 0.1rem;
+        transition: all 0.2s;
+    }
+
+    .btn-icon-sm:hover {
+        background: #f0f2f5;
+        color: #34495e;
+        border-color: #e0e0e0;
+    }
+
+    .btn-icon-sm.text-danger:hover { background: #ffebee; color: #e74c3c; }
+    .btn-icon-sm.text-primary:hover { background: #e3f2fd; color: #3498db; }
+    .btn-icon-sm.text-warning:hover { background: #fff8e1; color: #f39c12; }
+
+    /* === قسم الباركود المنسدل (مدمج) === */
+    .accordion-row {
+        background-color: #fcfcfc;
+    }
+    
+    .accordion-content {
+        padding: 0.75rem 1rem 0.75rem 4rem; /* مسافة بادئة */
+        border-bottom: 1px solid #f1f1f1;
+        font-size: 0.9rem;
+        display: none; /* مخفي افتراضياً */
+    }
+    
+    .accordion-content.show {
+        display: block;
+        animation: fadeIn 0.2s ease;
+    }
+
+    .barcode-tag {
+        display: inline-block;
+        background: #f0f2f5;
+        padding: 0.2rem 0.5rem;
+        border-radius: 4px;
+        margin-left: 0.3rem;
+        margin-bottom: 0.3rem;
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 0.85rem;
+        border: 1px solid #e0e0e0;
+    }
+    
+    .barcode-tag.primary {
+        background: #e3f2fd;
+        border-color: #bbdefb;
+        color: #1565c0;
+    }
+
+    /* === حالة فارغة === */
+    .empty-row td {
+        text-align: center;
+        padding: 3rem;
+        color: #95a5a6;
+    }
+    .empty-row i { font-size: 2rem; margin-bottom: 0.5rem; display: block; }
+
+    /* تجاوب الهواتف */
+    @media (max-width: 992px) {
+        .compact-table thead th { font-size: 0.75rem; padding: 0.6rem; }
+        .compact-table tbody td { padding: 0.6rem; font-size: 0.85rem; }
+        .search-input-compact { width: 180px; }
+    }
+    
+    @media (max-width: 768px) {
+        .hide-mobile { display: none; } /* إخفاء أعمدة أقل أهمية */
+        .header-title h1 { font-size: 1.2rem; }
+    }
+</style>
+
+<div class="compact-container">
+    <!-- الشريط العلوي -->
+    <div class="compact-header">
+        <div class="header-title">
+            <h1>المخزون والمنتجات</h1>
+            <span>إدارة وتتبع جميع المواد</span>
+        </div>
+        <div class="toolbar">
+            <div class="search-wrapper">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" class="search-input-compact" placeholder="بحث سريع...">
+            </div>
+            <a href="{% url 'invoice:product_create' %}" class="btn-add-compact">
+                <i class="fas fa-plus ms-1"></i> جديد
+            </a>
+        </div>
+    </div>
+
+    <!-- الجدول -->
+    <div class="table-card">
+        <table class="compact-table">
+            <thead>
+                <tr>
+                    <th style="width: 50px;">#</th>
+                    <th style="width: 50px;">الصورة</th>
+                    <th>اسم المادة</th>
+                    <th class="hide-mobile">سعر الشراء</th>
+                    <th>سعر البيع</th>
+                    <th>المخزون</th>
+                    <th class="hide-mobile">الباركود</th>
+                    <th style="width: 140px;">الإجراءات</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                {% for product in products %}
+                <!-- الصف الرئيسي -->
+                <tr onclick="toggleAccordion('accordion-{{ product.id }}')" style="cursor: pointer;">
+                    <td>{{ forloop.counter }}</td>
+                    <td>
+                        {% if product.product_image %}
+                            <img src="{{ product.product_image.url }}" class="img-thumb" alt="img">
+                        {% else %}
+                            <div class="no-img-icon"><i class="fas fa-box"></i></div>
+                        {% endif %}
+                    </td>
+                    <td class="product-name-cell">{{ product.product_name }}</td>
+                    <td class="hide-mobile">{{ product.purch_price }}</td>
+                    <td style="color: #27ae60; font-weight: 600;">{{ product.sale_price }}</td>
+                    <td>
+                        {% if product.current_stock_quantity <= 10 %}
+                            <span class="badge-sm bg-low">{{ product.current_stock_quantity }}</span>
+                        {% elif product.current_stock_quantity <= 50 %}
+                            <span class="badge-sm bg-med">{{ product.current_stock_quantity }}</span>
+                        {% else %}
+                            <span class="badge-sm bg-high">{{ product.current_stock_quantity }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="hide-mobile">
+                        {% if product.active_barcodes %}
+                            <span class="badge-sm bg-info-soft" title="اضغط لعرض الباركودات">
+                                {{ product.active_barcodes|length }} أكواد
+                            </span>
+                        {% else %}
+                            <span style="color:#bdc3c7; font-size:0.8rem;">-</span>
+                        {% endif %}
+                    </td>
+                    <td class="actions-cell" onclick="event.stopPropagation();"> <!-- منع فتح الأكورديون عند الضغط على الأزرار -->
+                        <a href="{% url 'invoice:product_detail' slug=product.slug %}" class="btn-icon-sm text-primary" title="عرض"><i class="fas fa-eye"></i></a>
+                        <a href="{% url 'invoice:product_edit' slug=product.slug %}" class="btn-icon-sm text-warning" title="تعديل"><i class="fas fa-edit"></i></a>
+                        <a href="{% url 'invoice:product_delete' slug=product.slug %}" class="btn-icon-sm text-danger" title="حذف" onclick="return confirm('هل أنت متأكد؟')"><i class="fas fa-trash"></i></a>
+                    </td>
+                </tr>
+                
+                <!-- صف تفاصيل الباركود (مخفي) -->
+                {% if product.active_barcodes %}
+                <tr id="accordion-{{ product.id }}" class="accordion-row">
+                    <td colspan="8" style="padding:0;">
+                        <div class="accordion-content">
+                            <div style="margin-bottom: 0.3rem; color:#7f8c8d; font-size:0.8rem;">باركودات نشطة:</div>
+                            {% for barcode in product.active_barcodes %}
+                                <span class="barcode-tag {% if barcode.is_primary %}primary{% endif %}">
+                                    {% if barcode.is_primary %}<i class="fas fa-star fa-xs" style="color:#f1c40f;"></i> {% endif %}
+                                    {{ barcode.barcode_in }}
+                                </span>
+                            {% endfor %}
+                        </div>
+                    </td>
+                </tr>
+                {% endif %}
+                {% empty %}
+                <tr class="empty-row">
+                    <td colspan="8">
+                        <i class="fas fa-inbox"></i>
+                        لا توجد منتجات.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    // وظيفة فتح وإغلاق صف الباركود
+    function toggleAccordion(id) {
+        const element = document.getElementById(id);
+        if (element) {
+            // إغلاق أي آخر مفتوح (اختياري)
+            // document.querySelectorAll('.accordion-content.show').forEach(el => el.classList.remove('show'));
+            
+            const content = element.querySelector('.accordion-content');
+            if(content) content.classList.toggle('show');
+        }
+    }
+
+    // البحث السريع
+    document.getElementById('searchInput').addEventListener('keyup', function() {
+        let filter = this.value.toLowerCase();
+        let rows = document.querySelectorAll('#tableBody tr:not(.accordion-row)');
+        
+        rows.forEach(row => {
+            let name = row.querySelector('.product-name-cell').innerText.toLowerCase();
+            let barcodeSection = row.nextElementSibling; // صف الباركود التالي إن وجد
+            
+            if (name.includes(filter)) {
+                row.style.display = '';
+                if(barcodeSection && barcodeSection.classList.contains('accordion-row')) {
+                    barcodeSection.style.display = ''; // إظهار صف الباركود إذا ظهر المنتج
+                }
+            } else {
+                row.style.display = 'none';
+                if(barcodeSection && barcodeSection.classList.contains('accordion-row')) {
+                    barcodeSection.style.display = 'none'; // إخفاء صف الباركود
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

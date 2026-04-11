@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+
+{% block title %}سجلات النظام{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ... الأنماط السابقة بدون تغيير ... */
+    .log-container {
+        font-family: 'Courier New', Courier, monospace;
+        background-color: #2d3748;
+        color: #e2e8f0;
+        padding: 20px;
+        border-radius: 8px;
+        overflow-x: auto;
+    }
+    .log-entry {
+        border-bottom: 1px solid #4a5568;
+        padding: 10px 0;
+    }
+    .log-entry:last-child {
+        border-bottom: none;
+    }
+    .log-timestamp {
+        color: #a0aec0;
+        font-size: 0.9em;
+    }
+    .log-level {
+        font-weight: bold;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 0.8em;
+        margin-right: 10px;
+    }
+    .log-level.debug { background-color: #4a5568; }
+    .log-level.info { background-color: #3182ce; }
+    .log-level.warning { background-color: #d69e2e; }
+    .log-level.error { background-color: #e53e3e; }
+    .log-level.critical { background-color: #9b2c2c; color: white; }
+    .log-level.raw { background-color: #718096; }
+    
+    .log-type-selector {
+        margin-left: 15px;
+    }
+    
+    .log-type-badge {
+        padding: 5px 10px;
+        border-radius: 4px;
+        font-size: 0.8em;
+        font-weight: bold;
+        margin-left: 5px;
+    }
+    
+    .log-type-badge.debug { background-color: #4a5568; }
+    .log-type-badge.errors { background-color: #e53e3e; }
+    .log-type-badge.info { background-color: #3182ce; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-file-alt me-2"></i>سجلات النظام (System Logs)</h2>
+        
+        <div class="d-flex align-items-center">
+            <!-- اختيار نوع السجل -->
+            <div class="log-type-selector">
+                <label for="log_type" class="me-2">نوع السجل:</label>
+                <select name="log_type" id="log_type" class="form-select me-2" onchange="changeLogType()">
+                    {% for type in log_types %}
+                        <option value="{{ type }}" {% if type == current_log_type %}selected{% endif %}>{{ type }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <!-- فلترة حسب مستوى الخطأ -->
+            <form method="get" class="d-flex align-items-center" id="levelFilterForm">
+                <input type="hidden" name="log_type" id="hidden_log_type" value="{{ current_log_type }}">
+                <label for="level" class="me-2">فلترة حسب المستوى:</label>
+                <select name="level" id="level" class="form-select me-2" onchange="this.form.submit()">
+                    {% for level in log_levels %}
+                        <option value="{{ level }}" {% if level == current_level %}selected{% endif %}>{{ level }}</option>
+                    {% endfor %}
+                    <option value="ALL" {% if current_level == 'ALL' %}selected{% endif %}>الكل</option>
+                </select>
+            </form>
+
+            <!-- زر حذف السجلات (يظهر للمديرين فقط) -->
+            {% if is_superuser %}
+            <form method="post" id="clearLogsForm" style="display: inline;">
+                {% csrf_token %}
+                <input type="hidden" name="log_type_to_clear" value="{{ current_log_type }}">
+                <button type="button" class="btn btn-danger me-2" onclick="confirmClearLogs()">
+                    <i class="fas fa-trash-alt me-1"></i> مسح السجلات
+                </button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- عرض نوع السجل الحالي -->
+    <div class="mb-3">
+        <span>نوع السجل الحالي: </span>
+        <span class="log-type-badge {{ current_log_type }}">{{ current_log_type }}</span>
+    </div>
+
+    <!-- عرض رسائل Django -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {% if error %}
+    <div class="alert alert-danger">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        {{ error }}
+    </div>
+    {% endif %}
+
+    <div class="card">
+        <div class="card-body log-container">
+            {% for log in page_obj %}
+            <div class="log-entry">
+                <span class="log-timestamp">{{ log.timestamp }}</span>
+                <span class="log-level {{ log.level_class }}">{{ log.level }}</span>
+                <span>{{ log.message }}</span>
+            </div>
+            {% endfor %}
+            
+            {% if not page_obj and not error %}
+            <div class="text-center py-4">
+                <i class="fas fa-info-circle fa-3x mb-3 text-muted"></i>
+                <p class="text-muted">لا توجد سجلات لعرضها في هذا النوع من السجلات.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- ترقيم الصفحات -->
+    {% if page_obj.has_other_pages %}
+    <nav aria-label="Page navigation" class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?log_type={{ current_log_type }}&page=1&level={{ current_level }}">الأولى</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?log_type={{ current_log_type }}&page={{ page_obj.previous_page_number }}&level={{ current_level }}">السابق</a>
+                </li>
+            {% endif %}
+
+            <li class="page-item active">
+                <span class="page-link">
+                    الصفحة {{ page_obj.number }} من {{ page_obj.paginator.num_pages }}
+                </span>
+            </li>
+
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?log_type={{ current_log_type }}&page={{ page_obj.next_page_number }}&level={{ current_level }}">التالي</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?log_type={{ current_log_type }}&page={{ page_obj.paginator.num_pages }}&level={{ current_level }}">الأخيرة</a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+
+</div>
+
+<script>
+    function changeLogType() {
+        const logType = document.getElementById('log_type').value;
+        const currentLevel = document.getElementById('level').value;
+        window.location.href = `?log_type=${logType}&level=${currentLevel}`;
+    }
+
+    function confirmClearLogs() {
+        const logType = "{{ current_log_type }}";
+        if (confirm(`هل أنت متأكد تمامًا من أنك تريد مسح جميع سجلات "${logType}"؟\n\nهذا الإجراء لا يمكن التراجع عنه.`)) {
+            document.getElementById('clearLogsForm').submit();
+        }
+    }
+</script>
+{% endblock %}

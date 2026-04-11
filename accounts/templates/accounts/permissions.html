@@ -1,0 +1,222 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">{{ title }}</h1>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createGroupModal">
+            <i class="fas fa-plus ms-2"></i>إنشاء مجموعة جديدة
+        </button>
+    </div>
+
+    <!-- قائمة المجموعات -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">المجموعات والأدوار الحالية</h5>
+        </div>
+        <div class="card-body">
+            {% if groups %}
+                <div class="table-responsive">
+                    <table class="table table-hover text-center align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>اسم المجموعة</th>
+                                <th>عدد الصلاحيات</th>
+                                <th>المستخدمون في المجموعة</th>
+                                <th>إجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for group in groups %}
+                            <tr>
+                                <td><strong>{{ group.name }}</strong></td>
+                                <td>
+                                    <span class="badge bg-info">{{ group.permissions.count }}</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary">{{ group.user_set.count }}</span>
+                                </td>
+                                <td>
+                                    <!-- أزرار الإجراءات -->
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-sm btn-outline-info" 
+                                                data-bs-toggle="modal" data-bs-target="#editGroupModal{{ group.id }}"
+                                                title="عرض وتعديل الصلاحيات">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <form method="post" style="display: inline;" onsubmit="return confirm('هل أنت متأكد من حذف هذه المجموعة؟');">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="delete_group" value="true">
+                                            <input type="hidden" name="group_id" value="{{ group.id }}">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="حذف المجموعة">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-users-slash fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">لا توجد مجموعات محددة بعد. اضغط على "إنشاء مجموعة جديدة" للبدء.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- ========== مودال إنشاء مجموعة جديدة ========== -->
+<div class="modal fade" id="createGroupModal" tabindex="-1" aria-labelledby="createGroupModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createGroupModalLabel">إنشاء مجموعة جديدة</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="إغلاق"></button>
+            </div>
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="create_group" value="true">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="groupName" class="form-label">اسم المجموعة</label>
+                        <input type="text" class="form-control" id="groupName" name="group_name" required>
+                    </div>
+                    
+                    <h6>اختر الصلاحيات للمجموعة:</h6>
+                    <div class="accordion" id="permissionsAccordion">
+                        {% for model_name, perms in permissions_by_model.items %}
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="heading{{ model_name|slugify }}">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ model_name|slugify }}" aria-expanded="false" aria-controls="collapse{{ model_name|slugify }}">
+                                    {{ model_name }}
+                                </button>
+                            </h2>
+                            <div id="collapse{{ model_name|slugify }}" class="accordion-collapse collapse" aria-labelledby="heading{{ model_name|slugify }}" data-bs-parent="#permissionsAccordion">
+                                <div class="accordion-body">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="selectAll-{{ model_name|slugify }}">
+                                        <label class="form-check-label" for="selectAll-{{ model_name|slugify }}">
+                                            <strong>تحديد الكل</strong>
+                                        </label>
+                                    </div>
+                                    <hr>
+                                    {% for perm in perms %}
+                                    <div class="form-check">
+                                        <input class="form-check-input permission-checkbox" type="checkbox" name="permissions" value="{{ perm.id }}" id="perm-{{ perm.id }}">
+                                        <label class="form-check-label" for="perm-{{ perm.id }}">
+                                            {{ perm.name }}
+                                        </label>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="submit" class="btn btn-primary">حفظ المجموعة</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ========== مودال تعديل صلاحيات المجموعات (قابل للتحرير الآن) ========== -->
+{% for group in groups %}
+<div class="modal fade" id="editGroupModal{{ group.id }}" tabindex="-1" aria-labelledby="editGroupModalLabel{{ group.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editGroupModalLabel{{ group.id }}">تعديل صلاحيات مجموعة: {{ group.name }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="إغلاق"></button>
+            </div>
+            <!-- تحويله إلى نموذج -->
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="edit_group" value="true">
+                <input type="hidden" name="group_id" value="{{ group.id }}">
+                <div class="modal-body">
+                    <h6>اختر الصلاحيات للمجموعة:</h6>
+                    <div class="accordion" id="editPermissionsAccordion{{ group.id }}">
+                        {% for model_name, perms in permissions_by_model.items %}
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="editHeading{{ model_name|slugify }}{{ group.id }}">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#editCollapse{{ model_name|slugify }}{{ group.id }}" aria-expanded="false" aria-controls="editCollapse{{ model_name|slugify }}{{ group.id }}">
+                                    {{ model_name }}
+                                </button>
+                            </h2>
+                            <div id="editCollapse{{ model_name|slugify }}{{ group.id }}" class="accordion-collapse collapse" aria-labelledby="editHeading{{ model_name|slugify }}{{ group.id }}" data-bs-parent="#editPermissionsAccordion{{ group.id }}">
+                                <div class="accordion-body">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="editSelectAll-{{ model_name|slugify }}{{ group.id }}">
+                                        <label class="form-check-label" for="editSelectAll-{{ model_name|slugify }}{{ group.id }}">
+                                            <strong>تحديد الكل</strong>
+                                        </label>
+                                    </div>
+                                    <hr>
+                                    {% for perm in perms %}
+                                    <div class="form-check">
+                                        <input class="form-check-input permission-checkbox" type="checkbox" name="permissions" value="{{ perm.id }}" id="editPerm-{{ perm.id }}-{{ group.id }}"
+                                        {% if perm in group.permissions.all %}checked{% endif %}>
+                                        <label class="form-check-label" for="editPerm-{{ perm.id }}-{{ group.id }}">
+                                            {{ perm.name }}
+                                        </label>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="submit" class="btn btn-primary">حفظ التغييرات</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // منطق "تحديد الكل" لكل قسم من الصلاحيات (للإنشاء والتعديل)
+    function setupSelectAll(modalId) {
+        const modalElement = document.getElementById(modalId);
+        if (!modalElement) return;
+
+        modalElement.querySelectorAll('.accordion-item').forEach(item => {
+            const selectAllCheckbox = item.querySelector('input[id^="selectAll-"], input[id^="editSelectAll-"]');
+            if (selectAllCheckbox) {
+                selectAllCheckbox.addEventListener('change', function() {
+                    const checkboxes = item.querySelectorAll('.permission-checkbox');
+                    checkboxes.forEach(cb => cb.checked = this.checked);
+                });
+            }
+        });
+    }
+    
+    // إعداد المنطق لمودال الإنشاء
+    setupSelectAll('createGroupModal');
+
+    // إعداد المنطق لكل مودال تعديل عند فتحه
+    document.querySelectorAll('[id^="editGroupModal"]').forEach(modal => {
+        modal.addEventListener('shown.bs.modal', function () {
+            setupSelectAll(this.id);
+        });
+    });
+});
+</script>
+{% endblock %}

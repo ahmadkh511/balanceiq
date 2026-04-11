@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %} إتمام الشراء -  متجر البرنامج {% endblock %}
+
+{% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+    /* نفس تنسيقات الجذور السابقة */
+    :root { --primary: #6366f1; --primary-dark: #4f46e5; --dark: #0f172a; --gray: #64748b; --radius: 16px; }
+    body { font-family: 'Cairo', sans-serif; background: #f3f4f6; }
+    
+    .checkout-container {
+        max-width: 800px;
+        margin: 40px auto;
+        padding: 0 20px;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+
+    @media (min-width: 768px) {
+        .checkout-container { grid-template-columns: 1fr 350px; }
+    }
+
+    .card {
+        background: white;
+        border-radius: var(--radius);
+        padding: 30px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+
+    .card-title {
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .form-group { margin-bottom: 20px; }
+    
+    .form-label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: var(--dark);
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        font-family: inherit;
+        font-size: 15px;
+        transition: 0.3s;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: var(--primary);
+    }
+
+    .order-summary-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        font-size: 14px;
+    }
+
+    .total-row {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px solid #eee;
+        font-size: 20px;
+        font-weight: 800;
+        color: var(--primary);
+    }
+
+    .submit-btn {
+        width: 100%;
+        padding: 15px;
+        background: var(--primary);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 18px;
+        font-weight: 700;
+        cursor: pointer;
+        margin-top: 20px;
+        transition: 0.3s;
+    }
+
+    .submit-btn:hover { background: var(--primary-dark); }
+</style>
+{% endblock %}
+
+{% block content %}
+<form id="checkoutForm" onsubmit="return submitOrder(event)">
+    {% csrf_token %}
+    <div class="checkout-container">
+        
+        <!-- قسم البيانات -->
+        <div class="card">
+            <h2 class="card-title">بيانات الشحن</h2>
+            
+            <div class="form-group">
+                <label class="form-label">الاسم الكامل *</label>
+                <input type="text" name="full_name" class="form-input" required placeholder="أدخل اسمك الرباعي">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">رقم الهاتف *</label>
+                <input type="text" name="phone" class="form-input" required placeholder="مثال: 0999999999">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">العنوان *</label>
+                <textarea name="address" class="form-input" rows="3" required placeholder="المدينة، الحي، الشارع، قرب..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">ملاحظات (اختياري)</label>
+                <textarea name="notes" class="form-input" rows="2" placeholder="تفاصيل إضافية للطلب"></textarea>
+            </div>
+        </div>
+
+        <!-- قسم ملخص الطلب -->
+        <div>
+            <div class="card">
+                <h2 class="card-title">ملخص طلبك</h2>
+                
+                {% for item in cart.items.all %}
+                <div class="order-summary-item">
+                    <span>{{ item.product.product_name }} (x{{ item.quantity }})</span>
+                    <span>{{ item.total_item_price }} ل.س</span>
+                </div>
+                {% endfor %}
+
+                <div class="total-row">
+                    <span>الإجمالي</span>
+                    <span>{{ cart.total_price }} ل.س</span>
+                </div>
+
+                <button type="submit" class="submit-btn">
+                    تأكيد الطلب
+                </button>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function submitOrder(e) {
+    e.preventDefault();
+    const btn = document.querySelector('.submit-btn');
+    const originalText = btn.innerText;
+    btn.innerText = 'جاري المعالجة...';
+    btn.disabled = true;
+
+    const form = document.getElementById('checkoutForm');
+    const formData = new FormData(form);
+
+    fetch('/invoice/place-order/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            // تحويل الزبون لصفحة النجاح أو المتجر
+            window.location.href = '/invoice/store/';
+        } else {
+            alert('حدث خطأ: ' + data.message);
+            btn.innerText = originalText;
+            btn.disabled = false;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('خطأ في الاتصال');
+        btn.innerText = originalText;
+        btn.disabled = false;
+    });
+
+    return false;
+}
+</script>
+{% endblock %}

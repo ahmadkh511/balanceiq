@@ -1,0 +1,1332 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>دليل التصميم - نظام الأزوردي | المرجع الكامل للمطورين</title>
+    <!-- Bootstrap 5 RTL -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts - Tajawal -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ============================================
+           [DESIGN-GUIDE] نظام الأزوردي - Aqua Design System
+           ============================================ */
+        :root {
+            --aqua-1: #e0f7fa;
+            --aqua-2: #b2ebf2;
+            --aqua-3: #4dd0e1;
+            --aqua-4: #0097a7;
+            --text-dark: #006064;
+            --text-light: #ffffff;
+            --shadow-sm: 0 2px 8px rgba(0, 150, 167, 0.08);
+            --shadow-md: 0 4px 12px rgba(0, 150, 167, 0.12);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--aqua-1);
+            font-family: 'Tajawal', sans-serif;
+            font-size: 0.9rem;
+            padding: 1rem;
+        }
+
+        .guide-header {
+            background: linear-gradient(135deg, var(--aqua-4) 0%, #006064 100%);
+            color: var(--text-light);
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .guide-header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .component-title {
+            border-right: 4px solid var(--aqua-4);
+            padding-right: 1rem;
+            margin: 1.5rem 0 1rem 0;
+            color: var(--text-dark);
+        }
+
+        .code-block {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+            position: relative;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 0.5rem;
+            left: 0.5rem;
+            background: var(--aqua-4);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 0.2rem 0.5rem;
+            font-size: 0.7rem;
+            cursor: pointer;
+        }
+
+        .copy-btn:hover {
+            background: var(--text-dark);
+        }
+
+        .demo-box {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* أنماط المكونات الأساسية */
+        .card {
+            border: none;
+            border-radius: 8px;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--aqua-4) 0%, #006064 100%);
+            color: var(--text-light);
+            padding: 0.6rem 1rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-body {
+            padding: 1rem;
+        }
+
+        .form-label {
+            font-weight: 500;
+            font-size: 0.75rem;
+            margin-bottom: 0.2rem;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .form-control, .form-select {
+            border-radius: 4px;
+            border: 1px solid var(--aqua-2);
+            padding: 0.35rem 0.5rem;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--aqua-3);
+            box-shadow: 0 0 0 2px rgba(77, 208, 225, 0.2);
+        }
+
+        .btn {
+            border-radius: 4px;
+            padding: 0.35rem 0.7rem;
+            font-weight: 600;
+            font-size: 0.8rem;
+            border: none;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--aqua-4) 0%, #006064 100%);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #00897b 0%, #00695c 100%);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ffb300 0%, #ff8f00 100%);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #e53935 0%, #b71c1c 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+            color: white;
+        }
+
+        .required-field::after {
+            content: " *";
+            color: #d32f2f;
+        }
+
+        .image-preview {
+            width: 60px;
+            height: 60px;
+            border: 2px dashed var(--aqua-2);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            background: var(--aqua-1);
+            margin: 0 auto;
+            overflow: hidden;
+        }
+
+        .table {
+            font-size: 0.8rem;
+        }
+
+        .table thead th {
+            background: linear-gradient(135deg, var(--aqua-3) 0%, var(--aqua-4) 100%);
+            color: white;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .autocomplete-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            min-width: 300px;
+            background: white;
+            border: 1px solid var(--aqua-3);
+            border-radius: 4px;
+            box-shadow: var(--shadow-md);
+            max-height: 250px;
+            overflow-y: auto;
+            z-index: 1050;
+            display: none;
+        }
+
+        .autocomplete-dropdown.show {
+            display: block;
+        }
+
+        .autocomplete-item {
+            padding: 0.5rem;
+            cursor: pointer;
+            border-bottom: 1px solid var(--aqua-1);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .autocomplete-item:hover {
+            background-color: var(--aqua-1);
+        }
+
+        .color-swatch {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border-radius: 4px;
+            margin-left: 0.5rem;
+            vertical-align: middle;
+        }
+
+        .color-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .color-item {
+            background: white;
+            border-radius: 8px;
+            padding: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* أنماط جدول البنود */
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.75rem;
+        }
+
+        .items-table thead th {
+            background: linear-gradient(135deg, var(--aqua-3) 0%, var(--aqua-4) 100%);
+            color: white;
+            font-weight: 600;
+            text-align: center;
+            padding: 0.4rem 0.2rem;
+            white-space: nowrap;
+        }
+
+        .items-table tbody td {
+            padding: 0.3rem 0.2rem;
+            vertical-align: middle;
+            border-bottom: 1px solid var(--aqua-1);
+        }
+
+        .barcode-fields-list {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.2rem;
+        }
+
+        .barcode-item {
+            display: flex;
+            align-items: center;
+            background: white;
+            border: 1px solid var(--aqua-2);
+            border-radius: 3px;
+            padding: 0.1rem;
+        }
+
+        .barcode-input {
+            border: none;
+            background: transparent;
+            padding: 0.1rem;
+            font-size: 0.65rem;
+            font-family: monospace;
+            width: 100%;
+        }
+
+        .paid-amount-container {
+            transition: all 0.3s ease;
+            opacity: 0;
+            max-height: 0;
+            overflow: hidden;
+        }
+
+        .paid-amount-container.show {
+            opacity: 1;
+            max-height: 80px;
+            margin-bottom: 0.5rem;
+        }
+
+        .shipping-number-container {
+            transition: all 0.3s ease;
+        }
+
+        @media (max-width: 768px) {
+            .barcode-fields-list {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            margin-top: 3rem;
+            border-top: 1px solid var(--aqua-2);
+            color: var(--text-dark);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Header الدليل -->
+    <div class="guide-header">
+        <i class="fas fa-palette" style="font-size: 3rem;"></i>
+        <h1>📘 دليل التصميم - نظام الأزوردي</h1>
+        <p>Aqua Design System | المرجع الرسمي للمطورين والمصممين</p>
+        <p><small>الإصدار 2.1 | تاريخ: 24 مارس 2026 | يتضمن جميع الميزات التفاعلية وإدارة الباركود الديناميكية</small></p>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- 1. الألوان المعتمدة -->
+    <!-- ============================================ -->
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-palette"></i> 1. الألوان المعتمدة (Color Palette)
+        </div>
+        <div class="card-body">
+            <p>يجب استخدام هذه الألوان حصرياً للحفاظ على اتساق الواجهة. جميع المتغيرات معرفة في <code>:root</code>.</p>
+            <div class="color-list">
+                <div class="color-item"><span class="color-swatch" style="background: #e0f7fa;"></span> --aqua-1: #e0f7fa</div>
+                <div class="color-item"><span class="color-swatch" style="background: #b2ebf2;"></span> --aqua-2: #b2ebf2</div>
+                <div class="color-item"><span class="color-swatch" style="background: #4dd0e1;"></span> --aqua-3: #4dd0e1</div>
+                <div class="color-item"><span class="color-swatch" style="background: #0097a7;"></span> --aqua-4: #0097a7</div>
+                <div class="color-item"><span class="color-swatch" style="background: #006064;"></span> --text-dark: #006064</div>
+                <div class="color-item"><span class="color-swatch" style="background: #ffffff; border:1px solid #ddd;"></span> --text-light: #ffffff</div>
+            </div>
+            <div class="code-block" id="colors-code">
+                <button class="copy-btn" onclick="copyToClipboard('colors-code')">📋 نسخ</button>
+                <pre>:root {
+  --aqua-1: #e0f7fa;
+  --aqua-2: #b2ebf2;
+  --aqua-3: #4dd0e1;
+  --aqua-4: #0097a7;
+  --text-dark: #006064;
+  --text-light: #ffffff;
+  --shadow-sm: 0 2px 8px rgba(0, 150, 167, 0.08);
+  --shadow-md: 0 4px 12px rgba(0, 150, 167, 0.12);
+}</pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- 2. البطاقات (Cards) -->
+    <!-- ============================================ -->
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-layer-group"></i> 2. البطاقات (Cards)
+        </div>
+        <div class="card-body">
+            <p>البطاقة هي الحاوية الأساسية لكل قسم في الصفحة.</p>
+            <div class="demo-box">
+                <div class="card" style="margin-bottom: 0;">
+                    <div class="card-header">
+                        <i class="fas fa-info-circle"></i> عنوان البطاقة
+                        <div class="ms-auto"></div>
+                        <button class="btn btn-sm btn-primary">زر اختياري</button>
+                    </div>
+                    <div class="card-body">
+                        هذا هو محتوى البطاقة. يمكن وضع أي عناصر هنا.
+                    </div>
+                </div>
+            </div>
+            <div class="code-block" id="card-code">
+                <button class="copy-btn" onclick="copyToClipboard('card-code')">📋 نسخ</button>
+                <pre>&lt;div class="card"&gt;
+    &lt;div class="card-header"&gt;
+        &lt;i class="fas fa-icon"&gt;&lt;/i&gt; عنوان القسم
+        &lt;div class="ms-auto"&gt;&lt;/div&gt;
+        &lt;a href="#" class="btn btn-sm btn-primary"&gt;زر&lt;/a&gt;
+    &lt;/div&gt;
+    &lt;div class="card-body"&gt;
+        المحتوى هنا
+    &lt;/div&gt;
+&lt;/div&gt;</pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- 3. الأزرار (Buttons) -->
+    <!-- ============================================ -->
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-mouse-pointer"></i> 3. الأزرار (Buttons)
+        </div>
+        <div class="card-body">
+            <p>أنواع الأزرار المعتمدة في النظام:</p>
+            <div class="demo-box">
+                <button class="btn btn-primary me-2"><i class="fas fa-save"></i> Primary</button>
+                <button class="btn btn-success me-2"><i class="fas fa-check"></i> Success</button>
+                <button class="btn btn-warning me-2"><i class="fas fa-exclamation-triangle"></i> Warning</button>
+                <button class="btn btn-danger me-2"><i class="fas fa-trash"></i> Danger</button>
+                <button class="btn btn-secondary"><i class="fas fa-times"></i> Secondary</button>
+            </div>
+            <div class="code-block" id="buttons-code">
+                <button class="copy-btn" onclick="copyToClipboard('buttons-code')">📋 نسخ</button>
+                <pre>&lt;button class="btn btn-primary"&gt;&lt;i class="fas fa-save"&gt;&lt;/i&gt; حفظ&lt;/button&gt;
+&lt;button class="btn btn-success"&gt;&lt;i class="fas fa-check"&gt;&lt;/i&gt; تأكيد&lt;/button&gt;
+&lt;button class="btn btn-warning"&gt;&lt;i class="fas fa-eye"&gt;&lt;/i&gt; إظهار&lt;/button&gt;
+&lt;button class="btn btn-danger"&gt;&lt;i class="fas fa-trash"&gt;&lt;/i&gt; حذف&lt;/button&gt;</pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- 4. الحقول والنماذج (Forms) -->
+    <!-- ============================================ -->
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-edit"></i> 4. الحقول والنماذج (Forms)
+        </div>
+        <div class="card-body">
+            <div class="demo-box">
+                <div class="row g-2">
+                    <div class="col-md-4">
+                        <label class="form-label"><i class="fas fa-user"></i> حقل عادي</label>
+                        <input type="text" class="form-control" placeholder="نص تجريبي">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label required-field"><i class="fas fa-star"></i> حقل إلزامي</label>
+                        <input type="text" class="form-control" placeholder="هذا الحقل مطلوب">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label"><i class="fas fa-list"></i> قائمة منسدلة</label>
+                        <select class="form-select">
+                            <option>خيار 1</option>
+                            <option>خيار 2</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="code-block" id="forms-code">
+                <button class="copy-btn" onclick="copyToClipboard('forms-code')">📋 نسخ</button>
+                <pre>&lt;label class="form-label required-field"&gt;&lt;i class="fas fa-user"&gt;&lt;/i&gt; اسم المورد&lt;/label&gt;
+&lt;input type="text" class="form-control" placeholder="أدخل النص"&gt;
+
+&lt;label class="form-label"&gt;&lt;i class="fas fa-list"&gt;&lt;/i&gt; القائمة&lt;/label&gt;
+&lt;select class="form-select"&gt;
+    &lt;option&gt;خيار 1&lt;/option&gt;
+&lt;/select&gt;</pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- 5. الجداول (Tables) -->
+    <!-- ============================================ -->
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-table"></i> 5. الجداول (Tables)
+        </div>
+        <div class="card-body">
+            <div class="demo-box">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr><th>#</th><th>المادة</th><th>الكمية</th><th>السعر</th><th>الإجمالي</th> </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>1</td><td>منتج تجريبي</td><td>2</td><td>50.00</td><td>100.00</td> </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="code-block" id="table-code">
+                <button class="copy-btn" onclick="copyToClipboard('table-code')">📋 نسخ</button>
+                <pre>&lt;table class="table"&gt;
+    &lt;thead&gt;&lt;tr&gt;&lt;th&gt;#&lt;/th&gt;&lt;th&gt;المادة&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;
+    &lt;tbody&gt;&lt;tr&gt;&lt;td&gt;1&lt;/td&gt;&lt;td&gt;منتج&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;
+&lt;/table&gt;</pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- 6. جدول بنود الفاتورة (Invoice Items Table) -->
+    <!-- ============================================ -->
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-table-list"></i> 6. جدول بنود الفاتورة (Invoice Items Table)
+        </div>
+        <div class="card-body">
+            <p>الهيكل الأساسي لجدول البنود الذي يجب استخدامه في جميع صفحات الفواتير.</p>
+            
+            <h6 class="mt-3">6.1. هيكل الجدول الكامل</h6>
+            <div class="demo-box">
+                <div class="items-section" style="background: white; border-radius: 8px; box-shadow: var(--shadow-sm);">
+                    <div class="items-header" style="background: linear-gradient(135deg, var(--aqua-4) 0%, #006064 100%); color: white; padding: 0.5rem 1rem; border-radius: 8px 8px 0 0;">
+                        <h5 style="margin: 0;"><i class="fas fa-list"></i> بنود الفاتورة</h5>
+                    </div>
+                    <div class="items-table-container" style="overflow-x: auto;">
+                        <table class="items-table">
+                            <thead>
+                                 <tr>
+                                    <th>#</th><th>المادة</th><th>الكمية</th><th>السعر</th><th>الإجمالي</th><th>ملاحظات</th><th>صورة</th><th></th>
+                                 </tr>
+                            </thead>
+                            <tbody>
+                                 <tr>
+                                    <td>1</td>
+                                    <td>
+                                        <div class="product-search-container" style="position: relative;">
+                                            <input type="text" class="form-control" placeholder="ابحث بالاسم..." style="font-size: 0.7rem;">
+                                        </div>
+                                    </td>
+                                    <td><input type="number" class="form-control" value="1" style="font-size: 0.7rem;"></td>
+                                    <td><input type="number" class="form-control" value="0" style="font-size: 0.7rem;"></td>
+                                    <td><input type="text" class="form-control item-total" readonly value="0.00" style="background: var(--aqua-1);"></td>
+                                    <td><input type="text" class="form-control" style="font-size: 0.7rem;"></td>
+                                    <td class="text-center"><div class="image-preview" style="width: 35px; height: 35px;"><i class="fas fa-camera"></i></div></td>
+                                    <td class="text-center"><button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button></td>
+                                 </tr>
+                            </tbody>
+                         </table>
+                    </div>
+                </div>
+            </div>
+
+            <h6 class="mt-3">6.2. تدفق العمل (Workflow) عند اختيار مادة</h6>
+            <div class="demo-box">
+                <ol style="font-size: 0.85rem;">
+                    <li><strong>البحث:</strong> يبدأ المستخدم بكتابة اسم المادة أو الباركود</li>
+                    <li><strong>ظهور القائمة المنسدلة:</strong> تظهر نتائج البحث مع صورة، اسم، سعر، باركود</li>
+                    <li><strong>اختيار المادة:</strong> يتم تعبئة الاسم، السعر، تحميل الصورة، تحديث الإجمالي</li>
+                    <li><strong>تحديث الحسابات:</strong> إعادة حساب إجمالي البند والفاتورة بالكامل</li>
+                </ol>
+            </div>
+
+            <div class="code-block" id="invoice-table-js">
+                <button class="copy-btn" onclick="copyToClipboard('invoice-table-js')">📋 نسخ</button>
+                <pre>function updateItemCalculations(itemRow) {
+    const qty = parseFloat(itemRow.querySelector('.quantity-input')?.value) || 0;
+    const price = parseFloat(itemRow.querySelector('.price-input')?.value) || 0;
+    const totalInput = itemRow.querySelector('.item-total');
+    if(totalInput) totalInput.value = (qty * price).toFixed(2);
+    updateFinancialCalculations();
+}</pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- 7. البحث التلقائي (Autocomplete) -->
+    <!-- ============================================ -->
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-search"></i> 7. البحث التلقائي (Autocomplete)
+        </div>
+        <div class="card-body">
+            <div class="demo-box">
+                <div class="product-search-container" style="position: relative;">
+                    <input type="text" class="form-control" placeholder="ابحث بالاسم..." id="demo-search">
+                    <div class="autocomplete-dropdown" id="demo-results">
+                        <div class="autocomplete-item">
+                            <i class="fas fa-box"></i>
+                            <div>
+                                <div class="autocomplete-item-title">منتج تجريبي</div>
+                                <div class="autocomplete-item-details">السعر: 100 ر.س</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="code-block" id="autocomplete-code">
+                <button class="copy-btn" onclick="copyToClipboard('autocomplete-code')">📋 نسخ</button>
+                <pre>&lt;div class="product-search-container" style="position: relative;"&gt;
+    &lt;input type="text" class="form-control product-search-input" placeholder="ابحث..."&gt;
+    &lt;div class="autocomplete-dropdown product-results"&gt;&lt;/div&gt;
+&lt;/div&gt;</pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- 8. معاينة الصور (Image Preview) -->
+    <!-- ============================================ -->
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-image"></i> 8. معاينة الصور (Image Preview)
+        </div>
+        <div class="card-body">
+            <div class="demo-box">
+                <div class="image-preview" id="demo-preview">
+                    <i class="fas fa-camera"></i>
+                </div>
+                <input type="file" id="demo-file" accept="image/*" style="display: none;">
+                <button class="btn btn-sm btn-primary mt-2" onclick="document.getElementById('demo-file').click()">اختر صورة</button>
+            </div>
+            <div class="code-block" id="image-code">
+                <button class="copy-btn" onclick="copyToClipboard('image-code')">📋 نسخ</button>
+                <pre>&lt;div class="image-preview"&gt;&lt;i class="fas fa-camera"&gt;&lt;/i&gt;&lt;/div&gt;
+&lt;input type="file" class="hidden-file-input" accept="image/*"&gt;</pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- 9. شركة الشحن - إظهار رقم الشحنة (مهم) -->
+    <!-- ============================================ -->
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-shipping-fast"></i> 9. شركة الشحن - إظهار رقم الشحنة
+        </div>
+        <div class="card-body">
+            <p><strong class="text-danger">⚠️ ميزة مهمة:</strong> عند اختيار شركة الشحن، يظهر حقل رقم الشحنة تلقائياً.</p>
+            
+            <div class="demo-box">
+                <div class="row g-2">
+                    <div class="col-md-6">
+                        <label class="form-label"><i class="fas fa-shipping-fast"></i> شركة الشحن</label>
+                        <select class="form-select" id="demo-shipping-company">
+                            <option value="">-- اختر شركة الشحن --</option>
+                            <option value="1">أرامكس</option>
+                            <option value="2">دي إتش إل</option>
+                            <option value="3">فيديكس</option>
+                            <option value="4">سمسا</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 shipping-number-container" id="demo-shipping-num-col" style="display: none;">
+                        <label class="form-label"><i class="fas fa-barcode"></i> رقم الشحنة</label>
+                        <input type="text" class="form-control" placeholder="أدخل رقم الشحنة">
+                    </div>
+                </div>
+            </div>
+
+            <div class="code-block" id="shipping-company-code">
+                <button class="copy-btn" onclick="copyToClipboard('shipping-company-code')">📋 نسخ</button>
+                <pre>&lt;!-- HTML --&gt;
+&lt;div class="row g-2"&gt;
+    &lt;div class="col-md-6"&gt;
+        &lt;label&gt;شركة الشحن&lt;/label&gt;
+        &lt;select id="purch_shipping_company" class="form-select"&gt;
+            &lt;option value=""&gt;-- اختر --&lt;/option&gt;
+        &lt;/select&gt;
+    &lt;/div&gt;
+    &lt;div class="col-md-6 shipping-number-container d-none" id="shipping-num-col"&gt;
+        &lt;label&gt;رقم الشحنة&lt;/label&gt;
+        &lt;input type="text" class="form-control" name="purch_shipping_num"&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- JavaScript --&gt;
+&lt;script&gt;
+    const shippingSelect = document.getElementById('purch_shipping_company');
+    const shippingNumCol = document.getElementById('shipping-num-col');
+    
+    if (shippingSelect && shippingNumCol) {
+        shippingSelect.addEventListener('change', function() {
+            if (this.value) {
+                shippingNumCol.classList.remove('d-none');
+            } else {
+                shippingNumCol.classList.add('d-none');
+            }
+        });
+    }
+&lt;/script&gt;</pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- 10. طريقة الدفع - إظهار المبلغ المدفوع (مهم) -->
+    <!-- ============================================ -->
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-credit-card"></i> 10. طريقة الدفع - إظهار المبلغ المدفوع
+        </div>
+        <div class="card-body">
+            <p><strong class="text-danger">⚠️ ميزة مهمة:</strong> عند اختيار طريقة دفع <strong>نقدي (Cash)</strong>، يظهر حقل المبلغ المدفوع تلقائياً.</p>
+            
+            <div class="demo-box">
+                <div class="row g-2">
+                    <div class="col-md-6">
+                        <label class="form-label"><i class="fas fa-money-bill-wave"></i> طريقة الدفع</label>
+                        <select class="form-select" id="demo-payment-method">
+                            <option value="">-- اختر طريقة الدفع --</option>
+                            <option value="1">نقدي</option>
+                            <option value="2">شيك</option>
+                            <option value="3">تحويل بنكي</option>
+                            <option value="4">بطاقة ائتمان</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 paid-amount-container" id="demo-paid-amount-container">
+                        <label class="form-label"><i class="fas fa-hand-holding-usd"></i> المبلغ المدفوع</label>
+                        <input type="number" class="form-control" id="demo-paid-amount" value="0" step="0.01">
+                        <div class="alert alert-warning mt-2 d-none" id="demo-cash-warning">
+                            <i class="fas fa-exclamation-triangle"></i> المبلغ المدفوع يتجاوز رصيد الصندوق
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-3 p-2" style="background: var(--aqua-1); border-radius: 4px;">
+                    <span><strong>رصيد الصندوق الحالي:</strong> <span id="demo-cash-balance">5,000.00</span> ر.س</span>
+                </div>
+            </div>
+
+            <div class="code-block" id="payment-method-code">
+                <button class="copy-btn" onclick="copyToClipboard('payment-method-code')">📋 نسخ</button>
+                <pre>&lt;!-- HTML --&gt;
+&lt;div class="row g-2"&gt;
+    &lt;div class="col-md-6"&gt;
+        &lt;label&gt;طريقة الدفع&lt;/label&gt;
+        &lt;select id="purch_payment_method" class="form-select"&gt;
+            &lt;option value=""&gt;-- اختر --&lt;/option&gt;
+        &lt;/select&gt;
+    &lt;/div&gt;
+    &lt;div class="col-md-6 paid-amount-container" id="paid-amount-container"&gt;
+        &lt;label&gt;المبلغ المدفوع&lt;/label&gt;
+        &lt;input type="number" id="paid-amount" class="form-control"&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- JavaScript --&gt;
+&lt;script&gt;
+    let isPaymentMethodCash = false;
+    let paidAmountModified = false;
+    
+    function checkPaymentMethod(value) {
+        const container = document.getElementById('paid-amount-container');
+        const paidInput = document.getElementById('paid-amount');
+        
+        // استدعاء API للتحقق من نوع طريقة الدفع
+        fetch(`/invoice/get-payment-method/${value}/`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.is_cash) {
+                    container.classList.add('show');
+                    isPaymentMethodCash = true;
+                    // تعبئة المبلغ المدفوع تلقائياً بالإجمالي
+                    if (!paidAmountModified) {
+                        const grandTotal = document.getElementById('grand-total')?.textContent || 0;
+                        paidInput.value = parseFloat(grandTotal).toFixed(2);
+                    }
+                } else {
+                    container.classList.remove('show');
+                    isPaymentMethodCash = false;
+                    paidInput.value = '0';
+                    paidAmountModified = false;
+                }
+            });
+    }
+    
+    // عند تغيير طريقة الدفع
+    document.getElementById('purch_payment_method')?.addEventListener('change', function() {
+        checkPaymentMethod(this.value);
+    });
+    
+    // عند تعديل المبلغ المدفوع يدوياً
+    document.getElementById('paid-amount')?.addEventListener('input', function() {
+        paidAmountModified = true;
+        updateRemainingAmount();
+    });
+&lt;/script&gt;</pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- 11. القسم المالي (Financial Section) -->
+    <!-- ============================================ -->
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-calculator"></i> 11. القسم المالي (Financial Section)
+        </div>
+        <div class="card-body">
+            <div class="demo-box">
+                <div class="financial-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                    <div>
+                        <div class="financial-row" style="display: flex; justify-content: space-between; background: var(--aqua-1); padding: 0.3rem 0.5rem;">
+                            <span>إجمالي البنود:</span>
+                            <span id="demo-subtotal">0.00</span>
+                        </div>
+                        <div class="financial-row" style="display: flex; justify-content: space-between; background: var(--aqua-1); padding: 0.3rem 0.5rem;">
+                            <span>الضريبة %:</span>
+                            <input type="number" id="demo-tax" value="0" style="width: 80px;">
+                        </div>
+                    </div>
+                    <div>
+                        <div class="financial-row" style="display: flex; justify-content: space-between; background: var(--aqua-1); padding: 0.3rem 0.5rem;">
+                            <span>الإضافة:</span>
+                            <input type="number" id="demo-addition" value="0" style="width: 80px;">
+                        </div>
+                        <div class="financial-row" style="display: flex; justify-content: space-between; background: var(--aqua-1); padding: 0.3rem 0.5rem;">
+                            <span>الخصم:</span>
+                            <input type="number" id="demo-discount" value="0" style="width: 80px;">
+                        </div>
+                    </div>
+                    <div class="financial-row" style="grid-column: 1/-1; background: #fff3e0; padding: 0.4rem 0.5rem;">
+                        <span><strong>الإجمالي العام:</strong></span>
+                        <span id="demo-grand-total">0.00</span>
+                    </div>
+                </div>
+            </div>
+            <div class="code-block" id="financial-code">
+                <button class="copy-btn" onclick="copyToClipboard('financial-code')">📋 نسخ</button>
+                <pre>function updateFinancialCalculations() {
+    let subtotal = 0;
+    document.querySelectorAll('.item-total').forEach(t => subtotal += parseFloat(t.value) || 0);
+    const tax = (parseFloat(document.getElementById('tax-percentage')?.value) || 0) * subtotal / 100;
+    const add = parseFloat(document.getElementById('invoice-addition')?.value) || 0;
+    const disc = parseFloat(document.getElementById('invoice-discount')?.value) || 0;
+    const total = subtotal + tax + add - disc;
+    
+    document.getElementById('subtotal-amount').textContent = subtotal.toFixed(2);
+    document.getElementById('grand-total').textContent = total.toFixed(2);
+}</pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- 12. إرشادات المطورين النهائية -->
+    <!-- ============================================ -->
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-clipboard-list"></i> 12. إرشادات المطورين والمصممين
+        </div>
+        <div class="card-body">
+            <ul>
+                <li><strong>استخدام المتغيرات:</strong> ممنوع استخدام ألوان ثابتة، استخدم <code>var(--aqua-1)</code> وما شابه.</li>
+                <li><strong>الاستجابة:</strong> استخدم نظام الشبكة من Bootstrap 5 (<code>row</code> و <code>col</code>).</li>
+                <li><strong>الأيقونات:</strong> جميع الأيقونات من FontAwesome 6.</li>
+                <li><strong>الخطوط:</strong> الخط الأساسي هو <code>'Tajawal', sans-serif</code>.</li>
+                <li><strong>شركة الشحن:</strong> عند اختيار شركة شحن، يجب إظهار حقل رقم الشحنة.</li>
+                <li><strong>طريقة الدفع:</strong> عند اختيار "نقدي"، يجب إظهار حقل المبلغ المدفوع.</li>
+                <li><strong>الحقول الإلزامية:</strong> أضف <code>class="required-field"</code> إلى الـ <code>&lt;label&gt;</code>.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- 13. إدارة حقول الباركود الديناميكية (مهم جداً) -->
+    <!-- ============================================ -->
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-barcode"></i> 13. إدارة حقول الباركود الديناميكية (Dynamic Barcode Fields)
+        </div>
+        <div class="card-body">
+            <p><strong class="text-danger">⚠️ تحذير مهم:</strong> عند إضافة صفوف جديدة (بنود) أو تغيير الكمية في فاتورة تحتوي على 50 حقل باركود، يجب <strong>الحفاظ على البيانات المدخلة في حقول الباركود</strong> وعدم فقدانها. لا يجوز تحديث الصفحة (Page Refresh) أو إعادة إنشاء العناصر بطريقة تؤدي إلى مسح القيم المدخلة.</p>
+            
+            <h6 class="mt-3">المشكلة (The Problem)</h6>
+            <div class="demo-box">
+                <p>تخيل أن لديك فاتورة تحتوي على 50 بنداً، ولكل بند 5 حقول باركود. إذا حاولت إضافة بند جديد باستخدام <code>location.reload()</code> أو إعادة تحميل جزء من الصفحة (AJAX with full DOM replacement)، ستفقد جميع البيانات التي أدخلها المستخدم في حقول الباركود الخمسين.</p>
+                <div class="alert alert-danger mt-2">
+                    <i class="fas fa-exclamation-circle"></i> <strong>خطأ شائع:</strong> استخدام <code>location.reload()</code> بعد إضافة بند جديد.
+                </div>
+            </div>
+
+            <h6 class="mt-3">الحل (The Solution)</h6>
+            <div class="demo-box">
+                <p><strong>يجب استخدام JavaScript النقي (Vanilla JS) لإضافة الصفوف ديناميكياً دون تحديث الصفحة.</strong> يتم إلحاق الصف الجديد بنهاية الجدول، ويتم ربط الأحداث اللازمة له (مثل البحث التلقائي وحساب الإجمالي).</p>
+            </div>
+
+            <div class="code-block" id="dynamic-barcode-code">
+                <button class="copy-btn" onclick="copyToClipboard('dynamic-barcode-code')">📋 نسخ</button>
+                <pre>// دالة لإضافة بند جديد مع الحفاظ على البيانات الحالية
+function addNewItemRow() {
+    // الحصول على الجدول الحالي
+    const tableBody = document.querySelector('#items-table tbody');
+    if (!tableBody) return;
+    
+    // حساب رقم البند الجديد
+    const rowCount = tableBody.querySelectorAll('tr').length;
+    const newRowNumber = rowCount + 1;
+    
+    // إنشاء الصف الجديد (TR)
+    const newRow = document.createElement('tr');
+    
+    // إضافة محتوى الصف الجديد (يجب أن يتطابق مع هيكل الصفوف الأخرى)
+    // من المهم هنا نسخ هيكل الصفوف الحالية باستخدام innerHTML أو إنشائها بالعناصر
+    // يجب أن تتضمن الخلايا: الرقم، المادة (مع حقل بحث)، الكمية، السعر، الإجمالي، الملاحظات، الصورة، الإجراءات.
+    // **الأهم**: يجب أن تحتوي خلية المادة على حقول الباركود بنفس الهيكل.
+    newRow.innerHTML = `
+        <td>${newRowNumber}</td>
+        <td>
+            <div class="product-search-container" style="position: relative;">
+                <input type="text" class="form-control product-search-input" placeholder="ابحث بالاسم أو الباركود..." style="font-size: 0.7rem;">
+                <div class="autocomplete-dropdown product-results"></div>
+            </div>
+            <!-- حقول الباركود: يمكن وضعها هنا أو في خلية منفصلة -->
+            <div class="barcode-fields-list mt-1">
+                ${generateBarcodeFields(5)} &lt;!-- افترض وجود 5 حقول باركود --&gt;
+            </div>
+        </td>
+        <td><input type="number" class="form-control quantity-input" value="1" style="font-size: 0.7rem;"></td>
+        <td><input type="number" class="form-control price-input" value="0" style="font-size: 0.7rem;"></td>
+        <td><input type="text" class="form-control item-total" readonly value="0.00" style="background: var(--aqua-1);"></td>
+        <td><input type="text" class="form-control" style="font-size: 0.7rem;"></td>
+        <td class="text-center"><div class="image-preview" style="width: 35px; height: 35px;"><i class="fas fa-camera"></i></div></td>
+        <td class="text-center"><button class="btn btn-danger btn-sm delete-row-btn"><i class="fas fa-trash"></i></button></td>
+    `;
+    
+    // إلحاق الصف الجديد بالجدول
+    tableBody.appendChild(newRow);
+    
+    // إعادة ربط الأحداث للعناصر الجديدة:
+    // 1. ربط حدث البحث التلقائي على حقل البحث الجديد
+    const newSearchInput = newRow.querySelector('.product-search-input');
+    if (newSearchInput) {
+        attachAutocomplete(newSearchInput, newRow);
+    }
+    
+    // 2. ربط حدث تغيير الكمية أو السعر لحساب الإجمالي
+    const qtyInput = newRow.querySelector('.quantity-input');
+    const priceInput = newRow.querySelector('.price-input');
+    if (qtyInput && priceInput) {
+        qtyInput.addEventListener('input', () => updateItemCalculations(newRow));
+        priceInput.addEventListener('input', () => updateItemCalculations(newRow));
+        updateItemCalculations(newRow); // حساب أولي
+    }
+    
+    // 3. ربط حدث حذف الصف
+    const deleteBtn = newRow.querySelector('.delete-row-btn');
+    if (deleteBtn) {
+        deleteBtn.addEventListener('click', () => {
+            newRow.remove();
+            updateFinancialCalculations(); // تحديث المجاميع بعد الحذف
+        });
+    }
+    
+    // 4. تحديث المجاميع النهائية بعد الإضافة
+    updateFinancialCalculations();
+}
+
+// دالة مساعدة لتوليد حقول الباركود (عدد محدد)
+function generateBarcodeFields(count) {
+    let html = '';
+    for (let i = 0; i < count; i++) {
+        html += `
+            <div class="barcode-item">
+                <input type="text" class="form-control barcode-input" placeholder="باركود ${i+1}" style="border: none; padding: 0.1rem; font-size: 0.65rem;">
+            </div>
+        `;
+    }
+    return `<div class="barcode-fields-list">${html}</div>`;
+}
+
+// مثال لربط حدث إضافة بند (يفترض وجود زر "إضافة بند")
+document.getElementById('add-item-btn')?.addEventListener('click', addNewItemRow);</pre>
+            </div>
+
+            <h6 class="mt-3">مثال عملي (Live Demo)</h6>
+            <div class="demo-box" id="dynamic-barcode-demo">
+                <p>اضغط على الزر أدناه لإضافة صف جديد. لاحظ أن الصفوف الحالية (إن وجدت) لا تفقد بياناتها.</p>
+                <button type="button" class="btn btn-primary mb-3" id="demo-add-item-btn"><i class="fas fa-plus-circle"></i> إضافة بند جديد (اختبار)</button>
+                <div class="items-section" style="background: white; border-radius: 8px; box-shadow: var(--shadow-sm);">
+                    <div class="items-header" style="background: linear-gradient(135deg, var(--aqua-4) 0%, #006064 100%); color: white; padding: 0.5rem 1rem; border-radius: 8px 8px 0 0;">
+                        <h5 style="margin: 0;"><i class="fas fa-list"></i> بنود الفاتورة (اختبار)</h5>
+                    </div>
+                    <div class="items-table-container" style="overflow-x: auto;">
+                        <table class="items-table" id="demo-items-table">
+                            <thead>
+                                32<th>#</th><th>المادة + الباركود</th><th>الكمية</th><th>السعر</th><th>الإجمالي</th><th>ملاحظات</th><th>صورة</th><th></th> </tr>
+                            </thead>
+                            <tbody id="demo-items-tbody">
+                                <tr data-item-id="1">
+                                    <td>1</td>
+                                    <td>
+                                        <div class="product-search-container" style="position: relative;">
+                                            <input type="text" class="form-control product-search-input" placeholder="ابحث بالاسم أو الباركود..." style="font-size: 0.7rem;">
+                                            <div class="autocomplete-dropdown product-results"></div>
+                                        </div>
+                                        <div class="barcode-fields-list mt-1">
+                                            <div class="barcode-item"><input type="text" class="form-control barcode-input" placeholder="باركود 1" style="border: none; padding: 0.1rem; font-size: 0.65rem;"></div>
+                                            <div class="barcode-item"><input type="text" class="form-control barcode-input" placeholder="باركود 2" style="border: none; padding: 0.1rem; font-size: 0.65rem;"></div>
+                                            <div class="barcode-item"><input type="text" class="form-control barcode-input" placeholder="باركود 3" style="border: none; padding: 0.1rem; font-size: 0.65rem;"></div>
+                                        </div>
+                                    </td>
+                                    <td><input type="number" class="form-control quantity-input" value="1" style="font-size: 0.7rem;"></td>
+                                    <td><input type="number" class="form-control price-input" value="100" style="font-size: 0.7rem;"></td>
+                                    <td><input type="text" class="form-control item-total" readonly value="100.00" style="background: var(--aqua-1);"></td>
+                                    <td><input type="text" class="form-control" style="font-size: 0.7rem;"></td>
+                                    <td class="text-center"><div class="image-preview" style="width: 35px; height: 35px;"><i class="fas fa-camera"></i></div></td>
+                                    <td class="text-center"><button class="btn btn-danger btn-sm delete-row-btn"><i class="fas fa-trash"></i></button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <i class="fas fa-code-branch"></i> نظام الأزوردي - Aqua Design System<br>
+        <small>المرجع الرسمي للمطورين | يشمل جميع الميزات التفاعلية وإدارة الباركود الديناميكية | آخر تحديث: 24 مارس 2026</small>
+    </div>
+</div>
+
+<script>
+    // وظيفة النسخ إلى الحافظة
+    function copyToClipboard(elementId) {
+        const element = document.getElementById(elementId);
+        const codeText = element.querySelector('pre').innerText;
+        
+        navigator.clipboard.writeText(codeText).then(() => {
+            const btn = element.querySelector('.copy-btn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '✓ تم النسخ';
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+            }, 2000);
+        }).catch(err => {
+            alert('حدث خطأ أثناء النسخ');
+        });
+    }
+
+    // تجربة معاينة الصورة
+    const preview = document.getElementById('demo-preview');
+    const fileInput = document.getElementById('demo-file');
+    if (preview && fileInput) {
+        preview.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    preview.innerHTML = `<img src="${e.target.result}" style="width:100%; height:100%; object-fit:cover;">`;
+                };
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+    }
+
+    // تجربة القائمة المنسدلة
+    const demoSearch = document.getElementById('demo-search');
+    const demoResults = document.getElementById('demo-results');
+    if (demoSearch && demoResults) {
+        demoSearch.addEventListener('focus', () => demoResults.classList.add('show'));
+        document.addEventListener('click', (e) => {
+            if (!demoSearch.contains(e.target) && !demoResults.contains(e.target)) {
+                demoResults.classList.remove('show');
+            }
+        });
+    }
+
+    // ============================================
+    // تجربة شركة الشحن - إظهار رقم الشحنة
+    // ============================================
+    const shippingSelect = document.getElementById('demo-shipping-company');
+    const shippingNumCol = document.getElementById('demo-shipping-num-col');
+    
+    if (shippingSelect && shippingNumCol) {
+        shippingSelect.addEventListener('change', function() {
+            if (this.value) {
+                shippingNumCol.style.display = 'block';
+            } else {
+                shippingNumCol.style.display = 'none';
+            }
+        });
+    }
+
+    // ============================================
+    // تجربة طريقة الدفع - إظهار المبلغ المدفوع
+    // ============================================
+    const paymentMethodSelect = document.getElementById('demo-payment-method');
+    const paidAmountContainer = document.getElementById('demo-paid-amount-container');
+    const paidAmountInput = document.getElementById('demo-paid-amount');
+    const cashWarning = document.getElementById('demo-cash-warning');
+    const cashBalanceSpan = document.getElementById('demo-cash-balance');
+    const grandTotalSpan = document.getElementById('demo-grand-total');
+    
+    let demoIsPaymentMethodCash = false;
+    let demoPaidAmountModified = false;
+    
+    function updateDemoRemainingAmount() {
+        const grandTotal = parseFloat(grandTotalSpan?.textContent) || 0;
+        const paid = parseFloat(paidAmountInput?.value) || 0;
+        const remaining = Math.max(0, grandTotal - paid);
+        
+        // التحقق من رصيد الصندوق
+        const balance = parseFloat(cashBalanceSpan?.textContent.replace(/,/g, '')) || 0;
+        if (cashWarning && paid > balance) {
+            cashWarning.classList.remove('d-none');
+        } else if (cashWarning) {
+            cashWarning.classList.add('d-none');
+        }
+    }
+    
+    function demoCheckPaymentMethod(value) {
+        // محاكاة API: نفترض أن القيمة "1" هي نقدي
+        const isCash = (value === '1');
+        
+        if (isCash) {
+            paidAmountContainer.classList.add('show');
+            demoIsPaymentMethodCash = true;
+            if (!demoPaidAmountModified) {
+                const grandTotal = parseFloat(grandTotalSpan?.textContent) || 0;
+                paidAmountInput.value = grandTotal.toFixed(2);
+                updateDemoRemainingAmount();
+            }
+        } else {
+            paidAmountContainer.classList.remove('show');
+            demoIsPaymentMethodCash = false;
+            paidAmountInput.value = '0';
+            demoPaidAmountModified = false;
+            updateDemoRemainingAmount();
+        }
+    }
+    
+    if (paymentMethodSelect) {
+        paymentMethodSelect.addEventListener('change', function() {
+            demoCheckPaymentMethod(this.value);
+        });
+    }
+    
+    if (paidAmountInput) {
+        paidAmountInput.addEventListener('input', function() {
+            demoPaidAmountModified = true;
+            updateDemoRemainingAmount();
+        });
+    }
+    
+    // تحديث الإجمالي في التجربة
+    function updateDemoGrandTotal() {
+        let subtotal = 0;
+        document.querySelectorAll('#demo-items-tbody .item-total').forEach(t => {
+            subtotal += parseFloat(t.value) || 0;
+        });
+        const tax = parseFloat(document.getElementById('demo-tax')?.value) || 0;
+        const addition = parseFloat(document.getElementById('demo-addition')?.value) || 0;
+        const discount = parseFloat(document.getElementById('demo-discount')?.value) || 0;
+        const total = subtotal + (subtotal * tax / 100) + addition - discount;
+        
+        if (grandTotalSpan) grandTotalSpan.textContent = total.toFixed(2);
+        if (document.getElementById('demo-subtotal')) document.getElementById('demo-subtotal').textContent = subtotal.toFixed(2);
+        
+        // تحديث المبلغ المدفوع إذا كان نقدي ولم يتم تعديله يدوياً
+        if (demoIsPaymentMethodCash && !demoPaidAmountModified && paidAmountInput) {
+            paidAmountInput.value = total.toFixed(2);
+        }
+        updateDemoRemainingAmount();
+    }
+    
+    // ربط الأحداث للحقول المالية
+    ['demo-tax', 'demo-addition', 'demo-discount'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', updateDemoGrandTotal);
+    });
+
+    // ============================================
+    // وظائف ديناميكية لجدول البنود في التجربة
+    // ============================================
+    function updateItemCalculations(row) {
+        const qty = parseFloat(row.querySelector('.quantity-input')?.value) || 0;
+        const price = parseFloat(row.querySelector('.price-input')?.value) || 0;
+        const totalInput = row.querySelector('.item-total');
+        if(totalInput) totalInput.value = (qty * price).toFixed(2);
+        updateDemoGrandTotal(); // تحديث الإجمالي العام
+    }
+
+    // دالة مساعدة لتوليد حقول باركود جديدة
+    function generateBarcodeFieldsDemo(count) {
+        let html = '';
+        for (let i = 0; i < count; i++) {
+            html += `
+                <div class="barcode-item">
+                    <input type="text" class="form-control barcode-input" placeholder="باركود ${i+1}" style="border: none; padding: 0.1rem; font-size: 0.65rem;">
+                </div>
+            `;
+        }
+        return `<div class="barcode-fields-list">${html}</div>`;
+    }
+
+    // دالة لإضافة صف جديد مع الحفاظ على بيانات الصفوف الحالية
+    function addDemoItemRow() {
+        const tableBody = document.getElementById('demo-items-tbody');
+        if (!tableBody) return;
+        
+        const rowCount = tableBody.querySelectorAll('tr').length;
+        const newRowNumber = rowCount + 1;
+        
+        const newRow = document.createElement('tr');
+        // إنشاء الصف الجديد بنفس هيكل الصفوف الحالية
+        newRow.innerHTML = `
+            <td>${newRowNumber}</td>
+            <td>
+                <div class="product-search-container" style="position: relative;">
+                    <input type="text" class="form-control product-search-input" placeholder="ابحث بالاسم أو الباركود..." style="font-size: 0.7rem;">
+                    <div class="autocomplete-dropdown product-results"></div>
+                </div>
+                ${generateBarcodeFieldsDemo(3)}
+            </td>
+            <td><input type="number" class="form-control quantity-input" value="1" style="font-size: 0.7rem;"></td>
+            <td><input type="number" class="form-control price-input" value="0" style="font-size: 0.7rem;"></td>
+            <td><input type="text" class="form-control item-total" readonly value="0.00" style="background: var(--aqua-1);"></td>
+            <td><input type="text" class="form-control" style="font-size: 0.7rem;"></td>
+            <td class="text-center"><div class="image-preview" style="width: 35px; height: 35px;"><i class="fas fa-camera"></i></div></td>
+            <td class="text-center"><button class="btn btn-danger btn-sm delete-row-btn"><i class="fas fa-trash"></i></button></td>
+        `;
+        
+        tableBody.appendChild(newRow);
+        
+        // ربط الأحداث للصف الجديد
+        const qtyInput = newRow.querySelector('.quantity-input');
+        const priceInput = newRow.querySelector('.price-input');
+        if (qtyInput && priceInput) {
+            qtyInput.addEventListener('input', () => updateItemCalculations(newRow));
+            priceInput.addEventListener('input', () => updateItemCalculations(newRow));
+            updateItemCalculations(newRow);
+        }
+        
+        // ربط حدث الحذف
+        const deleteBtn = newRow.querySelector('.delete-row-btn');
+        if (deleteBtn) {
+            deleteBtn.addEventListener('click', () => {
+                newRow.remove();
+                updateDemoGrandTotal();
+            });
+        }
+        
+        // محاكاة ربط البحث التلقائي (اختصار)
+        attachAutocompleteDemo(newRow.querySelector('.product-search-input'), newRow);
+        
+        updateDemoGrandTotal();
+    }
+
+    // محاكاة ربط البحث التلقائي (مبسطة للعرض)
+    function attachAutocompleteDemo(inputElement, rowElement) {
+        if (!inputElement) return;
+        const dropdown = inputElement.nextElementSibling;
+        if (!dropdown) return;
+        
+        inputElement.addEventListener('focus', () => {
+            dropdown.classList.add('show');
+        });
+        document.addEventListener('click', (e) => {
+            if (!inputElement.contains(e.target) && !dropdown.contains(e.target)) {
+                dropdown.classList.remove('show');
+            }
+        });
+        
+        // محاكاة اختيار منتج
+        dropdown.innerHTML = `<div class="autocomplete-item" data-price="150">
+                                <i class="fas fa-box"></i>
+                                <div><div class="autocomplete-item-title">منتج جديد</div><div>السعر: 150 ر.س</div></div>
+                              </div>`;
+        const item = dropdown.querySelector('.autocomplete-item');
+        if (item) {
+            item.addEventListener('click', () => {
+                const price = item.getAttribute('data-price') || 150;
+                inputElement.value = 'منتج جديد';
+                const priceInput = rowElement.querySelector('.price-input');
+                if (priceInput) priceInput.value = price;
+                updateItemCalculations(rowElement);
+                dropdown.classList.remove('show');
+            });
+        }
+    }
+
+    // تهيئة الأحداث للصفوف الحالية عند تحميل الصفحة
+    function initializeExistingRows() {
+        document.querySelectorAll('#demo-items-tbody tr').forEach(row => {
+            const qtyInput = row.querySelector('.quantity-input');
+            const priceInput = row.querySelector('.price-input');
+            if (qtyInput && priceInput) {
+                qtyInput.addEventListener('input', () => updateItemCalculations(row));
+                priceInput.addEventListener('input', () => updateItemCalculations(row));
+            }
+            const deleteBtn = row.querySelector('.delete-row-btn');
+            if (deleteBtn) {
+                deleteBtn.addEventListener('click', () => {
+                    row.remove();
+                    updateDemoGrandTotal();
+                });
+            }
+            const searchInput = row.querySelector('.product-search-input');
+            if (searchInput) {
+                attachAutocompleteDemo(searchInput, row);
+            }
+        });
+    }
+
+    // ربط زر الإضافة
+    const addItemBtn = document.getElementById('demo-add-item-btn');
+    if (addItemBtn) {
+        addItemBtn.addEventListener('click', addDemoItemRow);
+    }
+    
+    // تهيئة
+    initializeExistingRows();
+    updateDemoGrandTotal();
+</script>
+
+</body>
+</html>

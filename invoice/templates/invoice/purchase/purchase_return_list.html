@@ -1,0 +1,927 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}قائمة مرتجعات المشتريات{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* تصميم عصري متطور */
+    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&family=Tajawal:wght@300;400;500;700&display=swap');
+
+    :root {
+        --primary: #4361ee;
+        --primary-light: #4895ef;
+        --primary-soft: #e2eafc;
+        --primary-gradient: linear-gradient(135deg, #4361ee, #3a0ca3);
+        --success: #06d6a0;
+        --success-light: #d1fae5;
+        --warning: #ffb703;
+        --warning-light: #fed7aa;
+        --danger: #ef476f;
+        --danger-light: #fee2e2;
+        --dark: #1e293b;
+        --gray: #64748b;
+        --light: #f1f5f9;
+        --white: #ffffff;
+        --shadow-sm: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+        --shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+        --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+        --radius-sm: 8px;
+        --radius: 12px;
+        --radius-lg: 16px;
+    }
+
+    body {
+        font-family: 'Cairo', 'Tajawal', sans-serif;
+        background: linear-gradient(135deg, #f8faff 0%, #f0f4ff 100%);
+        min-height: 100vh;
+    }
+
+    /* الحاوية الرئيسية */
+    .modern-wrapper {
+        padding: 2rem;
+        max-width: 1440px;
+        margin: 0 auto;
+    }
+
+    /* رأس الصفحة العصري */
+    .modern-header {
+        background: var(--white);
+        border-radius: var(--radius-lg);
+        padding: 1.5rem 2rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow);
+        border: 1px solid rgba(67, 97, 238, 0.1);
+        backdrop-filter: blur(10px);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .header-content {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    .header-icon {
+        width: 60px;
+        height: 60px;
+        background: var(--primary-gradient);
+        border-radius: var(--radius);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--white);
+        font-size: 1.8rem;
+        box-shadow: var(--shadow);
+    }
+
+    .header-text h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0;
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .header-text p {
+        margin: 0.25rem 0 0;
+        color: var(--gray);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.95rem;
+    }
+
+    .header-stats {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .stat-badge {
+        background: var(--primary-soft);
+        padding: 0.75rem 1.5rem;
+        border-radius: 40px;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: var(--primary);
+        font-weight: 600;
+        font-size: 1rem;
+    }
+
+    .stat-badge i {
+        font-size: 1.2rem;
+    }
+
+    /* شريط الأدوات */
+    .toolbar-modern {
+        background: var(--white);
+        border-radius: var(--radius-lg);
+        padding: 1.25rem 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid rgba(67, 97, 238, 0.1);
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .search-modern {
+        flex: 2;
+        min-width: 300px;
+        position: relative;
+    }
+
+    .search-modern i {
+        position: absolute;
+        right: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--gray);
+        font-size: 1rem;
+        transition: all 0.3s;
+    }
+
+    .search-modern input {
+        width: 100%;
+        padding: 0.9rem 1.2rem 0.9rem 3rem;
+        border: 2px solid var(--light);
+        border-radius: 40px;
+        font-size: 0.95rem;
+        transition: all 0.3s;
+        background: var(--light);
+        font-family: 'Cairo', sans-serif;
+    }
+
+    .search-modern input:focus {
+        outline: none;
+        border-color: var(--primary);
+        background: var(--white);
+        box-shadow: 0 0 0 4px var(--primary-soft);
+    }
+
+    .search-modern input:focus + i {
+        color: var(--primary);
+    }
+
+    .filters-modern {
+        flex: 3;
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .filter-chip {
+        background: var(--light);
+        padding: 0.6rem 1.2rem;
+        border-radius: 40px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: 2px solid transparent;
+    }
+
+    .filter-chip:hover {
+        background: var(--primary-soft);
+        border-color: var(--primary-light);
+    }
+
+    .filter-chip i {
+        color: var(--primary);
+        font-size: 0.85rem;
+    }
+
+    .filter-chip.active {
+        background: var(--primary-gradient);
+        color: var(--white);
+        border-color: transparent;
+    }
+
+    .filter-chip.active i {
+        color: var(--white);
+    }
+
+    .toolbar-actions-modern {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .action-btn {
+        width: 42px;
+        height: 42px;
+        border-radius: var(--radius-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--light);
+        color: var(--gray);
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 1.1rem;
+    }
+
+    .action-btn:hover {
+        background: var(--primary);
+        color: var(--white);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow);
+    }
+
+    /* بطاقة المعلومات */
+    .info-card-modern {
+        background: linear-gradient(135deg, var(--primary-soft), #f0f7ff);
+        border-radius: var(--radius-lg);
+        padding: 1.25rem 1.75rem;
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        border-right: 5px solid var(--primary);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .info-card-modern i {
+        color: var(--primary);
+        font-size: 1.3rem;
+    }
+
+    .info-card-modern span {
+        color: var(--dark);
+        font-size: 1rem;
+    }
+
+    .info-card-modern a {
+        color: var(--primary);
+        font-weight: 700;
+        text-decoration: none;
+        margin-right: auto;
+        padding: 0.5rem 1.5rem;
+        background: var(--white);
+        border-radius: 40px;
+        font-size: 0.9rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .info-card-modern a:hover {
+        background: var(--primary);
+        color: var(--white);
+        transform: translateX(-5px);
+    }
+
+    /* الجدول العصري */
+    .table-modern {
+        background: var(--white);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        box-shadow: var(--shadow);
+        border: 1px solid rgba(67, 97, 238, 0.1);
+    }
+
+    .table-modern table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .table-modern th {
+        background: linear-gradient(135deg, #f8faff, #f0f4ff);
+        padding: 1rem 1rem;
+        font-weight: 600;
+        font-size: 0.85rem;
+        color: var(--dark);
+        border-bottom: 2px solid var(--primary-soft);
+        white-space: nowrap;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .table-modern th:hover {
+        color: var(--primary);
+    }
+
+    .table-modern td {
+        padding: 1rem 1rem;
+        font-size: 0.9rem;
+        border-bottom: 1px solid var(--light);
+        color: var(--dark);
+        vertical-align: middle;
+    }
+
+    .table-modern tbody tr {
+        transition: all 0.2s;
+    }
+
+    .table-modern tbody tr:hover {
+        background: var(--primary-soft);
+        transform: scale(1.01);
+        box-shadow: var(--shadow);
+    }
+
+    /* شارات الحالة */
+    .badge-modern {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.4rem 0.8rem;
+        border-radius: 40px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+    }
+
+    .badge-modern.success {
+        background: var(--success-light);
+        color: #065f46;
+    }
+
+    .badge-modern.warning {
+        background: var(--warning-light);
+        color: #92400e;
+    }
+
+    .badge-modern.info {
+        background: var(--primary-soft);
+        color: var(--primary);
+    }
+
+    .badge-modern.danger {
+        background: var(--danger-light);
+        color: #b91c1c;
+    }
+
+    /* أزرار الإجراءات */
+    .actions-modern {
+        display: flex;
+        gap: 0.4rem;
+    }
+
+    .action-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--white);
+        font-size: 0.8rem;
+        text-decoration: none;
+        transition: all 0.2s;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .action-icon:hover {
+        transform: translateY(-3px) scale(1.1);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .action-view {
+        background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    }
+
+    .action-delete {
+        background: linear-gradient(135deg, var(--danger), #ff6b6b);
+    }
+
+    /* حالة عدم وجود بيانات */
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        color: var(--primary-soft);
+        margin-bottom: 1rem;
+    }
+
+    .empty-state h3 {
+        color: var(--dark);
+        font-size: 1.3rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-state p {
+        color: var(--gray);
+        margin-bottom: 1.5rem;
+    }
+
+    .empty-state a {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.8rem 2rem;
+        background: var(--primary-gradient);
+        color: var(--white);
+        text-decoration: none;
+        border-radius: 40px;
+        font-weight: 600;
+        transition: all 0.2s;
+        box-shadow: var(--shadow);
+    }
+
+    .empty-state a:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    /* ترقيم الصفحات */
+    .pagination-modern {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.3rem;
+        padding: 1.5rem;
+        border-top: 1px solid var(--light);
+    }
+
+    .pagination-modern a,
+    .pagination-modern span {
+        min-width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: var(--radius-sm);
+        font-size: 0.9rem;
+        text-decoration: none;
+        color: var(--gray);
+        background: var(--white);
+        border: 1px solid var(--light);
+        transition: all 0.2s;
+    }
+
+    .pagination-modern a:hover {
+        background: var(--primary-soft);
+        color: var(--primary);
+        border-color: var(--primary);
+        transform: translateY(-2px);
+    }
+
+    .pagination-modern .active {
+        background: var(--primary-gradient);
+        color: var(--white);
+        border-color: transparent;
+        box-shadow: var(--shadow);
+    }
+
+    /* الفلاتر المتقدمة */
+    .advanced-filters {
+        background: var(--white);
+        border-radius: var(--radius-lg);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border: 1px solid rgba(67, 97, 238, 0.1);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .filter-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+
+    .filter-input {
+        width: 100%;
+        padding: 0.7rem 1rem;
+        border: 2px solid var(--light);
+        border-radius: var(--radius-sm);
+        font-size: 0.9rem;
+        transition: all 0.2s;
+        background: var(--white);
+        font-family: 'Cairo', sans-serif;
+    }
+
+    .filter-input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px var(--primary-soft);
+    }
+
+    .filter-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1rem;
+        justify-content: flex-end;
+    }
+
+    .btn-filter {
+        padding: 0.7rem 1.5rem;
+        border: none;
+        border-radius: var(--radius-sm);
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-filter.primary {
+        background: var(--primary-gradient);
+        color: var(--white);
+    }
+
+    .btn-filter.secondary {
+        background: var(--light);
+        color: var(--dark);
+    }
+
+    .btn-filter:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow);
+    }
+
+    @media (max-width: 768px) {
+        .modern-wrapper {
+            padding: 1rem;
+        }
+        
+        .modern-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .header-content {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .toolbar-modern {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        .table-modern {
+            overflow-x: auto;
+        }
+        
+        .table-modern table {
+            min-width: 900px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="modern-wrapper">
+    <!-- رأس الصفحة العصري -->
+    <div class="modern-header">
+        <div class="header-content">
+            <div class="header-icon">
+                <i class="fas fa-undo-alt"></i>
+            </div>
+            <div class="header-text">
+                <h1>مرتجعات المشتريات</h1>
+                <p>
+                    <i class="fas fa-circle" style="color: var(--success); font-size: 0.5rem;"></i>
+                    إدارة طلبات الإرجاع والمبالغ المستردة
+                </p>
+            </div>
+        </div>
+        <div class="header-stats">
+            <div class="stat-badge">
+                <i class="fas fa-chart-line"></i>
+                <span>{{ page_obj.paginator.count }} إجمالي</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- بطاقة المعلومات -->
+    <div class="info-card-modern">
+        <i class="fas fa-lightbulb"></i>
+        <span>يتم إنشاء المرتجعات من داخل فاتورة الشراء</span>
+        <a href="{% url 'invoice:purch_list' %}">
+            <i class="fas fa-arrow-left"></i>
+            فواتير الشراء
+        </a>
+    </div>
+
+    <!-- شريط الأدوات -->
+    <div class="toolbar-modern">
+        <div class="search-modern">
+            <i class="fas fa-search"></i>
+            <input type="text" class="search-input" placeholder="بحث برقم المرتجع، المورد، أو رقم الفاتورة..." id="searchInput" value="{{ search_query }}">
+        </div>
+        
+        <div class="filters-modern">
+            <span class="filter-chip {% if not status_filter %}active{% endif %}" onclick="filterByStatus('all')">
+                <i class="fas fa-list"></i> الكل
+            </span>
+            <span class="filter-chip {% if status_filter == 'settled' %}active{% endif %}" onclick="filterByStatus('settled')">
+                <i class="fas fa-check-circle"></i> مكتمل
+            </span>
+            <span class="filter-chip {% if status_filter == 'partial' %}active{% endif %}" onclick="filterByStatus('partial')">
+                <i class="fas fa-adjust"></i> جزئي
+            </span>
+            <span class="filter-chip {% if status_filter == 'pending' %}active{% endif %}" onclick="filterByStatus('pending')">
+                <i class="fas fa-clock"></i> انتظار
+            </span>
+        </div>
+
+        <div class="toolbar-actions-modern">
+            <button class="action-btn" onclick="toggleFilters()" title="فلترة متقدمة">
+                <i class="fas fa-sliders-h"></i>
+            </button>
+            <button class="action-btn" onclick="refreshPage()" title="تحديث">
+                <i class="fas fa-sync-alt"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- الفلاتر المتقدمة -->
+    <div id="advancedFilters" class="advanced-filters" style="display: none;">
+        <form method="get" class="filter-grid">
+            <div>
+                <select name="supplier" class="filter-input">
+                    <option value="">كل الموردين</option>
+                    {% for supplier in suppliers %}
+                    <option value="{{ supplier.id }}" {% if request.GET.supplier == supplier.id|stringformat:"s" %}selected{% endif %}>
+                        {{ supplier.get_full_name|default:supplier.username }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <input type="date" name="date_from" class="filter-input" value="{{ request.GET.date_from }}" placeholder="من تاريخ">
+            </div>
+            <div>
+                <input type="date" name="date_to" class="filter-input" value="{{ request.GET.date_to }}" placeholder="إلى تاريخ">
+            </div>
+            <div class="filter-actions">
+                <button type="submit" class="btn-filter primary">
+                    <i class="fas fa-filter"></i> تطبيق
+                </button>
+                <a href="{% url 'invoice:purchase_return_list' %}" class="btn-filter secondary">
+                    <i class="fas fa-redo-alt"></i> إعادة
+                </a>
+            </div>
+            <input type="hidden" name="search" value="{{ search_query }}">
+            <input type="hidden" name="status" value="{{ status_filter }}">
+        </form>
+    </div>
+
+    <!-- الجدول العصري -->
+    <div class="table-modern">
+        <table>
+            <thead>
+                <tr>
+                    <th onclick="sortTable(0)"><i class="fas fa-hashtag"></i> #</th>
+                    <th onclick="sortTable(1)"><i class="fas fa-file"></i> رقم المرتجع</th>
+                    <th onclick="sortTable(2)"><i class="fas fa-calendar"></i> التاريخ</th>
+                    <th onclick="sortTable(3)"><i class="fas fa-user"></i> المورد</th>
+                    <th onclick="sortTable(4)"><i class="fas fa-link"></i> الفاتورة</th>
+                    <th onclick="sortTable(5)"><i class="fas fa-cube"></i> الأصناف</th>
+                    <th onclick="sortTable(6)"><i class="fas fa-money-bill"></i> الإجمالي</th>
+                    <th onclick="sortTable(7)"><i class="fas fa-hand-holding"></i> المستلم</th>
+                    <th onclick="sortTable(8)"><i class="fas fa-tag"></i> الحالة</th>
+                    <th>الإجراءات</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for return in purchase_returns %}
+                <tr>
+                    <td><strong>{{ forloop.counter }}</strong></td>
+                    <td>
+                        <span style="color: var(--primary); font-weight: 600;">{{ return.uniqueId|default:return.slug|truncatechars:10 }}</span>
+                        {% if return.return_notes %}
+                        <br><small style="color: var(--gray); font-size: 0.7rem;">{{ return.return_notes|truncatechars:15 }}</small>
+                        {% endif %}
+                    </td>
+                    <td>{{ return.return_date|date:"Y/m/d"|default:"-" }}</td>
+                    <td>
+                        {% if return.purch_supplier %}
+                        <div style="display: flex; align-items: center; gap: 0.4rem;">
+                            <div style="width: 28px; height: 28px; background: var(--primary-soft); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--primary);">
+                                <i class="fas fa-user" style="font-size: 0.8rem;"></i>
+                            </div>
+                            <span>{{ return.purch_supplier.get_full_name|default:return.purch_supplier.username|truncatechars:12 }}</span>
+                        </div>
+                        {% else %}
+                        -
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if return.original_purchase %}
+                        <a href="{% url 'invoice:purch_detail' return.original_purchase.slug %}" style="color: var(--primary); text-decoration: none; font-weight: 500;">
+                            <i class="fas fa-external-link-alt"></i> {{ return.original_purchase.uniqueId }}
+                        </a>
+                        {% else %}
+                        -
+                        {% endif %}
+                    </td>
+                    <td class="text-center">
+                        <span class="badge-modern info">
+                            <i class="fas fa-box"></i> {{ return.return_items.count }}
+                        </span>
+                    </td>
+                    <td style="font-family: 'Courier New', monospace; font-weight: 600; color: var(--dark);">
+                        {{ return.return_final_total|floatformat:2 }}
+                    </td>
+                    <td style="font-family: 'Courier New', monospace; color: var(--success);">
+                        {{ return.paid_amount|floatformat:2 }}
+                    </td>
+                    <td>
+                        {% if return.settlement_status == 'settled' %}
+                        <span class="badge-modern success">
+                            <i class="fas fa-check-circle"></i> مكتمل
+                        </span>
+                        {% elif return.settlement_status == 'partial' %}
+                        <span class="badge-modern warning">
+                            <i class="fas fa-adjust"></i> جزئي
+                        </span>
+                        {% else %}
+                        <span class="badge-modern danger">
+                            <i class="fas fa-clock"></i> انتظار
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="actions-modern">
+                            <a href="{% url 'invoice:purchase_return_detail' return.slug %}" class="action-icon action-view" title="عرض التفاصيل">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="{% url 'invoice:purchase_return_delete' return.slug %}" class="action-icon action-delete" title="حذف" 
+                               onclick="return confirm('هل أنت متأكد من حذف هذا المرتجع؟ لا يمكن التراجع عن هذا الإجراء.');">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="10">
+                        <div class="empty-state">
+                            <i class="fas fa-undo-alt"></i>
+                            <h3>لا توجد مرتجعات</h3>
+                            <p>لم يتم إنشاء أي مرتجعات للمشتريات بعد</p>
+                            <a href="{% url 'invoice:purch_list' %}">
+                                <i class="fas fa-arrow-left"></i>
+                                فواتير الشراء
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- ترقيم الصفحات -->
+        {% if page_obj.has_other_pages %}
+        <div class="pagination-modern">
+            {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" title="السابق">
+                <i class="fas fa-chevron-right"></i>
+            </a>
+            {% endif %}
+
+            {% for i in page_obj.paginator.page_range %}
+                {% if page_obj.number == i %}
+                <span class="active">{{ i }}</span>
+                {% elif i > page_obj.number|add:'-3' and i < page_obj.number|add:'3' %}
+                <a href="?page={{ i }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ i }}</a>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" title="التالي">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+// إظهار/إخفاء الفلاتر المتقدمة
+function toggleFilters() {
+    const filters = document.getElementById('advancedFilters');
+    if (filters.style.display === 'none' || filters.style.display === '') {
+        filters.style.display = 'block';
+        filters.style.animation = 'slideDown 0.3s ease';
+    } else {
+        filters.style.display = 'none';
+    }
+}
+
+// تحديث الصفحة
+function refreshPage() {
+    location.reload();
+}
+
+// فلترة سريعة بالحالة
+function filterByStatus(status) {
+    document.querySelectorAll('.filter-chip').forEach(chip => {
+        chip.classList.remove('active');
+    });
+    event.currentTarget.classList.add('active');
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    const searchQuery = urlParams.get('search') || '';
+    
+    let url = '?';
+    if (status !== 'all') {
+        url += `status=${status}`;
+    }
+    if (searchQuery) {
+        url += `${status !== 'all' ? '&' : ''}search=${searchQuery}`;
+    }
+    
+    window.location.href = url || "{% url 'invoice:purchase_return_list' %}";
+}
+
+// بحث فوري
+document.getElementById('searchInput')?.addEventListener('keyup', function(e) {
+    if (e.key === 'Enter') {
+        const urlParams = new URLSearchParams(window.location.search);
+        const status = urlParams.get('status') || '';
+        let url = `?search=${this.value}`;
+        if (status) {
+            url += `&status=${status}`;
+        }
+        window.location.href = url;
+    }
+});
+
+// دالة فرز الجدول
+let sortDirection = {};
+
+function sortTable(columnIndex) {
+    const table = document.querySelector('table');
+    const tbody = table.tBodies[0];
+    const rows = Array.from(tbody.rows);
+    
+    sortDirection[columnIndex] = sortDirection[columnIndex] === 'asc' ? 'desc' : 'asc';
+    
+    rows.sort((a, b) => {
+        let aVal = a.cells[columnIndex].innerText.trim();
+        let bVal = b.cells[columnIndex].innerText.trim();
+        
+        if (columnIndex === 0 || columnIndex === 5 || columnIndex === 6 || columnIndex === 7) {
+            aVal = parseFloat(aVal) || 0;
+            bVal = parseFloat(bVal) || 0;
+        } else if (columnIndex === 2) {
+            aVal = new Date(aVal) || 0;
+            bVal = new Date(bVal) || 0;
+        }
+        
+        if (sortDirection[columnIndex] === 'asc') {
+            return aVal > bVal ? 1 : -1;
+        } else {
+            return aVal < bVal ? 1 : -1;
+        }
+    });
+    
+    rows.forEach(row => tbody.appendChild(row));
+    
+    // تحديث رؤوس الأعمدة
+    document.querySelectorAll('th i.fa-sort').forEach(i => i.remove());
+    const headerIcon = document.createElement('i');
+    headerIcon.className = `fas fa-sort-${sortDirection[columnIndex] === 'asc' ? 'up' : 'down'} ms-1`;
+    event.currentTarget.appendChild(headerIcon);
+}
+
+// عرض الفلاتر المتقدمة إذا كانت هناك فلاتر نشطة
+window.onload = function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('supplier') || urlParams.get('date_from') || urlParams.get('date_to')) {
+        document.getElementById('advancedFilters').style.display = 'block';
+    }
+    
+    // إضافة تأثيرات حركية
+    document.querySelectorAll('tr').forEach((row, index) => {
+        row.style.animation = `fadeIn 0.3s ease ${index * 0.05}s both`;
+    });
+}
+
+// إضافة animation keyframes
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideDown {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateX(-10px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+`;
+document.head.appendChild(style);
+</script>
+{% endblock %}

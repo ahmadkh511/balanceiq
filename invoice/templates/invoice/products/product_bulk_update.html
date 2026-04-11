@@ -1,0 +1,536 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+
+{% block extra_css %}
+<style>
+    body { background-color: #f4f6f9; }
+    .main-container { padding: 1rem; }
+    .card { border: none; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); margin-bottom: 1.5rem; }
+    .card-header { background-color: #fff; border-bottom: 1px solid #e3e6f0; padding: 1rem 1.25rem; font-weight: 700; }
+    
+    .calc-card {
+        background: linear-gradient(112deg, #ffffff 0%, #f8f9fc 100%);
+        border-left: 5px solid #4e73df; position: sticky; top: 10px; z-index: 100;
+    }
+    .calc-input {
+        font-weight: bold; text-align: center;
+        border: 2px solid #e3e6f0; border-radius: 8px; transition: all 0.3s;
+    }
+    .calc-input:focus { border-color: #4e73df; box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.15); }
+    
+    .btn-group-actions { display: flex; gap: 0.5rem; }
+    .btn-save-changes {
+        background: linear-gradient(45deg, #1cc88a, #17a673); border: none; color: white; font-weight: bold;
+        padding: 12px 25px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.3s;
+    }
+    .btn-save-changes:hover { transform: translateY(-2px); color: white; }
+    .btn-reset-data {
+        background: linear-gradient(45deg, #e74a3b, #be2617); border: none; color: white; font-weight: bold;
+        padding: 12px 25px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.3s;
+    }
+    .btn-reset-data:hover { transform: translateY(-2px); color: white; }
+    
+    .search-box { border-radius: 8px; border: 1px solid #d1d3e2; padding: 12px 20px; font-size: 1rem; }
+    
+    .table-modern { width: 100%; margin-bottom: 0; table-layout: fixed; }
+    .table-modern thead th {
+        font-size: 0.8rem; font-weight: 700; color: #4e73df;
+        text-transform: uppercase; border-bottom: 2px solid #eaecf4;
+        padding: 0.5rem; text-align: center; background-color: #f8f9fc;
+    }
+    .table-modern tbody td {
+        padding: 0.2rem; vertical-align: middle; border-top: 1px solid #eaecf4; text-align: center;
+    }
+    .table-modern tbody tr:focus-within { background-color: #fff9e6 !important; }
+    
+    .input-cell {
+        border: 1px solid #d1d3e2; border-radius: 6px;
+        font-size: 0.95rem; font-weight: 600; text-align: right;
+        padding: 12px 8px; width: 100%; background-color: #fff;
+        color: #333; transition: all 0.2s; direction: ltr;
+    }
+    .input-cell:focus { border: 2px solid #4e73df; outline: none; background-color: #fff; }
+    .input-cell-readonly {
+        background-color: #f0f0f0 !important; color: #6c757d;
+        border: 1px solid #e9ecef; cursor: not-allowed;
+    }
+    .usd-equivalent {
+        display: block; font-size: 0.75rem; color: #1cc88a; margin-top: 2px;
+        font-weight: bold; font-family: sans-serif; direction: ltr; text-align: center;
+        background-color: #f8f9fa; border-radius: 4px; padding: 2px; min-height: 1.2em;
+    }
+    .offer-column { background-color: #fcfcfc; }
+    .offer-input { border-left: 4px solid #36b9cc; }
+    
+    .tier-box { position: relative; }
+    .btn-delete-tier {
+        position: absolute; top: -8px; left: -8px;
+        background: #e74a3b; color: white; border: none;
+        border-radius: 50%; width: 20px; height: 20px; font-size: 10px;
+        display: none; align-items: center; justify-content: center; cursor: pointer;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .tier-box:hover .btn-delete-tier { display: flex; }
+
+    #toast-container { position: fixed; bottom: 25px; left: 25px; z-index: 9999; }
+    .custom-toast {
+        min-width: 280px; padding: 15px 20px; border-radius: 10px; color: #fff; font-weight: 600; font-size: 0.95rem;
+        box-shadow: 0 5px 25px rgba(0,0,0,0.2); display: flex; align-items: center;
+        opacity: 0; transform: translateY(20px); transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    }
+    .custom-toast.show { opacity: 1; transform: translateY(0); }
+    .toast-success { background-color: #1cc88a; }
+    .toast-saving { background-color: #36b9cc; }
+    .toast-error { background-color: #e74a3b; }
+    .toast-icon { font-size: 1.2rem; margin-left: 10px; }
+
+    .stock-badge {
+        background-color: #eaf6ff; color: #36b9cc; padding: 5px 10px; border-radius: 20px;
+        font-weight: bold; font-size: 0.8rem; border: 1px solid #bee5eb;
+    }
+</style>
+{% endblock %}
+
+
+
+
+
+{% block content %}
+<div class="container-fluid main-container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800 font-weight-bold">{{ title }}</h1>
+        <a href="{% url 'invoice:product_list' %}" class="btn btn-light border shadow-sm">
+            <i class="fas fa-arrow-right ms-2"></i>العودة للقائمة
+        </a>
+    </div>
+
+    <div class="card calc-card mb-4 shadow-sm">
+        <div class="card-header py-3 border-0">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-sliders-h text-primary me-2"></i>
+                    <span class="m-0 font-weight-bold text-primary">لوحة التحكم بالتسعير الموحد</span>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <button class="btn btn-sm btn-outline-primary" id="btnAddTier">
+                        <i class="fas fa-plus me-1"></i> إضافة مستوى خصم جديد
+                    </button>
+                    <div class="btn-group-actions">
+                        <button class="btn btn-reset-data" id="btnResetRequest"><i class="fas fa-undo me-1"></i> إعادة ضبط</button>
+                        <button class="btn btn-save-changes" id="btnSaveRequest"><i class="fas fa-save me-1"></i> تنفيذ التحديث</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-body py-3">
+            <form id="calculatorForm">
+                {% csrf_token %}
+                <div class="row g-3 align-items-end" id="tiersInputsRow">
+                    <div class="col-lg-2 col-md-4">
+                        <label class="text-muted small d-block mb-1">نسبة الربح (%)</label>
+                        <input type="number" step="0.1" class="form-control calc-input" id="profit_margin" value="{{ settings.profit_margin|floatformat:'-2' }}">
+                    </div>
+                    <div class="col-lg-2 col-md-4">
+                        <label class="text-muted small d-block mb-1">سعر الصرف ($)</label>
+                        <input type="number" step="0.01" class="form-control calc-input" id="conversion_factor" value="{{ settings.conversion_factor|floatformat:'-2' }}">
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <input type="text" id="productSearch" class="form-control search-box" placeholder="ابحث عن اسم المادة...">
+    </div>
+
+    <div class="card shadow">
+        <div class="table-responsive">
+            <table class="table table-modern">
+                <thead>
+                    <tr>
+                        <th style="width: 15%">المادة</th>
+                        <th style="width: 5%">الكمية</th>
+                        <th style="width: 8%">التكلفة</th>
+                        <th style="width: 10%">السعر النهائي</th>
+                        <th id="dynamicHeaders"></th>
+                    </tr>
+                </thead>
+                <tbody id="productsTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="passwordModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title"><i class="fas fa-lock me-2"></i><span id="modalTitle">تأكيد العملية</span></h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-center py-4">
+        <i class="fas fa-shield-alt fa-3x text-muted mb-3"></i>
+        <p id="modalBodyText" class="text-muted">يرجى إدخال كلمة المرور للمتابعة.</p>
+        <input type="password" id="confirmPassword" class="form-control form-control-lg text-center" placeholder="كلمة المرور">
+        <div id="passwordError" class="text-danger mt-2 small font-weight-bold" style="display:none;"></div>
+      </div>
+      <div class="modal-footer border-top-0">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+        <button type="button" class="btn btn-primary px-4" id="btnModalConfirm"><i class="fas fa-check me-1"></i> تأكيد</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+{{ tiers|json_script:"tiers-data" }}
+{{ products|json_script:"products-data" }}
+
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var tiersData = JSON.parse(document.getElementById('tiers-data').textContent);
+    var productsData = JSON.parse(document.getElementById('products-data').textContent);
+    var csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    var toastContainer = document.getElementById('toast-container');
+    var currentAction = 'save';
+
+    var passwordModalEl = document.getElementById('passwordModal');
+    var passwordModal = new bootstrap.Modal(passwordModalEl);
+    var passwordInput = document.getElementById('confirmPassword');
+    var passwordError = document.getElementById('passwordError');
+    var modalTitle = document.getElementById('modalTitle');
+    var modalBodyText = document.getElementById('modalBodyText');
+
+    function cleanNumber(num) {
+        if (num === null || num === undefined || num === '') return '';
+        var val = String(num).trim();
+        if (val.endsWith('.')) val = val.slice(0, -1);
+        var parsed = parseFloat(val);
+        return isNaN(parsed) ? '' : parsed.toString();
+    }
+
+    function updateUsdLabel(inputElement, conversion) {
+        var value = parseFloat(inputElement.value) || 0;
+        var usdLabel = inputElement.parentElement.querySelector('.usd-equivalent');
+        if (usdLabel && value > 0 && conversion > 0) {
+            usdLabel.textContent = '~ ' + (value / conversion).toFixed(2) + ' USD';
+        } else if (usdLabel) { usdLabel.textContent = ''; }
+    }
+
+    function createToast(message, type) {
+        type = type || 'success';
+        var toast = document.createElement('div');
+        toast.className = 'custom-toast toast-' + type;
+        var icon = 'fa-check-circle';
+        if (type === 'saving') icon = 'fa-spinner fa-spin';
+        if (type === 'error') icon = 'fa-exclamation-triangle';
+        toast.innerHTML = '<i class="fas ' + icon + ' toast-icon"></i><span>' + message + '</span>';
+        toastContainer.appendChild(toast);
+        setTimeout(function() { toast.classList.add('show'); }, 10);
+        setTimeout(function() { toast.classList.remove('show'); setTimeout(function() { toast.remove(); }, 500); }, 3000);
+    }
+
+    // بناء الجدول الأساسي (مرة واحدة فقط عند تحميل الصفحة)
+    function buildBaseTable() {
+        var tbody = document.getElementById('productsTableBody');
+        tbody.innerHTML = '';
+        for (var i = 0; i < productsData.length; i++) {
+            var p = productsData[i];
+            var tr = document.createElement('tr');
+            tr.dataset.productId = p.id;
+            tr.dataset.baseCost = p.cost;
+            tr.dataset.tierPrices = JSON.stringify(p.tier_prices || {});
+            tr.innerHTML = 
+                '<td class="text-start ps-3"><span class="font-weight-bold text-dark">' + p.name + '</span></td>' +
+                '<td><span class="stock-badge">' + p.stock + '</span></td>' +
+                '<td><input type="text" class="input-cell input-cell-readonly" value="' + cleanNumber(p.cost) + '" readonly></td>' +
+                '<td><input type="number" step="0.01" class="input-cell" value="' + cleanNumber(p.wholesale) + '" data-field="wholesale_price"><small class="usd-equivalent"></small></td>';
+            tbody.appendChild(tr);
+        }
+    }
+
+    // بناء المستويات عند التحميل الأول فقط
+    function renderInitialTiers() {
+        for (var t = 0; t < tiersData.length; t++) {
+            addTierToUI(tiersData[t]);
+        }
+        applyUsdToAllInputs();
+    }
+
+    // دالة إضافة عمود واحد فقط (بدون مسح الباقي)
+    function addTierToUI(tier) {
+        var inputsRow = document.getElementById('tiersInputsRow');
+        
+        var colDiv = document.createElement('div');
+        colDiv.className = 'col tier-box';
+        colDiv.innerHTML = 
+            '<button class="btn-delete-tier" data-id="' + tier.id + '" title="حذف المستوى"><i class="fas fa-times"></i></button>' +
+            '<label class="text-muted small d-block mb-1">' + tier.name + '</label>' +
+            '<input type="number" class="form-control calc-input tier-percent" data-tier-id="' + tier.id + '" placeholder="%" value="' + (tier.percent || 0) + '">';
+        inputsRow.appendChild(colDiv);
+
+        var th = document.createElement('th');
+        th.className = 'offer-column';
+        th.style.width = '10%';
+        th.dataset.tierId = tier.id; // مهم جداً للحذف لاحقاً
+        th.textContent = tier.name;
+        document.getElementById('dynamicHeaders').appendChild(th);
+
+        var rows = document.querySelectorAll('#productsTableBody tr');
+        for (var r = 0; r < rows.length; r++) {
+            var row = rows[r];
+            var tierPrices = JSON.parse(row.dataset.tierPrices || '{}');
+            var existingPrice = tierPrices[String(tier.id)] || '';
+            
+            var td = document.createElement('td');
+            td.className = 'offer-column dynamic-tier-cell';
+            td.innerHTML = 
+                '<input type="number" step="0.01" class="input-cell offer-input" data-tier-id="' + tier.id + '" value="' + existingPrice + '">' +
+                '<small class="usd-equivalent"></small>';
+            row.appendChild(td);
+        }
+    }
+
+    // دالة حذف عمود واحد فقط (بدون مسح الباقي)
+    function removeTierFromUI(tierId) {
+        var input = document.querySelector('.tier-percent[data-tier-id="' + tierId + '"]');
+        if(input) input.closest('.tier-box').remove();
+
+        var th = document.querySelector('#dynamicHeaders th[data-tier-id="' + tierId + '"]');
+        if(th) th.remove();
+
+        var cells = document.querySelectorAll('.offer-input[data-tier-id="' + tierId + '"]');
+        for (var i = 0; i < cells.length; i++) {
+            cells[i].closest('td.dynamic-tier-cell').remove();
+        }
+    }
+
+    function applyUsdToAllInputs() {
+        var conversion = parseFloat(document.getElementById('conversion_factor').value) || 0;
+        var inputs = document.querySelectorAll('.input-cell:not(.input-cell-readonly)');
+        for (var i = 0; i < inputs.length; i++) {
+            updateUsdLabel(inputs[i], conversion);
+        }
+    }
+
+    // التهيئة
+    buildBaseTable();
+    renderInitialTiers();
+
+    // حدث إضافة مستوى جديد
+    document.getElementById('btnAddTier').addEventListener('click', function() {
+        var name = prompt("أدخل اسم المستوى الجديد (مثال: عروض نهاية الموسم):");
+        if (!name) return;
+
+        fetch("{% url 'invoice:product_bulk_update' %}", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
+            body: JSON.stringify({ add_tier: true, tier_name: name })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if(data.success) {
+                var newTier = { id: data.tier_id, name: data.tier_name, percent: 0 };
+                tiersData.push(newTier);
+                addTierToUI(newTier); // إضافة العمود الجديد فقط
+                applyUsdToAllInputs();
+            } else { alert(data.message); }
+        });
+    });
+
+    // حدث حذف مستوى
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.btn-delete-tier')) {
+            if(!confirm('هل تريد حذف هذا المستوى وجميع أسعاره؟')) return;
+            var btn = e.target.closest('.btn-delete-tier');
+            var tierId = btn.dataset.id;
+            
+            fetch("{% url 'invoice:product_bulk_update' %}", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
+                body: JSON.stringify({ delete_tier: true, tier_id: tierId })
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if(data.success) {
+                    tiersData = tiersData.filter(function(t) { return t.id != tierId; });
+                    removeTierFromUI(tierId); // حذف العمود فقط
+                } else { alert(data.message); }
+            });
+        }
+    });
+
+    // باقي الأكواد (البحث، الحفظ، الحساب) تبقى كما هي بدون أي تغيير
+    document.getElementById('productSearch').addEventListener('keyup', function() {
+        var searchTerm = this.value.toLowerCase();
+        var rows = document.querySelectorAll('#productsTableBody tr');
+        for (var i = 0; i < rows.length; i++) {
+            var name = rows[i].querySelector('td:first-child span').textContent.toLowerCase();
+            rows[i].style.display = name.includes(searchTerm) ? '' : 'none';
+        }
+    });
+
+    document.addEventListener('focusout', function(e) {
+        var target = e.target;
+        if (target.classList.contains('offer-input') && target.dataset.tierId) {
+            var row = target.closest('tr');
+            var productId = row.dataset.productId;
+            var field = 'tier_' + target.dataset.tierId;
+            var value = target.value;
+            applyUsdToAllInputs();
+
+            createToast('جاري الحفظ...', 'saving');
+            fetch("{% url 'invoice:product_bulk_update' %}", {
+                method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
+                body: JSON.stringify({ manual_update: true, product_id: productId, updates: { field: field, value: value } })
+            }).then(function(r) { return r.json(); }).then(function(data) {
+                if(data.success) createToast('تم الحفظ', 'success');
+                else createToast(data.message || 'خطأ', 'error');
+            }).catch(function() { createToast('خطأ في الاتصال', 'error'); });
+        }
+        else if (target.dataset.field === 'wholesale_price') {
+             var row = target.closest('tr');
+             applyUsdToAllInputs();
+             saveSingleField(row.dataset.productId, 'wholesale_price', target.value);
+        }
+    });
+
+    function saveSingleField(productId, field, value) {
+        createToast('جاري الحفظ...', 'saving');
+        fetch("{% url 'invoice:product_bulk_update' %}", {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
+            body: JSON.stringify({ manual_update: true, product_id: productId, updates: { field: field, value: value } })
+        }).then(function(r) { return r.json(); }).then(function(data) {
+            if(data.success) createToast('تم الحفظ', 'success');
+            else createToast(data.message || 'خطأ', 'error');
+        }).catch(function() { createToast('خطأ في الاتصال', 'error'); });
+    }
+
+    document.getElementById('calculatorForm').addEventListener('input', function(e) {
+        if(e.target.classList.contains('tier-percent')) {
+            var tierId = e.target.dataset.tierId;
+            for (var i = 0; i < tiersData.length; i++) {
+                if(tiersData[i].id == tierId) {
+                    tiersData[i].percent = parseFloat(e.target.value) || 0;
+                    break;
+                }
+            }
+        }
+        calculatePreview();
+    });
+    
+    document.getElementById('conversion_factor').addEventListener('input', applyUsdToAllInputs);
+
+    function calculatePreview() {
+        var margin = parseFloat(document.getElementById('profit_margin').value) || 0;
+        var conversion = parseFloat(document.getElementById('conversion_factor').value) || 0;
+        var rows = document.querySelectorAll('#productsTableBody tr');
+
+        for (var i = 0; i < rows.length; i++) {
+            var row = rows[i];
+            var baseCost = parseFloat(row.dataset.baseCost) || 0;
+            
+            var wholesalePrice = baseCost;
+            if (margin > 0) wholesalePrice = baseCost * (1 + margin / 100);
+
+            var wholesaleInput = row.querySelector('[data-field="wholesale_price"]');
+            if(wholesaleInput) {
+                wholesaleInput.value = cleanNumber(wholesalePrice.toFixed(2));
+                updateUsdLabel(wholesaleInput, conversion);
+            }
+            
+            for (var j = 0; j < tiersData.length; j++) {
+                var tier = tiersData[j];
+                var input = row.querySelector('.offer-input[data-tier-id="' + tier.id + '"]');
+                if (!input) continue;
+                
+                var price = 0;
+                if (tier.percent > 0) {
+                    price = wholesalePrice * (1 - tier.percent / 100);
+                }
+                input.value = price > 0 ? cleanNumber(price.toFixed(2)) : '';
+                updateUsdLabel(input, conversion);
+            }
+        }
+    }
+
+    document.getElementById('btnSaveRequest').addEventListener('click', function() {
+        currentAction = 'save';
+        modalTitle.textContent = "تأكيد الحفظ";
+        modalBodyText.innerHTML = "سيتم حفظ الأسعار الظاهرة في الحقول.<br><strong>هل أنت متأكد؟</strong>";
+        passwordError.style.display = 'none'; passwordInput.value = '';
+        passwordModal.show();
+    });
+
+    document.getElementById('btnResetRequest').addEventListener('click', function() {
+        currentAction = 'reset';
+        modalTitle.textContent = "تأكيد إعادة الضبط";
+        modalBodyText.innerHTML = "<span class='text-danger font-weight-bold'>تحذير!</span> سيتم تصفير الإعدادات وإرجاع الأسعار إلى التكلفة.";
+        passwordError.style.display = 'none'; passwordInput.value = '';
+        passwordModal.show();
+    });
+
+    document.getElementById('btnModalConfirm').addEventListener('click', function() {
+        var password = passwordInput.value;
+        if(!password) { passwordError.textContent = 'الرجاء إدخال كلمة المرور'; passwordError.style.display = 'block'; return; }
+        if (currentAction === 'save') performSave(password);
+        else if (currentAction === 'reset') performReset(password);
+    });
+
+    function performSave(password) {
+        var margin = parseFloat(document.getElementById('profit_margin').value) || 0;
+        var conversion = parseFloat(document.getElementById('conversion_factor').value) || 0;
+        
+        var bulkUpdates = {};
+        var rows = document.querySelectorAll('#productsTableBody tr');
+        for (var i = 0; i < rows.length; i++) {
+            var row = rows[i];
+            var productId = row.dataset.productId;
+            var prices = { wholesale_price: cleanNumber(row.querySelector('[data-field="wholesale_price"]').value) };
+            
+            var tierInputs = row.querySelectorAll('.offer-input');
+            for (var j = 0; j < tierInputs.length; j++) {
+                prices['tier_' + tierInputs[j].dataset.tierId] = cleanNumber(tierInputs[j].value);
+            }
+            bulkUpdates[productId] = prices;
+        }
+
+        createToast('جاري الحفظ...', 'saving');
+        fetch("{% url 'invoice:product_bulk_update' %}", {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
+            body: JSON.stringify({ 
+                password: password, bulk_updates: bulkUpdates,
+                tiers: tiersData.map(function(t) { return { id: t.id, name: t.name, percent: t.percent }; })
+            })
+        }).then(function(r) { return r.json(); }).then(handleResponse).catch(handleConnectionError);
+    }
+
+    function performReset(password) {
+        createToast('جاري إعادة الضبط...', 'saving');
+        fetch("{% url 'invoice:product_bulk_update' %}", {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
+            body: JSON.stringify({ password: password, reset_data: true })
+        }).then(function(r) { return r.json(); }).then(function(data) {
+            handleResponse(data);
+            if(data.success) setTimeout(function() { location.reload(); }, 1500);
+        }).catch(handleConnectionError);
+    }
+
+    function handleResponse(data) {
+        if(data.success) { createToast(data.message || 'تمت العملية بنجاح', 'success'); passwordModal.hide(); }
+        else { passwordError.textContent = data.message || 'حدث خطأ'; passwordError.style.display = 'block'; createToast(data.message || 'فشل العملية', 'error'); }
+    }
+    
+    function handleConnectionError() {
+        passwordError.textContent = 'خطأ في الاتصال'; passwordError.style.display = 'block'; createToast('خطأ في الاتصال', 'error');
+    }
+});
+</script>
+{% endblock %}

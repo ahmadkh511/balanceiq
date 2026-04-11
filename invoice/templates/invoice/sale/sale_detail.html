@@ -1,0 +1,959 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ============================================
+       نظام الأزوردي - Aqua Design System
+       ============================================ */
+    :root {
+        --aqua-1: #e0f7fa;
+        --aqua-2: #b2ebf2;
+        --aqua-3: #4dd0e1;
+        --aqua-4: #0097a7;
+        --text-dark: #006064;
+        --text-light: #ffffff;
+        --shadow-sm: 0 2px 8px rgba(0, 150, 167, 0.08);
+        --shadow-md: 0 4px 12px rgba(0, 150, 167, 0.12);
+    }
+
+    .badge-paid {
+        background: #d1fae5;
+        color: #065f46;
+    }
+    .badge-pending {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .print-fab {
+        position: fixed;
+        bottom: 1.5rem;
+        left: 1.5rem;
+        z-index: 1050;
+        padding: 0.6rem 1.2rem;
+        border-radius: 50px;
+        box-shadow: 0 4px 15px rgba(0, 150, 167, 0.35);
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .info-strip {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 0;
+        border-bottom: 1px solid var(--aqua-2);
+        font-size: 0.82rem;
+    }
+    .info-cell {
+        padding: 0.5rem 0.85rem;
+        border-left: 1px solid var(--aqua-1);
+    }
+    .info-cell:last-child { border-left: none; }
+    .info-cell-label {
+        font-size: 0.68rem;
+        color: var(--aqua-4);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        margin-bottom: 0.1rem;
+    }
+    .info-cell-value {
+        font-weight: 600;
+        color: var(--text-dark);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .notes-bar {
+        padding: 0.4rem 0.85rem;
+        background: #fffbeb;
+        border-bottom: 1px solid #fde68a;
+        font-size: 0.78rem;
+        color: #92400e;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+    .thumb {
+        width: 32px;
+        height: 32px;
+        border-radius: 4px;
+        object-fit: cover;
+        border: 1px solid var(--aqua-2);
+    }
+    .thumb-placeholder {
+        width: 32px;
+        height: 32px;
+        background: var(--aqua-1);
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--aqua-2);
+        font-size: 0.7rem;
+    }
+
+    .finance-strip {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        border-top: 1px solid var(--aqua-2);
+        gap: 0;
+    }
+    .finance-preview {
+        padding: 0.75rem;
+        background: var(--aqua-1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .finance-preview img {
+        max-height: 80px;
+        border-radius: 4px;
+        border: 1px solid var(--aqua-2);
+    }
+    .finance-grid {
+        display: grid;
+        grid-template-columns: repeat(3, auto);
+        gap: 0.3rem 1.5rem;
+        padding: 0.6rem 1rem;
+        align-items: end;
+    }
+    .fin-item { display: flex; flex-direction: column; gap: 0.05rem; }
+    .fin-label { font-size: 0.68rem; color: var(--aqua-4); }
+    .fin-value { font-weight: 600; font-size: 0.82rem; white-space: nowrap; }
+    .fin-value.green { color: #00897b; }
+    .fin-value.red { color: #e53935; }
+    .fin-total {
+        grid-column: 1 / -1;
+        background: linear-gradient(135deg, var(--aqua-4) 0%, #006064 100%);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.95rem;
+        margin-top: 0.35rem;
+    }
+    .fin-words {
+        grid-column: 1 / -1;
+        font-size: 0.75rem;
+        color: var(--aqua-4);
+        text-align: center;
+        font-style: italic;
+        margin-top: 0.2rem;
+    }
+
+    /* === نافذة الإعدادات === */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+        backdrop-filter: blur(3px);
+    }
+    .modal-overlay.active { display: flex; }
+    .modal-box {
+        background: white;
+        border-radius: 8px;
+        width: 600px;
+        max-width: 95vw;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        animation: modalIn 0.25s ease;
+    }
+    @keyframes modalIn {
+        from { transform: translateY(20px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+    .modal-close {
+        width: 30px;
+        height: 30px;
+        border: none;
+        background: var(--aqua-1);
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 1rem;
+        color: var(--text-dark);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+    }
+    .modal-close:hover { background: var(--aqua-2); }
+    .section-title {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin: 1rem 0 0.5rem;
+        padding-bottom: 0.3rem;
+        border-bottom: 1px dashed var(--aqua-2);
+    }
+    .section-title:first-child { margin-top: 0; }
+    .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.25rem; }
+    .field-check {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.3rem 0.4rem;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background 0.15s;
+        font-size: 0.8rem;
+    }
+    .field-check:hover { background: var(--aqua-1); }
+    .field-check input[type="checkbox"] {
+        width: 15px; height: 15px; accent-color: var(--aqua-4); cursor: pointer;
+    }
+    .field-key {
+        color: var(--aqua-4);
+        font-size: 0.65rem;
+        font-family: monospace;
+        background: var(--aqua-1);
+        padding: 0.05rem 0.3rem;
+        border-radius: 3px;
+        margin-right: auto;
+    }
+    .btn-group {
+        display: flex; gap: 0.25rem; background: var(--aqua-1); padding: 0.2rem; border-radius: 4px;
+    }
+    .btn-opt {
+        flex: 1; padding: 0.3rem; border: none; background: transparent; border-radius: 4px;
+        font-size: 0.78rem; cursor: pointer; font-family: 'Tajawal', sans-serif;
+        color: var(--aqua-4); font-weight: 600; transition: all 0.2s; text-align: center;
+    }
+    .btn-opt.active {
+        background: white; color: var(--text-dark); box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 0.4rem 0; }
+    .toggle-row label { font-size: 0.8rem; }
+    .toggle-switch { position: relative; width: 38px; height: 20px; cursor: pointer; }
+    .toggle-switch input { display: none; }
+    .toggle-slider {
+        position: absolute; inset: 0; background: var(--aqua-2); border-radius: 10px; transition: 0.2s;
+    }
+    .toggle-slider::before {
+        content: ''; position: absolute; width: 16px; height: 16px; background: white;
+        border-radius: 50%; top: 2px; left: 2px; transition: 0.2s;
+    }
+    .toggle-switch input:checked + .toggle-slider { background: var(--aqua-4); }
+    .toggle-switch input:checked + .toggle-slider::before { left: 20px; }
+
+    .header-footer-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+    .hf-input-group label {
+        display: block; font-size: 0.75rem; font-weight: 600; color: var(--text-dark); margin-bottom: 0.2rem;
+    }
+    .hf-input-group input, .hf-input-group textarea {
+        width: 100%; border: 1px solid var(--aqua-2); border-radius: 4px; padding: 0.35rem 0.5rem;
+        font-size: 0.8rem; font-family: 'Tajawal', sans-serif; transition: all 0.2s;
+    }
+    .hf-input-group input:focus, .hf-input-group textarea:focus {
+        border-color: var(--aqua-3); box-shadow: 0 0 0 2px rgba(77, 208, 225, 0.2); outline: none;
+    }
+    .hf-preview-box {
+        background: var(--aqua-1); border: 1px dashed var(--aqua-2); border-radius: 4px;
+        padding: 0.5rem; text-align: center; margin-top: 0.3rem; cursor: pointer;
+    }
+    .hf-preview-box img { max-height: 50px; border-radius: 4px; }
+
+    .toast {
+        position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%) translateY(80px);
+        background: var(--text-dark); color: white; padding: 0.6rem 1.2rem; border-radius: 4px;
+        font-size: 0.82rem; z-index: 99999; opacity: 0; transition: all 0.3s; pointer-events: none;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+    @media (max-width: 768px) {
+        .info-strip { grid-template-columns: repeat(2, 1fr); }
+        .finance-strip { grid-template-columns: 1fr; }
+        .finance-grid { grid-template-columns: repeat(2, auto); }
+        .field-grid { grid-template-columns: 1fr; }
+        .header-footer-inputs { grid-template-columns: 1fr; }
+    }
+
+    /* =============================================
+       أنماط الطباعة
+       ============================================= */
+    @media print {
+        * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+
+        body {
+            background: white !important;
+            font-size: 11pt !important;
+            color: #000 !important;
+            padding: 0 !important;
+        }
+
+        .no-print { display: none !important; }
+
+        .main-wrapper {
+            max-width: 100% !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+
+        .card {
+            box-shadow: none !important;
+            border-radius: 0 !important;
+            border: none !important;
+        }
+
+        /* === الهيدر المتكرر === */
+        .print-header-area {
+            display: block !important;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            padding: 6pt 10mm !important;
+            border-bottom: 1.5pt solid #333 !important;
+            background: white !important;
+            z-index: 10000 !important;
+            text-align: center !important;
+        }
+        .print-header-area .ph-logo { max-height: 30pt !important; vertical-align: middle !important; }
+        .print-header-area .ph-company {
+            font-size: 12pt !important; font-weight: 700 !important; color: #000 !important;
+            display: inline-block !important; vertical-align: middle !important;
+        }
+        .print-header-area .ph-details { font-size: 8pt !important; color: #444 !important; }
+
+        /* === الفوتر المتكرر === */
+        .print-footer-area {
+            display: block !important;
+            position: fixed !important;
+            bottom: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            padding: 4pt 10mm !important;
+            border-top: 1pt solid #999 !important;
+            background: white !important;
+            z-index: 10000 !important;
+            text-align: center !important;
+            font-size: 7pt !important;
+            color: #666 !important;
+        }
+
+        /* === مساحة المحتوى === */
+        .invoice-print-area {
+            padding-top: 45pt !important;
+            padding-bottom: 25pt !important;
+        }
+
+        /* === الحقول المخفية === */
+        [data-print-hidden="true"] { display: none !important; }
+
+        /* === ضبط الخطوط === */
+        .card-header-print {
+            padding: 4pt 0 !important; border-bottom: 1pt solid #333 !important;
+            font-size: 12pt !important; font-weight: 700 !important; margin-bottom: 4pt !important;
+        }
+        .header-meta { font-size: 8pt !important; }
+        .badge-print { font-size: 7pt !important; }
+
+        .info-strip { border-bottom: 0.5pt solid #ccc !important; font-size: 8pt !important; }
+        .info-cell { padding: 3pt 6pt !important; border-left: 0.3pt solid #ddd !important; }
+        .info-cell-label { font-size: 6pt !important; }
+
+        .notes-bar { padding: 2pt 6pt !important; border-bottom: 0.3pt solid #ccc !important; font-size: 7pt !important; }
+
+        .table { font-size: 8pt !important; }
+        .table thead th {
+            padding: 3pt 4pt !important; font-size: 7pt !important;
+            background: #e0e0e0 !important; color: #000 !important;
+        }
+        .table tbody td { padding: 2pt 4pt !important; border-bottom: 0.3pt solid #ddd !important; }
+        .thumb { width: 22pt !important; height: 22pt !important; }
+
+        .finance-strip { grid-template-columns: 1fr !important; border-top: 1pt solid #333 !important; }
+        .finance-grid { grid-template-columns: repeat(3, auto) !important; padding: 4pt 8pt !important; gap: 2pt 12pt !important; }
+        .fin-label { font-size: 6pt !important; }
+        .fin-value { font-size: 8pt !important; }
+        .fin-total { padding: 4pt 8pt !important; font-size: 10pt !important; }
+        .fin-words { font-size: 6.5pt !important; }
+
+        /* أوضاع الورق */
+        .print-thermal .info-strip { font-size: 7pt !important; }
+        .print-thermal .table { font-size: 7pt !important; }
+        .print-thermal .table thead th { font-size: 6pt !important; }
+        .print-thermal .fin-total { font-size: 8pt !important; }
+        .print-a5 .card-header-print { font-size: 10pt !important; }
+        .print-a5 .info-strip { font-size: 7pt !important; }
+        .print-a5 .table { font-size: 7pt !important; }
+
+        /* منع تقسيم العناصر */
+        .table tr { page-break-inside: avoid; }
+        .info-strip { page-break-inside: avoid; }
+        .finance-strip { page-break-inside: avoid; }
+
+        /* بدون ألوان */
+        .print-grayscale * { filter: grayscale(100%) !important; }
+        /* بدون خطوط */
+        .print-no-lines .table td, .print-no-lines .table th { border: none !important; }
+    }
+
+    /* === قاعدة @page واحدة فقط (افتراضية) === */
+    @page {
+        margin: 10mm;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="main-wrapper">
+
+    <button class="btn btn-primary print-fab no-print" id="openPrintModalBtn">
+        <i class="fas fa-print"></i> طباعة الفاتورة
+    </button>
+
+    <div class="card invoice-print-area" id="invoiceCard">
+
+        <!-- هيدر الطباعة المتكرر -->
+        <div class="print-header-area no-print" id="printHeaderArea" style="display:none;">
+            <table style="width:100%; border-collapse:collapse;">
+                <tr>
+                    <td style="width:60px; vertical-align:middle;">
+                        <img src="" alt="شعار" class="ph-logo" id="phLogoImg" style="display:none;">
+                        <span id="phLogoPlaceholder" style="font-size:8pt; color:#999;">بدون شعار</span>
+                    </td>
+                    <td style="vertical-align:middle; text-align:center;">
+                        <div class="ph-company" id="phCompanyName">اسم الشركة</div>
+                        <div class="ph-details" id="phCompanyDetails"></div>
+                    </td>
+                    <td style="width:60px;"></td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- فوتر الطباعة المتكرر -->
+        <div class="print-footer-area no-print" id="printFooterArea" style="display:none;">
+            <span id="phFooterText"></span>
+        </div>
+
+        <!-- رأس الفاتورة -->
+        <div class="card-header-print" id="printableHeaderStrip">
+            <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+                <i class="fas fa-file-invoice-dollar no-print"></i>
+                <span>فاتورة مبيعات #{{ sale.uniqueId }}</span>
+                <div class="ms-auto"></div>
+                <span class="header-meta" style="font-size:0.8rem; opacity:0.8;">
+                    <i class="far fa-calendar-alt"></i> {{ sale.date_created|date:"Y-m-d" }}
+                </span>
+                <span class="badge-print {% if sale.is_paid %}badge-paid{% else %}badge-pending{% endif %}"
+                      data-print-field="status"
+                      style="font-size:0.7rem; padding:0.15rem 0.5rem; border-radius:12px;">
+                    {{ sale.is_paid|yesno:"مدفوعة,معلقة" }}
+                </span>
+            </div>
+        </div>
+
+        <!-- أزرار الإجراءات -->
+        <div class="no-print" style="padding:0.5rem 1rem; display:flex; gap:0.4rem; border-bottom:1px solid var(--aqua-1);">
+            <a class="btn btn-primary" data-href="{% url 'invoice:sale_edit' slug=sale.slug %}">
+                <i class="fas fa-pen"></i> تعديل
+            </a>
+            <a class="btn btn-secondary" data-href="{% url 'invoice:sale_list' %}">
+                <i class="fas fa-arrow-right"></i> العودة للقائمة
+            </a>
+        </div>
+
+        <!-- شريط المعلومات -->
+        <div class="info-strip" data-print-field="info-strip">
+            <div class="info-cell" data-print-field="customer-name">
+                <div class="info-cell-label">العميل</div>
+                <div class="info-cell-value">
+                    {% if sale.sale_customer %}
+                        {{ sale.sale_customer.get_full_name|default:sale.sale_customer.username }}
+                    {% else %} عميل نقدي {% endif %}
+                </div>
+            </div>
+            <div class="info-cell" data-print-field="customer-phone">
+                <div class="info-cell-label">الهاتف</div>
+                <div class="info-cell-value">{{ sale.sale_customer_phone|default:"---" }}</div>
+            </div>
+            <div class="info-cell" data-print-field="shipping-company">
+                <div class="info-cell-label">شركة الشحن</div>
+                <div class="info-cell-value">{{ sale.sale_shipping_company.name|default:"---" }}</div>
+            </div>
+            <div class="info-cell" data-print-field="shipping-num">
+                <div class="info-cell-label">رقم الشحن</div>
+                <div class="info-cell-value">{{ sale.sale_shipping_num|default:"---" }}</div>
+            </div>
+            <div class="info-cell" data-print-field="user">
+                <div class="info-cell-label">المستخدم</div>
+                <div class="info-cell-value">{{ sale.created_by.username|default:"---" }}</div>
+            </div>
+            <div class="info-cell" data-print-field="sale-status">
+                <div class="info-cell-label">حالة البيع</div>
+                <div class="info-cell-value">{{ sale.sale_status.name|default:"---" }}</div>
+            </div>
+            <div class="info-cell" data-print-field="payment-method">
+                <div class="info-cell-label">طريقة الدفع</div>
+                <div class="info-cell-value">{{ sale.sale_payment_method.name|default:"---" }}</div>
+            </div>
+        </div>
+
+        {% if sale.sale_notes %}
+        <div class="notes-bar" data-print-field="notes">
+            <i class="fas fa-comment-alt"></i>
+            <span>{{ sale.sale_notes }}</span>
+        </div>
+        {% endif %}
+
+        <!-- جدول البنود -->
+        <div class="card-body" style="padding:0.5rem; overflow-x:auto;">
+            <table class="table table-bordered" style="margin-bottom:0;">
+                <thead>
+                    <tr>
+                        <th style="width:25px;" data-print-field="col-index">#</th>
+                        <th data-print-field="col-product">المنتج</th>
+                        <th data-print-field="col-qty">الكمية</th>
+                        <th data-print-field="col-price">السعر</th>
+                        <th data-print-field="col-total">الإجمالي</th>
+                        <th data-print-field="col-barcode">الباركود</th>
+                        <th data-print-field="col-image">صورة</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ib in items_with_barcodes %}
+                    <tr>
+                        <td style="color:#999;" data-print-field="col-index">{{ forloop.counter }}</td>
+                        <td data-print-field="col-product">
+                            <strong style="display:block; font-size:0.85rem;">{{ ib.item.item_name }}</strong>
+                            {% if ib.item.product %}
+                                <span style="color:#999; font-size:0.7rem;">{{ ib.item.product.product_code }}</span>
+                            {% endif %}
+                            {% if ib.item.notes %}<div style="color:#bbb; font-size:0.7rem;">{{ ib.item.notes }}</div>{% endif %}
+                        </td>
+                        <td data-print-field="col-qty">{{ ib.item.sold_quantity }}</td>
+                        <td data-print-field="col-price">{{ ib.item.unit_price|floatformat:2 }}</td>
+                        <td style="font-weight:600;" data-print-field="col-total">{{ ib.item.sale_total|floatformat:2 }}</td>
+                        <td data-print-field="col-barcode">
+                            {% for b in ib.barcodes %}
+                                <span style="display:inline-block; background:var(--aqua-1); color:var(--aqua-4); padding:0.05rem 0.3rem; border-radius:3px; font-size:0.65rem; font-family:monospace; margin:1px;">{{ b.code }}</span>
+                            {% empty %}
+                                <span style="color:#bbb;">-</span>
+                            {% endfor %}
+                        </td>
+                        <td data-print-field="col-image">
+                            {% if ib.item.sale_item_image %}
+                                <img src="{{ ib.item.sale_item_image.url }}" class="thumb" alt="">
+                            {% else %}
+                                <div class="thumb-placeholder no-print"><i class="fas fa-image"></i></div>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" style="text-align:center; color:#bbb; padding:2rem;">لا توجد أصناف في هذه الفاتورة</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- التذييل المالي -->
+        <div class="finance-strip">
+            <div class="finance-preview">
+                {% if sale.sale_image %}
+                    <img src="{{ sale.sale_image.url }}" alt="صورة الفاتورة">
+                {% else %}
+                    <span style="color:var(--aqua-2); font-size:0.78rem;">لا توجد صورة</span>
+                {% endif %}
+            </div>
+            <div class="finance-grid">
+                <div class="fin-item" data-print-field="subtotal">
+                    <span class="fin-label">المجموع الفرعي</span>
+                    <span class="fin-value">{{ sale.sale_subtotal|floatformat:2 }}</span>
+                </div>
+                <div class="fin-item" data-print-field="addition">
+                    <span class="fin-label">الإضافة</span>
+                    <span class="fin-value">{{ sale.sale_addition|floatformat:2 }}</span>
+                </div>
+                <div class="fin-item" data-print-field="discount">
+                    <span class="fin-label">الخصم</span>
+                    <span class="fin-value">{{ sale.sale_discount|floatformat:2 }}</span>
+                </div>
+                <div class="fin-item" data-print-field="tax">
+                    <span class="fin-label">الضريبة ({{ sale.sale_tax_percentage }}%)</span>
+                    <span class="fin-value">{{ sale.sale_tax_amount|floatformat:2 }}</span>
+                </div>
+                <div class="fin-item" data-print-field="paid">
+                    <span class="fin-label">المدفوع</span>
+                    <span class="fin-value green">{{ sale.paid_amount|floatformat:2 }}</span>
+                </div>
+                <div class="fin-item" data-print-field="balance">
+                    <span class="fin-label">المتبقي</span>
+                    <span class="fin-value red">{{ sale.balance_due|floatformat:2 }}</span>
+                </div>
+                <div class="fin-total" data-print-field="final-total">
+                    <span>الإجمالي ({{ sale.sale_currency.name_ar|default:"ل.س" }})</span>
+                    <strong>{{ sale.sale_final_total|floatformat:2 }}</strong>
+                </div>
+                {% if sale.total_in_words %}
+                <div class="fin-words" data-print-field="amount-words">
+                    {{ sale.total_in_words }}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- نافذة إعدادات الطباعة -->
+<div class="modal-overlay" id="printModal">
+    <div class="modal-box">
+        <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="display:flex; align-items:center; gap:0.4rem;">
+                <i class="fas fa-cog"></i> إعدادات الطباعة
+            </span>
+            <button class="modal-close" id="closeModalBtn">&times;</button>
+        </div>
+
+        <div class="card-body">
+            <div class="section-title">هيدر وفوتر صفحة الطباعة</div>
+            <p style="font-size:0.75rem; color:var(--aqua-4); margin-bottom:0.5rem;">
+                <i class="fas fa-info-circle"></i> تظهر فقط عند الطباعة وتتكرر مع كل صفحة.
+            </p>
+            <div class="header-footer-inputs">
+                <div class="hf-input-group">
+                    <label><i class="fas fa-image"></i> شعار الشركة</label>
+                    <input type="file" id="logoInput" accept="image/*" style="display:none;">
+                    <div class="hf-preview-box" id="logoPreviewBox">
+                        <span id="logoPlaceholderText" style="font-size:0.75rem; color:var(--aqua-4);">اضغط لرفع الشعار</span>
+                        <img id="logoPreviewImg" src="" alt="" style="display:none;">
+                    </div>
+                </div>
+                <div class="hf-input-group">
+                    <label><i class="fas fa-building"></i> اسم الشركة</label>
+                    <input type="text" id="companyNameInput" placeholder="مثال: مؤسسة الأزوردي">
+                </div>
+                <div class="hf-input-group" style="grid-column: 1 / -1;">
+                    <label><i class="fas fa-align-right"></i> بيانات إضافية</label>
+                    <textarea id="companyDetailsInput" rows="2" placeholder="هاتف: 011xxx | عنوان: دمشق"></textarea>
+                </div>
+                <div class="hf-input-group" style="grid-column: 1 / -1;">
+                    <label><i class="fas fa-shoe-prints"></i> نص الفوتر المتكرر</label>
+                    <input type="text" id="footerTextInput" placeholder="شكراً لتعاملكم معنا">
+                </div>
+            </div>
+
+            <div class="section-title">حجم الورق</div>
+            <div class="btn-group" id="paperSizeGroup">
+                <button class="btn-opt active" data-value="a4">A4</button>
+                <button class="btn-opt" data-value="a5">A5</button>
+                <button class="btn-opt" data-value="thermal">حراري 80mm</button>
+                <button class="btn-opt" data-value="half-a4">نصف A4</button>
+            </div>
+
+            <div class="section-title">الهوامش</div>
+            <div class="btn-group" id="marginGroup">
+                <button class="btn-opt" data-value="minimal">أقل</button>
+                <button class="btn-opt active" data-value="normal">عادي</button>
+                <button class="btn-opt" data-value="wide">واسع</button>
+            </div>
+
+            <div class="section-title">معلومات الفاتورة</div>
+            <div class="field-grid">
+                <label class="field-check"><input type="checkbox" checked data-target="customer-name"> اسم العميل <span class="field-key">عميل</span></label>
+                <label class="field-check"><input type="checkbox" checked data-target="customer-phone"> هاتف العميل <span class="field-key">هاتف</span></label>
+                <label class="field-check"><input type="checkbox" checked data-target="shipping-company"> شركة الشحن <span class="field-key">شحن</span></label>
+                <label class="field-check"><input type="checkbox" checked data-target="shipping-num"> رقم الشحن <span class="field-key">رقم شحن</span></label>
+                <label class="field-check"><input type="checkbox" checked data-target="user"> المستخدم <span class="field-key">مستخدم</span></label>
+                <label class="field-check"><input type="checkbox" checked data-target="sale-status"> حالة البيع <span class="field-key">حالة</span></label>
+                <label class="field-check"><input type="checkbox" checked data-target="payment-method"> طريقة الدفع <span class="field-key">دفع</span></label>
+                <label class="field-check"><input type="checkbox" checked data-target="status"> شارة الحالة <span class="field-key">مدفوعة</span></label>
+                <label class="field-check"><input type="checkbox" checked data-target="notes"> الملاحظات <span class="field-key">ملاحظات</span></label>
+            </div>
+
+            <div class="section-title">أعمدة جدول البنود</div>
+            <div class="field-grid">
+                <label class="field-check"><input type="checkbox" checked data-target="col-index"> الترقيم <span class="field-key">#</span></label>
+                <label class="field-check"><input type="checkbox" checked data-target="col-product"> المنتج <span class="field-key">اسم</span></label>
+                <label class="field-check"><input type="checkbox" checked data-target="col-qty"> الكمية <span class="field-key">كم</span></label>
+                <label class="field-check"><input type="checkbox" checked data-target="col-price"> السعر <span class="field-key">سعر</span></label>
+                <label class="field-check"><input type="checkbox" checked data-target="col-total"> الإجمالي <span class="field-key">مجموع</span></label>
+                <label class="field-check"><input type="checkbox" checked data-target="col-barcode"> الباركود <span class="field-key">باركود</span></label>
+                <label class="field-check"><input type="checkbox" checked data-target="col-image"> صورة المنتج <span class="field-key">صورة</span></label>
+            </div>
+
+            <div class="section-title">القسم المالي</div>
+            <div class="field-grid">
+                <label class="field-check"><input type="checkbox" checked data-target="subtotal"> المجموع الفرعي <span class="field-key">فرعي</span></label>
+                <label class="field-check"><input type="checkbox" checked data-target="addition"> الإضافة <span class="field-key">إضافة</span></label>
+                <label class="field-check"><input type="checkbox" checked data-target="discount"> الخصم <span class="field-key">خصم</span></label>
+                <label class="field-check"><input type="checkbox" checked data-target="tax"> الضريبة <span class="field-key">ضريبة</span></label>
+                <label class="field-check"><input type="checkbox" checked data-target="paid"> المدفوع <span class="field-key">مدفوع</span></label>
+                <label class="field-check"><input type="checkbox" checked data-target="balance"> المتبقي <span class="field-key">متبقي</span></label>
+                <label class="field-check"><input type="checkbox" checked data-target="final-total"> الإجمالي النهائي <span class="field-key">نهائي</span></label>
+                <label class="field-check"><input type="checkbox" checked data-target="amount-words"> المبلغ كتابةً <span class="field-key">كتابة</span></label>
+            </div>
+
+            <div class="section-title">خيارات إضافية</div>
+            <div class="toggle-row">
+                <label>طباعة بالألوان</label>
+                <label class="toggle-switch"><input type="checkbox" id="printColors" checked><span class="toggle-slider"></span></label>
+            </div>
+            <div class="toggle-row">
+                <label>إظهار خطوط فاصلة بين الصفوف</label>
+                <label class="toggle-switch"><input type="checkbox" id="printLines" checked><span class="toggle-slider"></span></label>
+            </div>
+        </div>
+
+        <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
+            <div style="display:flex; gap:0.35rem;">
+                <button class="btn btn-secondary" id="selectAllBtn"><i class="fas fa-check-double"></i> تحديد الكل</button>
+                <button class="btn btn-secondary" id="deselectAllBtn"><i class="fas fa-times"></i> إلغاء الكل</button>
+            </div>
+            <button class="btn btn-primary" id="executePrintBtn" style="padding:0.45rem 1.5rem;">
+                <i class="fas fa-print"></i> طباعة الآن
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    var printState = { paperSize: 'a4', marginSize: 'normal', logoDataUrl: '' };
+    var printModal = document.getElementById('printModal');
+    var invoiceCard = document.getElementById('invoiceCard');
+    var toastEl = document.getElementById('toast');
+
+    /* فتح/إغلاق */
+    document.getElementById('openPrintModalBtn').addEventListener('click', function() {
+        printModal.classList.add('active');
+    });
+    document.getElementById('closeModalBtn').addEventListener('click', function() {
+        printModal.classList.remove('active');
+    });
+    printModal.addEventListener('click', function(e) {
+        if (e.target === printModal) printModal.classList.remove('active');
+    });
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') printModal.classList.remove('active');
+    });
+
+    /* روابط data-href */
+    document.querySelectorAll('[data-href]').forEach(function(link) {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            var href = this.getAttribute('data-href');
+            if (href) window.location.href = href;
+        });
+    });
+
+    /* أزرار المجموعات */
+    document.querySelectorAll('.btn-group').forEach(function(group) {
+        group.querySelectorAll('.btn-opt').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                group.querySelectorAll('.btn-opt').forEach(function(b) { b.classList.remove('active'); });
+                this.classList.add('active');
+                if (group.id === 'paperSizeGroup') printState.paperSize = this.dataset.value;
+                if (group.id === 'marginGroup') printState.marginSize = this.dataset.value;
+            });
+        });
+    });
+
+    /* تحديد/إلغاء الكل */
+    document.getElementById('selectAllBtn').addEventListener('click', function() {
+        printModal.querySelectorAll('input[type="checkbox"][data-target]').forEach(function(cb) { cb.checked = true; });
+        showToast('تم تحديد جميع الحقول');
+    });
+    document.getElementById('deselectAllBtn').addEventListener('click', function() {
+        printModal.querySelectorAll('input[type="checkbox"][data-target]').forEach(function(cb) { cb.checked = false; });
+        showToast('تم إلغاء تحديد جميع الحقول');
+    });
+
+    /* رفع الشعار */
+    var logoInput = document.getElementById('logoInput');
+    var logoPreviewImg = document.getElementById('logoPreviewImg');
+    var logoPlaceholderText = document.getElementById('logoPlaceholderText');
+    document.getElementById('logoPreviewBox').addEventListener('click', function() { logoInput.click(); });
+    logoInput.addEventListener('change', function() {
+        if (this.files && this.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                printState.logoDataUrl = e.target.result;
+                logoPreviewImg.src = e.target.result;
+                logoPreviewImg.style.display = 'block';
+                logoPlaceholderText.style.display = 'none';
+            };
+            reader.readAsDataURL(this.files[0]);
+        }
+    });
+
+    function showToast(msg) {
+        toastEl.textContent = msg;
+        toastEl.classList.add('show');
+        setTimeout(function() { toastEl.classList.remove('show'); }, 2000);
+    }
+
+    /* === تغيير هوامش الصفحة ديناميكياً === */
+    function changePrintPage() {
+        var styleId = 'dynamic-page-style';
+        var existingStyle = document.getElementById(styleId);
+        if (existingStyle) existingStyle.remove();
+
+        var style = document.createElement('style');
+        style.id = styleId;
+        var marginValue = '10mm';
+        var sizeValue = '';
+
+        if (printState.marginSize === 'minimal') marginValue = '3mm';
+        else if (printState.marginSize === 'normal') marginValue = '8mm';
+        else if (printState.marginSize === 'wide') marginValue = '15mm';
+
+        if (printState.paperSize === 'thermal') {
+            marginValue = '2mm';
+            sizeValue = 'size: 80mm auto;';
+        } else if (printState.paperSize === 'half-a4') {
+            marginValue = '8mm';
+            sizeValue = 'size: A4 landscape;';
+        }
+
+        style.textContent = '@page { margin: ' + marginValue + '; ' + sizeValue + ' }';
+        document.head.appendChild(style);
+    }
+
+    /* === إخفاء عناصر base.html قبل الطباعة === */
+    var hiddenBaseElements = [];
+
+    function hideBaseElements() {
+        var selectors = [
+            'nav', 'aside', '.navbar', '.sidebar', '.side-bar',
+            '.breadcrumb', '.breadcrumbs', 'footer', '.footer',
+            '.top-bar', '.topbar', '.header-area', '[role="navigation"]'
+        ];
+        selectors.forEach(function(sel) {
+            document.querySelectorAll(sel).forEach(function(el) {
+                if (el.closest('.invoice-print-area') || el.closest('.modal-overlay') || el.closest('.print-fab')) return;
+                hiddenBaseElements.push({ el: el, display: el.style.display });
+                el.style.display = 'none';
+            });
+        });
+    }
+
+    function showBaseElements() {
+        hiddenBaseElements.forEach(function(item) {
+            item.el.style.display = item.display;
+        });
+        hiddenBaseElements = [];
+    }
+
+    /* === التنفيذ الرئيسي === */
+    document.getElementById('executePrintBtn').addEventListener('click', function() {
+
+        /* 1. تجهيز الهيدر والفوتر */
+        var headerArea = document.getElementById('printHeaderArea');
+        var footerArea = document.getElementById('printFooterArea');
+
+        document.getElementById('phCompanyName').textContent = document.getElementById('companyNameInput').value || 'اسم الشركة';
+        document.getElementById('phCompanyDetails').textContent = document.getElementById('companyDetailsInput').value || '';
+        document.getElementById('phFooterText').textContent = document.getElementById('footerTextInput').value || '';
+
+        if (printState.logoDataUrl) {
+            document.getElementById('phLogoImg').src = printState.logoDataUrl;
+            document.getElementById('phLogoImg').style.display = 'block';
+            document.getElementById('phLogoPlaceholder').style.display = 'none';
+        } else {
+            document.getElementById('phLogoImg').style.display = 'none';
+            document.getElementById('phLogoPlaceholder').style.display = 'inline';
+        }
+
+        headerArea.style.display = 'block';
+        headerArea.classList.remove('no-print');
+        footerArea.style.display = 'block';
+        footerArea.classList.remove('no-print');
+
+        /* 2. تطبيق اختيار الحقول */
+        printModal.querySelectorAll('input[type="checkbox"][data-target]').forEach(function(cb) {
+            var target = cb.dataset.target;
+            invoiceCard.querySelectorAll('[data-print-field="' + target + '"]').forEach(function(el) {
+                el.setAttribute('data-print-hidden', cb.checked ? 'false' : 'true');
+            });
+        });
+
+        var anyInfoVisible = false;
+        invoiceCard.querySelectorAll('.info-cell').forEach(function(cell) {
+            if (cell.getAttribute('data-print-hidden') !== 'true') anyInfoVisible = true;
+        });
+        var infoStrip = invoiceCard.querySelector('[data-print-field="info-strip"]');
+        if (infoStrip) infoStrip.setAttribute('data-print-hidden', anyInfoVisible ? 'false' : 'true');
+
+        /* 3. خيارات الألوان والخطوط */
+        if (!document.getElementById('printColors').checked) {
+            invoiceCard.classList.add('print-grayscale');
+        } else {
+            invoiceCard.classList.remove('print-grayscale');
+        }
+        if (!document.getElementById('printLines').checked) {
+            invoiceCard.classList.add('print-no-lines');
+        } else {
+            invoiceCard.classList.remove('print-no-lines');
+        }
+
+        /* 4. حجم الورق */
+        invoiceCard.classList.remove('print-a4', 'print-a5', 'print-thermal', 'print-half-a4');
+        invoiceCard.classList.add('print-' + printState.paperSize);
+
+        /* 5. تغيير الهوامش */
+        changePrintPage();
+
+        /* 6. إخفاء عناصر base.html */
+        hideBaseElements();
+
+        /* 7. طباعة */
+        printModal.classList.remove('active');
+        showToast('جارٍ الطباعة...');
+
+        setTimeout(function() {
+            window.print();
+
+            /* 8. تنظيف */
+            setTimeout(function() {
+                headerArea.style.display = 'none';
+                headerArea.classList.add('no-print');
+                footerArea.style.display = 'none';
+                footerArea.classList.add('no-print');
+
+                invoiceCard.querySelectorAll('[data-print-field]').forEach(function(el) {
+                    el.removeAttribute('data-print-hidden');
+                });
+                invoiceCard.classList.remove('print-a4', 'print-a5', 'print-thermal', 'print-half-a4', 'print-grayscale', 'print-no-lines');
+
+                showBaseElements();
+
+                var dynStyle = document.getElementById('dynamic-page-style');
+                if (dynStyle) dynStyle.remove();
+            }, 500);
+        }, 300);
+    });
+
+    /* Ctrl+P */
+    document.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+            e.preventDefault();
+            printModal.classList.add('active');
+        }
+    });
+</script>
+{% endblock %}

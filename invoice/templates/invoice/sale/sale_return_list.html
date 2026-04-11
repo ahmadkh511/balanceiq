@@ -1,0 +1,348 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}قائمة مرتجعات المبيعات{% endblock %}
+
+{% block extra_css %}
+<style>
+:root {
+  --aqua-1: #e0f7fa;
+  --aqua-2: #b2ebf2;
+  --aqua-3: #4dd0e1;
+  --aqua-4: #0097a7;
+  --text-dark: #006064;
+  --return-color: #ff9800;
+  --return-light: #fff3e0;
+}
+
+body {
+  background-color: var(--aqua-1);
+  font-family: 'Tajawal', sans-serif;
+}
+
+.container-fluid {
+  padding: 1rem;
+}
+
+.list-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,150,167,0.1);
+  overflow: hidden;
+}
+
+.list-header {
+  background: linear-gradient(135deg, var(--return-color) 0%, #f57c00 100%);
+  color: white;
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.list-header h2 {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.filter-section {
+  background: #f8f9fa;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--aqua-2);
+}
+
+.filter-form {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+
+.filter-group {
+  flex: 1;
+  min-width: 150px;
+}
+
+.filter-group label {
+  display: block;
+  font-size: 0.75rem;
+  color: #666;
+  margin-bottom: 0.2rem;
+}
+
+.filter-group input,
+.filter-group select {
+  width: 100%;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--aqua-2);
+  border-radius: 4px;
+  font-size: 0.8rem;
+}
+
+.filter-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn {
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 0.8rem;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  text-decoration: none;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--aqua-4) 0%, #006064 100%);
+  color: white;
+}
+
+.btn-return {
+  background: linear-gradient(135deg, var(--return-color) 0%, #f57c00 100%);
+  color: white;
+}
+
+.btn-secondary {
+  background: #6c757d;
+  color: white;
+}
+
+.btn-sm {
+  padding: 0.2rem 0.5rem;
+  font-size: 0.7rem;
+}
+
+.table-container {
+  overflow-x: auto;
+  padding: 1.5rem;
+}
+
+.returns-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.returns-table th {
+  background: linear-gradient(135deg, var(--return-color) 0%, #f57c00 100%);
+  color: white;
+  padding: 0.8rem 0.5rem;
+  text-align: center;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.returns-table td {
+  padding: 0.8rem 0.5rem;
+  border-bottom: 1px solid var(--aqua-2);
+  text-align: center;
+  vertical-align: middle;
+}
+
+.returns-table tbody tr:hover {
+  background-color: var(--return-light);
+}
+
+.badge-status {
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.badge-success {
+  background: #d4edda;
+  color: #155724;
+}
+
+.badge-warning {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.badge-danger {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.3rem;
+  justify-content: center;
+}
+
+.action-btn {
+  padding: 0.2rem 0.4rem;
+  border-radius: 3px;
+  color: white;
+  text-decoration: none;
+  font-size: 0.7rem;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 0.3rem;
+  margin-top: 1.5rem;
+  padding: 1rem;
+}
+
+.pagination .page-item {
+  list-style: none;
+}
+
+.pagination .page-link {
+  padding: 0.4rem 0.8rem;
+  background: white;
+  border: 1px solid var(--aqua-2);
+  border-radius: 4px;
+  color: var(--text-dark);
+  text-decoration: none;
+}
+
+.pagination .page-item.active .page-link {
+  background: var(--return-color);
+  color: white;
+  border-color: var(--return-color);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="list-card">
+        <div class="list-header">
+            <h2><i class="fas fa-undo-alt me-2"></i> قائمة مرتجعات المبيعات</h2>
+            <a href="{% url 'invoice:sale_list' %}" class="btn btn-primary btn-sm">
+                <i class="fas fa-arrow-right"></i> العودة للمبيعات
+            </a>
+        </div>
+        
+        <!-- فلترة البحث -->
+        <div class="filter-section">
+            <form method="get" class="filter-form">
+                <div class="filter-group">
+                    <label>بحث</label>
+                    <input type="text" name="q" placeholder="رقم المرتجع / الفاتورة / العميل..." value="{{ search_query|default:'' }}">
+                </div>
+                <div class="filter-group">
+                    <label>من تاريخ</label>
+                    <input type="date" name="start_date" value="{{ start_date|default:'' }}">
+                </div>
+                <div class="filter-group">
+                    <label>إلى تاريخ</label>
+                    <input type="date" name="end_date" value="{{ end_date|default:'' }}">
+                </div>
+                <div class="filter-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i> بحث
+                    </button>
+                    <a href="{% url 'invoice:sale_return_list' %}" class="btn btn-secondary">
+                        <i class="fas fa-redo"></i> إعادة
+                    </a>
+                </div>
+            </form>
+        </div>
+        
+        <!-- جدول المرتجعات -->
+        <div class="table-container">
+            <table class="returns-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>رقم المرتجع</th>
+                        <th>الفاتورة الأصلية</th>
+                        <th>العميل</th>
+                        <th>تاريخ المرتجع</th>
+                        <th>عدد البنود</th>
+                        <th>الإجمالي</th>
+                        <th>المبلغ المسترد</th>
+                        <th>الحالة</th>
+                        <th>تاريخ الإنشاء</th>
+                        <th>الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for return in page_obj %}
+                    <tr>
+                        <td>{{ forloop.counter0|add:page_obj.start_index }}</td>
+                        <td><strong>{{ return.uniqueId }}</strong></td>
+                        <td>
+                            <a href="{% url 'invoice:sale_detail' return.original_sale.slug %}" style="color: var(--aqua-4);">
+                                {{ return.original_sale.uniqueId }}
+                            </a>
+                        </td>
+                        <td>{{ return.original_sale.sale_customer.username|default:"غير محدد" }}</td>
+                        <td>{{ return.return_date|date:"Y-m-d" }}</td>
+                        <td>{{ return.total_items_count }}</td>
+                        <td>{{ return.return_final_total|floatformat:2 }}</td>
+                        <td class="{% if return.is_refunded %}text-success{% endif %}">
+                            {{ return.refund_amount|floatformat:2 }}
+                            {% if return.is_refunded %}
+                            <i class="fas fa-check-circle text-success ms-1"></i>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if return.return_status %}
+                                <span class="badge-status 
+                                    {% if return.return_status.name == 'مؤكد' %}badge-success
+                                    {% elif return.return_status.name == 'معلق' %}badge-warning
+                                    {% else %}badge-secondary{% endif %}">
+                                    {{ return.return_status.name }}
+                                </span>
+                            {% else %}
+                                <span class="badge-status badge-warning">قيد المعالجة</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ return.date_created|date:"Y-m-d H:i" }}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <a href="{% url 'invoice:sale_return_detail' return.slug %}" class="action-btn" style="background: var(--aqua-4);" title="عرض">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{% url 'invoice:sale_return_update' return.slug %}" class="action-btn" style="background: var(--return-color);" title="تعديل">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="11" style="text-align: center; padding: 3rem;">
+                            <i class="fas fa-undo-alt fa-3x mb-3" style="color: var(--aqua-2);"></i>
+                            <h5 style="color: #666;">لا توجد مرتجعات مبيعات</h5>
+                            <a href="{% url 'invoice:sale_list' %}" class="btn btn-return mt-3">
+                                <i class="fas fa-plus"></i> إنشاء مرتجع جديد
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- ترقيم الصفحات -->
+        {% if page_obj.paginator.num_pages > 1 %}
+        <div class="pagination">
+            {% if page_obj.has_previous %}
+            <a href="?page=1{% if search_query %}&q={{ search_query }}{% endif %}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}" class="page-link">&laquo; الأولى</a>
+            <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}" class="page-link">السابق</a>
+            {% endif %}
+            
+            <span class="page-link active">{{ page_obj.number }} من {{ page_obj.paginator.num_pages }}</span>
+            
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}" class="page-link">التالي</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&q={{ search_query }}{% endif %}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}" class="page-link">الأخيرة &raquo;</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

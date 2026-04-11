@@ -1,0 +1,1083 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}نظام إدارة الفواتير{% endblock %}</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { prefix: 'tw-', corePlugins: { preflight: false } }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --aqua-1: #e0f7fa;
+            --aqua-2: #b2ebf2;
+            --aqua-3: #4dd0e1;
+            --aqua-4: #0097a7;
+            --text-dark: #006064;
+            --text-light: #ffffff;
+            --shadow-sm: 0 2px 8px rgba(0, 150, 167, 0.08);
+            --shadow-md: 0 4px 12px rgba(0, 150, 167, 0.12);
+            --sidebar-width: 280px;
+            --navbar-height: 60px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background-color: var(--aqua-1);
+            color: var(--text-dark);
+            direction: rtl;
+            text-align: right;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            font-size: 0.9rem;
+        }
+
+        /* ========== زر هامبرغر ========== */
+        .sidebar-toggle span {
+            display: block; width: 18px; height: 2px;
+            background-color: rgba(255,255,255,0.6); border-radius: 2px; transition: all 0.3s ease;
+        }
+        .sidebar-toggle:hover span { background-color: var(--text-light); }
+        .sidebar-toggle.active span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+        .sidebar-toggle.active span:nth-child(2) { opacity: 0; }
+        .sidebar-toggle.active span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
+        /* ========== شريط التنقل العلوي ========== */
+        .navbar-mainbg {
+            background: linear-gradient(135deg, var(--aqua-4) 0%, #006064 100%);
+            height: var(--navbar-height);
+            position: fixed; top: 0; left: 0; right: 0;
+            z-index: 1030;
+            box-shadow: 0 2px 12px rgba(0, 96, 100, 0.2);
+        }
+
+        .navbar-inner {
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 0 16px;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .navbar-right-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
+        .navbar-logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: var(--text-light);
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+        .navbar-logo:hover { color: var(--text-light); }
+
+        .logo-icon {
+            width: 45px;
+            height: 45px;
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .logo-icon i { color: var(--text-light); font-size: 1.2rem; }
+        .logo-icon img { width: 100%; height: 100%; object-fit: contain; }
+
+        /* -- القسم الأوسط: القوائم -- */
+        .navbar-center-section {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            overflow: visible;
+        }
+
+        #navbarSupportedContent {
+            position: relative;
+            overflow: visible;
+        }
+
+        #navbarSupportedContent ul {
+            padding: 0; margin: 0;
+            list-style: none;
+            display: flex;
+            align-items: stretch;
+        }
+
+        #navbarSupportedContent li {
+            float: right;
+            position: relative;
+        }
+
+        #navbarSupportedContent ul li a {
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            font-size: 13.5px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 18px 14px;
+            position: relative;
+            transition: color 0.3s ease;
+            white-space: nowrap;
+            gap: 5px;
+        }
+
+        #navbarSupportedContent ul li a i.nav-icon { font-size: 0.8rem; margin: 0; }
+
+        #navbarSupportedContent>ul>li.active>a {
+            color: var(--aqua-4);
+            font-weight: 600;
+        }
+
+        #navbarSupportedContent>ul>li:hover>a {
+            color: rgba(255,255,255,0.95);
+        }
+
+        /* سهم القوائم المنسدلة */
+        #navbarSupportedContent ul li.has-submenu>a:not(:only-child):after {
+            content: "\f107";
+            font-family: "Font Awesome 5 Free";
+            font-weight: 900;
+            font-size: 10px;
+            margin-right: 2px;
+            transition: transform 0.3s ease;
+        }
+        #navbarSupportedContent>ul>li.has-submenu:hover>a:not(:only-child):after,
+        #navbarSupportedContent>ul>li.has-submenu.active>a:not(:only-child):after {
+            transform: rotate(180deg);
+        }
+
+        /* ===== المحدد المتحرك ===== */
+        .hori-selector {
+            display: inline-block;
+            position: absolute;
+            height: 100%;
+            top: 0;
+            left: 0;
+            transition-duration: 0.6s;
+            transition-timing-function: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            background-color: rgba(255, 255, 255, 0.95);
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+            margin-top: 8px;
+            z-index: 0;
+        }
+
+        #navbarSupportedContent>ul>li { z-index: 1; }
+
+        /* ===== القوائم المنسدلة ===== */
+        .menu-submenu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            min-width: 220px;
+            background: white;
+            border-radius: 0 0 4px 4px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--aqua-2);
+            border-top: 3px solid var(--aqua-3);
+            padding: 6px 0;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-6px);
+            transition: all 0.25s ease;
+            z-index: 1060;
+        }
+
+        #navbarSupportedContent li.has-submenu:hover>.menu-submenu {
+            opacity: 1; visibility: visible; transform: translateY(0);
+        }
+
+        .menu-submenu li { float: none !important; }
+
+        .menu-submenu li a {
+            color: var(--text-dark) !important;
+            padding: 9px 18px 9px 14px !important;
+            font-size: 0.82rem !important;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.15s ease;
+        }
+
+        .menu-submenu li a i {
+            color: #9ca3af; font-size: 0.78rem;
+            width: 18px; text-align: center;
+            margin: 0 !important;
+            transition: color 0.15s ease;
+        }
+
+        .menu-submenu li a:hover {
+            background-color: var(--aqua-1) !important;
+            color: var(--aqua-4) !important;
+        }
+        .menu-submenu li a:hover i { color: var(--aqua-4) !important; }
+
+        .menu-submenu li.sub-active a {
+            background-color: var(--aqua-1) !important;
+            color: var(--aqua-4) !important;
+            font-weight: 600;
+        }
+        .menu-submenu li.sub-active a i { color: var(--aqua-4) !important; }
+
+        /* -- القسم الأيسر -- */
+        .navbar-left-section {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .nav-action-btn {
+            position: relative;
+            width: 34px; height: 34px;
+            border-radius: 4px;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.75);
+            border: 1px solid rgba(255,255,255,0.15);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            font-size: 0.88rem;
+        }
+        .nav-action-btn:hover {
+            background: rgba(255,255,255,0.2);
+            color: var(--text-light);
+            border-color: rgba(255,255,255,0.3);
+        }
+
+        .nav-badge {
+            position: absolute;
+            top: -4px; left: -4px;
+            min-width: 16px; height: 16px;
+            border-radius: 4px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.55rem; font-weight: 700;
+            padding: 0 3px;
+            border: 2px solid var(--aqua-4);
+        }
+        .nav-badge.green { background: #00897b; color: white; }
+        .nav-badge.red { background: #e53935; color: white; animation: badgePulse 2s infinite; }
+
+        @keyframes badgePulse {
+            0% { box-shadow: 0 0 0 0 rgba(229,57,53,0.5); }
+            70% { box-shadow: 0 0 0 6px rgba(229,57,53,0); }
+            100% { box-shadow: 0 0 0 0 rgba(229,57,53,0); }
+        }
+
+        /* Dropdown المستخدم */
+        .user-dropdown { position: relative; }
+        .user-dropdown-trigger {
+            display: flex; align-items: center; justify-content: center;
+            width: 34px; height: 34px;
+            border-radius: 4px;
+            border: 2px solid rgba(255,255,255,0.4);
+            background: rgba(255,255,255,0.15);
+            cursor: pointer;
+            overflow: hidden;
+            transition: all 0.2s ease;
+        }
+        .user-dropdown-trigger:hover { border-color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.25); }
+        .user-dropdown-trigger img { width: 100%; height: 100%; object-fit: cover; }
+        .user-dropdown-trigger i { color: rgba(255,255,255,0.7); font-size: 0.75rem; }
+
+        .user-dropdown-menu {
+            position: absolute;
+            top: calc(100% + 10px);
+            left: 0;
+            min-width: 230px;
+            background: white;
+            border-radius: 4px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--aqua-2);
+            padding: 0;
+            opacity: 0; visibility: hidden;
+            transform: scale(0.95) translateY(-4px);
+            transition: all 0.2s ease;
+            z-index: 1070;
+            overflow: hidden;
+        }
+        .user-dropdown-menu.show { opacity: 1; visibility: visible; transform: scale(1) translateY(0); }
+
+        .user-dropdown-menu .ud-header {
+            padding: 12px 16px;
+            background: linear-gradient(135deg, var(--aqua-4) 0%, #006064 100%);
+            color: var(--text-light);
+        }
+        .user-dropdown-menu .ud-name { font-size: 0.88rem; font-weight: 600; margin: 0; }
+        .user-dropdown-menu .ud-role { font-size: 0.72rem; opacity: 0.8; margin: 2px 0 0; }
+
+        .user-dropdown-menu .ud-login-info {
+            padding: 8px 16px;
+            background: var(--aqua-1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.72rem;
+            color: var(--text-dark);
+            border-bottom: 1px solid var(--aqua-2);
+        }
+        .user-dropdown-menu .ud-login-info i { color: var(--aqua-4); font-size: 0.7rem; }
+        .user-dropdown-menu .ud-login-info span { opacity: 0.75; }
+
+        .user-dropdown-menu .ud-links { padding: 6px 0; }
+
+        .user-dropdown-menu a,
+        .user-dropdown-menu button {
+            display: flex; align-items: center; gap: 10px;
+            width: 100%; padding: 9px 16px;
+            font-size: 0.82rem; color: var(--text-dark);
+            text-decoration: none; background: none;
+            border: none; cursor: pointer;
+            transition: all 0.15s ease;
+            font-family: 'Tajawal', sans-serif; text-align: right;
+        }
+        .user-dropdown-menu a:hover,
+        .user-dropdown-menu button:hover { background: var(--aqua-1); color: var(--aqua-4); }
+        .user-dropdown-menu a i,
+        .user-dropdown-menu button i { color: #9ca3af; width: 16px; text-align: center; transition: color 0.15s ease; }
+        .user-dropdown-menu a:hover i,
+        .user-dropdown-menu button:hover i { color: var(--aqua-4); }
+        .user-dropdown-menu hr { margin: 0; border-color: var(--aqua-2); }
+
+        /* ========== الشريط الجانبي ========== */
+        .sidebar {
+            position: fixed;
+            top: var(--navbar-height);
+            right: -280px;
+            width: var(--sidebar-width);
+            height: calc(100vh - var(--navbar-height));
+            background-color: white;
+            box-shadow: -2px 0 15px rgba(0, 150, 167, 0.08);
+            z-index: 1020;
+            transition: right 0.3s ease;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+        .sidebar.active { right: 0; }
+
+        .sidebar-login-bar {
+            padding: 10px 16px;
+            background: var(--aqua-1);
+            border-bottom: 1px solid var(--aqua-2);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.72rem;
+            color: var(--text-dark);
+        }
+        .sidebar-login-bar i { color: var(--aqua-4); font-size: 0.7rem; }
+        .sidebar-login-bar .sl-label { opacity: 0.6; }
+        .sidebar-login-bar .sl-value { font-weight: 600; }
+
+        .sidebar-menu { list-style: none; padding: 8px 0; margin: 0; }
+        .sidebar-item { position: relative; }
+
+        .sidebar-link {
+            display: flex; align-items: center;
+            padding: 11px 18px;
+            color: var(--text-dark);
+            text-decoration: none;
+            transition: all 0.2s ease;
+            font-weight: 500; font-size: 0.85rem;
+            position: relative;
+        }
+        .sidebar-link:hover { background-color: var(--aqua-1); color: var(--aqua-4); }
+        .sidebar-link.active { background-color: var(--aqua-1); color: var(--aqua-4); font-weight: 600; }
+        .sidebar-link.active::before {
+            content: ''; position: absolute;
+            right: 0; top: 0; bottom: 0; width: 3px;
+            background: linear-gradient(180deg, var(--aqua-3), var(--aqua-4));
+            border-radius: 0 3px 3px 0;
+        }
+
+        .sidebar-icon { font-size: 0.95rem; width: 22px; text-align: center; margin-left: 10px; }
+        .sidebar-text { white-space: nowrap; }
+        .sidebar-arrow { margin-right: auto; transition: transform 0.3s ease; font-size: 0.65rem; color: #9ca3af; }
+        .sidebar-item.has-dropdown.active .sidebar-arrow { transform: rotate(180deg); color: var(--aqua-4); }
+
+        .sidebar-dropdown {
+            list-style: none; padding: 0; margin: 0;
+            max-height: 0; overflow: hidden; transition: max-height 0.3s ease;
+            background-color: rgba(224, 247, 250, 0.3);
+        }
+        .sidebar-item.has-dropdown.active .sidebar-dropdown { max-height: 500px; }
+        .sidebar-dropdown .sidebar-link { padding-right: 50px; font-size: 0.8rem; }
+
+        .sidebar-cart-count {
+            background: #00897b; color: white;
+            font-size: 0.65rem; padding: 2px 7px;
+            border-radius: 4px; margin-right: auto; font-weight: 700;
+        }
+
+        .sidebar-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(0, 96, 100, 0.3); z-index: 1015;
+            display: none; opacity: 0; transition: opacity 0.3s ease;
+            backdrop-filter: blur(2px);
+        }
+        .sidebar-overlay.active { display: block; opacity: 1; }
+
+        /* ========== المحتوى الرئيسي ========== */
+        .main-content {
+            margin-right: 0;
+            padding-top: calc(var(--navbar-height) + 16px);
+            padding-bottom: 16px;
+            padding-left: 16px; padding-right: 16px;
+            min-height: calc(100vh - var(--navbar-height));
+            transition: margin-right 0.3s ease;
+            width: 100%;
+        }
+        .main-content.sidebar-open { margin-right: var(--sidebar-width); }
+
+        /* ========== الفوتر ========== */
+        .footer {
+            background: linear-gradient(135deg, var(--aqua-4) 0%, #006064 100%);
+            color: var(--text-light);
+            padding: 1.5rem 0;
+            margin-right: 0;
+            transition: margin-right 0.3s ease;
+            width: 100%;
+        }
+        .footer.sidebar-open { margin-right: var(--sidebar-width); }
+        .footer-container { max-width: 1400px; margin: 0 auto; padding: 0 2rem; width: 100%; }
+        .footer-logo { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 0.8rem; }
+        .footer-logo .f-logo {
+            width: 45px;
+            height: 45px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        .footer-logo .f-logo img { width: 100%; height: 100%; object-fit: contain; }
+        .footer-logo .f-logo i { font-size: 1.2rem; }
+        .footer-logo-text { font-size: 1rem; font-weight: 700; }
+        .footer-links h6 { color: var(--aqua-2); margin-bottom: 0.6rem; font-weight: 600; font-size: 0.82rem; }
+        .footer-links ul { list-style: none; padding: 0; }
+        .footer-links li { margin-bottom: 0.2rem; }
+        .footer-links a {
+            color: rgba(255,255,255,0.65); text-decoration: none;
+            transition: all 0.2s ease; display: flex;
+            align-items: center; gap: 0.4rem; font-size: 0.8rem;
+        }
+        .footer-links a:hover { color: var(--text-light); transform: translateX(4px); }
+        .footer-contact i { width: 18px; color: var(--aqua-3); font-size: 0.75rem; }
+        .footer-bottom {
+            border-top: 1px solid rgba(255,255,255,0.15);
+            padding-top: 0.8rem; margin-top: 0.8rem;
+            text-align: center; color: rgba(255,255,255,0.5); font-size: 0.72rem;
+        }
+        .social-links { display: flex; gap: 0.4rem; margin-top: 0.6rem; }
+        .social-links a {
+            width: 28px; height: 28px; border-radius: 4px;
+            background: rgba(255,255,255,0.1); display: flex;
+            align-items: center; justify-content: center; transition: all 0.2s ease;
+            color: rgba(255,255,255,0.7);
+        }
+        .social-links a:hover { background: rgba(255,255,255,0.2); color: white; transform: translateY(-2px); }
+
+        /* ========== مكونات عامة ========== */
+        .card { border: none; border-radius: 4px; box-shadow: var(--shadow-sm); margin-bottom: 1rem; overflow: hidden; }
+        .card:hover { box-shadow: var(--shadow-md); }
+        .card-header {
+            background: linear-gradient(135deg, var(--aqua-4) 0%, #006064 100%);
+            color: var(--text-light); padding: 0.6rem 1rem;
+            font-weight: 600; font-size: 0.9rem;
+            display: flex; align-items: center; gap: 0.5rem;
+        }
+        .card-body { padding: 1rem; }
+
+        .btn { border-radius: 4px; padding: 0.35rem 0.7rem; font-weight: 600; font-size: 0.8rem; border: none; transition: all 0.2s; display: inline-flex; align-items: center; gap: 0.3rem; }
+        .btn-primary { background: linear-gradient(135deg, var(--aqua-4) 0%, #006064 100%); color: white; }
+        .btn-primary:hover { background: linear-gradient(135deg, #00838f 0%, #004d40 100%); transform: translateY(-1px); }
+        .btn-success { background: linear-gradient(135deg, #00897b 0%, #00695c 100%); color: white; }
+        .btn-success:hover { transform: translateY(-1px); }
+        .btn-danger { background: linear-gradient(135deg, #e53935 0%, #b71c1c 100%); color: white; }
+        .btn-danger:hover { transform: translateY(-1px); }
+        .btn-warning { background: linear-gradient(135deg, #ffb300 0%, #ff8f00 100%); color: white; }
+        .btn-warning:hover { transform: translateY(-1px); }
+
+        .table { font-size: 0.8rem; }
+        .table thead th { background: linear-gradient(135deg, var(--aqua-3) 0%, var(--aqua-4) 100%); color: white; font-weight: 600; text-align: center; border-color: var(--aqua-4); }
+
+        .form-control, .form-select { border-radius: 4px; border: 1px solid var(--aqua-2); padding: 0.35rem 0.5rem; font-size: 0.8rem; transition: all 0.2s; }
+        .form-control:focus, .form-select:focus { border-color: var(--aqua-3); box-shadow: 0 0 0 2px rgba(77, 208, 225, 0.2); }
+        .form-label { font-weight: 500; font-size: 0.75rem; margin-bottom: 0.2rem; color: var(--text-dark); display: flex; align-items: center; gap: 0.3rem; }
+
+        .alert { border-radius: 4px; border: none; padding: 0.6rem 1rem; margin-bottom: 1rem; font-size: 0.85rem; }
+        .required-field::after { content: " *"; color: #d32f2f; }
+
+        .stat-card { background: white; border-radius: 4px; padding: 1rem; box-shadow: var(--shadow-sm); transition: all 0.2s ease; height: 100%; }
+        .stat-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+        .stat-icon { width: 48px; height: 48px; border-radius: 4px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; font-size: 1.2rem; color: white; }
+        .stat-icon.primary { background: linear-gradient(135deg, var(--aqua-3), var(--aqua-4)); }
+        .stat-icon.success { background: linear-gradient(135deg, #00897b, #00695c); }
+        .stat-icon.warning { background: linear-gradient(135deg, #ffb300, #ff8f00); }
+        .stat-icon.danger { background: linear-gradient(135deg, #e53935, #b71c1c); }
+        .stat-icon.info { background: linear-gradient(135deg, #8e24aa, #6a1b9a); }
+        .stat-value { font-size: 1.6rem; font-weight: 700; margin-bottom: 2px; }
+        .stat-label { color: #78909c; font-size: 0.8rem; }
+
+        /* ========== استجابة ========== */
+        @media (max-width: 1200px) {
+            #navbarSupportedContent ul li a { padding: 18px 10px; font-size: 12.5px; }
+        }
+        @media (max-width: 992px) {
+            .navbar-center-section { display: none !important; }
+            .main-content.sidebar-open { margin-right: 0; }
+            .footer.sidebar-open { margin-right: 0; }
+        }
+        @media (max-width: 768px) {
+            .main-content { padding: 12px; }
+            .footer { padding: 1rem 0; }
+            .footer-container { padding: 0 1rem; }
+            .footer-logo { flex-direction: column; text-align: center; gap: 0.4rem; }
+        }
+        @media (max-width: 576px) {
+            .main-content { padding: 8px; }
+            .navbar-logo span { display: none; }
+        }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    {% if user.is_authenticated %}
+
+    <!-- ========== الشريط العلوي ========== -->
+    <nav class="navbar-mainbg">
+        <div class="navbar-inner">
+
+            <div class="navbar-right-section">
+                <button type="button" id="menuToggle" class="sidebar-toggle tw-relative tw-inline-flex tw-items-center tw-justify-center tw-rounded tw-p-2 tw-cursor-pointer tw-border-0" style="gap:3px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);" aria-label="القائمة">
+                    <span></span><span></span><span></span>
+                </button>
+                <a href="{% url 'index' %}" class="navbar-logo">
+                    <div class="logo-icon">
+                        {% if company_settings.company_logo %}
+                            <img src="{{ company_settings.company_logo.url }}" alt="شعار الشركة">
+                        {% elif company_logo %}
+                            <img src="{{ company_logo.url }}" alt="شعار الشركة">
+                        {% else %}
+                            <i class="fas fa-file-invoice-dollar"></i>
+                        {% endif %}
+                    </div>
+                    <span>{{ company_settings.company_name|default:" أدخل أسم شركتك" }}</span>
+                </a>
+            </div>
+
+            <div class="navbar-center-section">
+                <div id="navbarSupportedContent">
+                    <div class="hori-selector"></div>
+                    <ul>
+                        <li class="{% if request.resolver_match.url_name == 'index' %}active{% endif %}">
+                            <a href="{% url 'index' %}"><i class="fas fa-home nav-icon"></i>الرئيسية</a>
+                        </li>
+                        <li class="has-submenu {% if 'invoice' in request.resolver_match.url_name or 'purch' in request.resolver_match.url_name %}active{% endif %}">
+                            <a href="#"><i class="fas fa-file-invoice nav-icon"></i>الفواتير</a>
+                            <ul class="menu-submenu">
+                                <li class="{% if request.resolver_match.url_name == 'purch_create' %}sub-active{% endif %}"><a href="{% url 'invoice:purch_create' %}"><i class="fas fa-plus-circle"></i>إنشاء فاتورة شراء</a></li>
+                                <li class="{% if request.resolver_match.url_name == 'purch_list' %}sub-active{% endif %}"><a href="{% url 'invoice:purch_list' %}"><i class="fas fa-list"></i>قائمة فواتير المشتريات</a></li>
+                                <li><a href="#"><i class="fas fa-plus-circle"></i>إنشاء فاتورة بيع</a></li>
+                                <li><a href="#"><i class="fas fa-list"></i>قائمة فواتير المبيعات</a></li>
+                                <li class="{% if request.resolver_match.url_name == 'purchase_return_list' %}sub-active{% endif %}"><a href="{% url 'invoice:purchase_return_list' %}"><i class="fas fa-undo"></i>مرتجعات المشتريات</a></li>
+                            </ul>
+                        </li>
+                        <li class="{% if 'product' in request.resolver_match.url_name %}active{% endif %}">
+                            <a href="{% url 'invoice:product_list' %}"><i class="fas fa-boxes nav-icon"></i>المنتجات</a>
+                        </li>
+                        <li class="{% if 'cash' in request.resolver_match.url_name %}active{% endif %}">
+                            <a href="{% url 'invoice:cash_dashboard' %}"><i class="fas fa-wallet nav-icon"></i>الصندوق</a>
+                        </li>
+                        {% if user.is_staff %}
+                        <li class="has-submenu {% if 'user' in request.resolver_match.url_name or 'register' in request.resolver_match.url_name or 'permissions' in request.resolver_match.url_name %}active{% endif %}">
+                            <a href="#"><i class="fas fa-users-cog nav-icon"></i>المستخدمين</a>
+                            <ul class="menu-submenu">
+                                <li class="{% if request.resolver_match.url_name == 'user_list' %}sub-active{% endif %}"><a href="{% url 'accounts:user_list' %}"><i class="fas fa-list"></i>قائمة المستخدمين</a></li>
+                                <li class="{% if request.resolver_match.url_name == 'register' %}sub-active{% endif %}"><a href="{% url 'accounts:register' %}"><i class="fas fa-user-plus"></i>إضافة مستخدم جديد</a></li>
+                                {% if user.is_superuser %}
+                                <li class="{% if request.resolver_match.url_name == 'permissions' %}sub-active{% endif %}"><a href="{% url 'accounts:permissions' %}"><i class="fas fa-user-shield"></i>الصلاحيات والأدوار</a></li>
+                                {% endif %}
+                            </ul>
+                        </li>
+                        {% endif %}
+                        <li class="has-submenu {% if 'currency' in request.resolver_match.url_name or 'payment_method' in request.resolver_match.url_name or 'shipping_company' in request.resolver_match.url_name or 'status' in request.resolver_match.url_name or 'price_type' in request.resolver_match.url_name %}active{% endif %}">
+                            <a href="#"><i class="fas fa-cogs nav-icon"></i>الإعدادات</a>
+                            <ul class="menu-submenu">
+                                <li class="{% if request.resolver_match.url_name == 'currency_list' %}sub-active{% endif %}"><a href="{% url 'invoice:currency_list' %}"><i class="fas fa-dollar-sign"></i>العملات</a></li>
+                                <li class="{% if request.resolver_match.url_name == 'payment_method_list' %}sub-active{% endif %}"><a href="{% url 'invoice:payment_method_list' %}"><i class="fas fa-credit-card"></i>طرق الدفع</a></li>
+                                <li class="{% if request.resolver_match.url_name == 'shipping_company_list' %}sub-active{% endif %}"><a href="{% url 'invoice:shipping_company_list' %}"><i class="fas fa-truck"></i>شركات الشحن</a></li>
+                                <li class="{% if request.resolver_match.url_name == 'status_list' %}sub-active{% endif %}"><a href="{% url 'invoice:status_list' %}"><i class="fas fa-info-circle"></i>الحالات</a></li>
+                                <li class="{% if request.resolver_match.url_name == 'price_type_list' %}sub-active{% endif %}"><a href="{% url 'invoice:price_type_list' %}"><i class="fas fa-tags"></i>أنواع الأسعار</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="#"><i class="fas fa-chart-bar nav-icon"></i>التقارير</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="navbar-left-section">
+                <a href="/invoice/cart/" id="cartBtn" class="nav-action-btn tw-hidden sm:tw-inline-flex" title="سلة التسوق">
+                    <i class="fas fa-shopping-cart"></i>
+                    {% if cart_count > 0 %}
+                    <span class="nav-badge green">{{ cart_count }}</span>
+                    {% endif %}
+                </a>
+                <button type="button" id="notificationBtn" class="nav-action-btn tw-hidden sm:tw-inline-flex" title="الإشعارات">
+                    <i class="fas fa-bell"></i>
+                    <span class="nav-badge red">3</span>
+                </button>
+                <div class="user-dropdown">
+                    <div class="user-dropdown-trigger" id="userMenuBtn">
+                        {% if user.profile.profile_picture %}
+                            <img src="{{ user.profile.profile_picture.url }}" alt="">
+                        {% else %}
+                            <i class="fas fa-user"></i>
+                        {% endif %}
+                    </div>
+                    <div class="user-dropdown-menu" id="userDropdown">
+                        <div class="ud-header">
+                            <p class="ud-name">{{ user.get_full_name|default:user.username }}</p>
+                            <p class="ud-role">{% if user.is_staff %}مدير النظام{% else %}مستخدم{% endif %}</p>
+                        </div>
+                        <div class="ud-login-info">
+                            <i class="fas fa-clock"></i>
+                            <span>آخر دخول:</span>
+                            <strong>{% now "j F Y H:i" %}</strong>
+                        </div>
+                        <div class="ud-links">
+                            <a href="{% url 'accounts:profile' %}"><i class="fas fa-user-circle"></i>الملف الشخصي</a>
+                            <a href="{% url 'accounts:change_password' %}"><i class="fas fa-key"></i>تغيير كلمة المرور</a>
+                            {% if user.is_superuser %}
+                            <a href="{% url 'accounts:company_settings' %}"><i class="fas fa-building"></i>إعدادات الشركة</a>
+                            {% endif %}
+                            <a href="#"><i class="fas fa-cog"></i>الإعدادات</a>
+                            <a href="#"><i class="fas fa-bell"></i>الإشعارات</a>
+                            <hr>
+                            <form action="{% url 'accounts:logout' %}" method="post">
+                                {% csrf_token %}
+                                <button type="submit" style="color:#e53935;"><i class="fas fa-sign-out-alt"></i>تسجيل الخروج</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ========== الشريط الجانبي ========== -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-login-bar">
+            <i class="fas fa-clock"></i>
+            <span class="sl-label">آخر دخول</span>
+            <span class="sl-value">{% now "j F Y H:i" %}</span>
+        </div>
+        <ul class="sidebar-menu">
+            <li class="sidebar-item">
+                <a href="{% url 'index' %}" class="sidebar-link {% if request.resolver_match.url_name == 'index' %}active{% endif %}">
+                    <i class="fas fa-home sidebar-icon"></i><span class="sidebar-text">الرئيسية</span>
+                </a>
+            </li>
+            <li class="sidebar-item has-dropdown {% if 'invoice' in request.resolver_match.url_name or 'purch' in request.resolver_match.url_name %}active{% endif %}">
+                <a href="#" class="sidebar-link">
+                    <i class="fas fa-file-invoice sidebar-icon"></i><span class="sidebar-text">الفواتير</span>
+                    <i class="fas fa-chevron-left sidebar-arrow"></i>
+                </a>
+                <ul class="sidebar-dropdown">
+                    <li class="sidebar-item"><a href="{% url 'invoice:purch_create' %}" class="sidebar-link"><i class="fas fa-plus-circle sidebar-icon"></i><span class="sidebar-text">إنشاء فاتورة شراء</span></a></li>
+                    <li class="sidebar-item"><a href="{% url 'invoice:purch_list' %}" class="sidebar-link"><i class="fas fa-list sidebar-icon"></i><span class="sidebar-text">قائمة فواتير المشتريات</span></a></li>
+                    <li class="sidebar-item"><a href="#" class="sidebar-link"><i class="fas fa-plus-circle sidebar-icon"></i><span class="sidebar-text">إنشاء فاتورة بيع</span></a></li>
+                    <li class="sidebar-item"><a href="#" class="sidebar-link"><i class="fas fa-list sidebar-icon"></i><span class="sidebar-text">قائمة فواتير المبيعات</span></a></li>
+                    <li class="sidebar-item"><a href="{% url 'invoice:purchase_return_list' %}" class="sidebar-link"><i class="fas fa-undo sidebar-icon"></i><span class="sidebar-text">مرتجعات المشتريات</span></a></li>
+                </ul>
+            </li>
+            <li class="sidebar-item">
+                <a href="{% url 'invoice:product_list' %}" class="sidebar-link {% if 'product' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="fas fa-boxes sidebar-icon"></i><span class="sidebar-text">المنتجات</span>
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a href="/invoice/cart/" class="sidebar-link">
+                    <i class="fas fa-shopping-cart sidebar-icon"></i><span class="sidebar-text">سلة التسوق</span>
+                    {% if cart_count > 0 %}
+                    <span class="sidebar-cart-count">{{ cart_count }}</span>
+                    {% endif %}
+                </a>
+            </li>
+            {% if user.is_staff %}
+            <li class="sidebar-item has-dropdown {% if 'user' in request.resolver_match.url_name or 'register' in request.resolver_match.url_name or 'permissions' in request.resolver_match.url_name %}active{% endif %}">
+                <a href="#" class="sidebar-link">
+                    <i class="fas fa-users-cog sidebar-icon"></i><span class="sidebar-text">إدارة المستخدمين</span>
+                    <i class="fas fa-chevron-left sidebar-arrow"></i>
+                </a>
+                <ul class="sidebar-dropdown">
+                    <li class="sidebar-item"><a href="{% url 'accounts:user_list' %}" class="sidebar-link"><i class="fas fa-list sidebar-icon"></i><span class="sidebar-text">قائمة المستخدمين</span></a></li>
+                    <li class="sidebar-item"><a href="{% url 'accounts:register' %}" class="sidebar-link"><i class="fas fa-user-plus sidebar-icon"></i><span class="sidebar-text">إضافة مستخدم جديد</span></a></li>
+                    {% if user.is_superuser %}
+                    <li class="sidebar-item"><a href="{% url 'accounts:permissions' %}" class="sidebar-link"><i class="fas fa-user-shield sidebar-icon"></i><span class="sidebar-text">الصلاحيات والأدوار</span></a></li>
+                    {% endif %}
+                </ul>
+            </li>
+            {% endif %}
+            <li class="sidebar-item">
+                <a href="{% url 'invoice:cash_dashboard' %}" class="sidebar-link {% if 'cash' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="fas fa-wallet sidebar-icon"></i><span class="sidebar-text">الصندوق</span>
+                </a>
+            </li>
+            <li class="sidebar-item has-dropdown {% if 'currency' in request.resolver_match.url_name or 'payment_method' in request.resolver_match.url_name or 'shipping_company' in request.resolver_match.url_name or 'status' in request.resolver_match.url_name or 'price_type' in request.resolver_match.url_name %}active{% endif %}">
+                <a href="#" class="sidebar-link">
+                    <i class="fas fa-cogs sidebar-icon"></i><span class="sidebar-text">الإعدادات</span>
+                    <i class="fas fa-chevron-left sidebar-arrow"></i>
+                </a>
+                <ul class="sidebar-dropdown">
+                    <li class="sidebar-item"><a href="{% url 'invoice:currency_list' %}" class="sidebar-link"><i class="fas fa-dollar-sign sidebar-icon"></i><span class="sidebar-text">العملات</span></a></li>
+                    <li class="sidebar-item"><a href="{% url 'invoice:payment_method_list' %}" class="sidebar-link"><i class="fas fa-credit-card sidebar-icon"></i><span class="sidebar-text">طرق الدفع</span></a></li>
+                    <li class="sidebar-item"><a href="{% url 'invoice:shipping_company_list' %}" class="sidebar-link"><i class="fas fa-truck sidebar-icon"></i><span class="sidebar-text">شركات الشحن</span></a></li>
+                    <li class="sidebar-item"><a href="{% url 'invoice:status_list' %}" class="sidebar-link"><i class="fas fa-info-circle sidebar-icon"></i><span class="sidebar-text">الحالات</span></a></li>
+                    <li class="sidebar-item"><a href="{% url 'invoice:price_type_list' %}" class="sidebar-link"><i class="fas fa-tags sidebar-icon"></i><span class="sidebar-text">أنواع الأسعار</span></a></li>
+                </ul>
+            </li>
+            <li class="sidebar-item">
+                <a href="{% url 'accounts:system_logs' %}" class="sidebar-link {% if request.resolver_match.url_name == 'system_logs' %}active{% endif %}">
+                    <i class="fas fa-file-alt sidebar-icon"></i><span class="sidebar-text">سجلات النظام</span>
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a href="#" class="sidebar-link">
+                    <i class="fas fa-chart-bar sidebar-icon"></i><span class="sidebar-text">التقارير</span>
+                </a>
+            </li>
+        </ul>
+    </aside>
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    {% endif %}
+
+    <!-- ========== المحتوى الرئيسي ========== -->
+    <main class="main-content" id="mainContent">
+        {% if messages %}
+            <div class="alert-container">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        <div class="d-flex align-items-center">
+                            <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' or message.tags == 'danger' %}fa-exclamation-circle{% elif message.tags == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %} ms-2"></i>
+                            <div class="me-2">{{ message }}</div>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="إغلاق"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        {% block content %}{% endblock %}
+    </main>
+
+    {% if user.is_authenticated %}
+    <!-- ========== الفوتر ========== -->
+    <footer class="footer" id="footer">
+        <div class="footer-container">
+            <div class="row g-3">
+                <!-- العمود الأول: شعار الشركة ومعلومات عنها -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="footer-logo">
+                        <div class="f-logo">
+                            {% if company_settings.company_logo %}
+                                <img src="{{ company_settings.company_logo.url }}" alt="شعار الشركة">
+                            {% elif company_logo %}
+                                <img src="{{ company_logo.url }}" alt="شعار الشركة">
+                            {% else %}
+                                <i class="fas fa-file-invoice-dollar"></i>
+                            {% endif %}
+                        </div>
+                        <div class="footer-logo-text">{{ company_settings.company_name|default:" أدخل اسم شركتك" }}</div>
+                    </div>
+                    <p style="color:rgba(255,255,255,0.65);margin-bottom:0.6rem;font-size:0.8rem;">نظام متكامل لإدارة الفواتير والمخزون والعملاء.</p>
+                    <div class="social-links">
+                        {% if company_settings.social_facebook %}
+                            <a href="{{ company_settings.social_facebook }}" target="_blank"><i class="fab fa-facebook-f"></i></a>
+                        {% else %}
+                            <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        {% endif %}
+                        {% if company_settings.social_twitter %}
+                            <a href="{{ company_settings.social_twitter }}" target="_blank"><i class="fab fa-twitter"></i></a>
+                        {% else %}
+                            <a href="#"><i class="fab fa-twitter"></i></a>
+                        {% endif %}
+                        {% if company_settings.social_instagram %}
+                            <a href="{{ company_settings.social_instagram }}" target="_blank"><i class="fab fa-instagram"></i></a>
+                        {% else %}
+                            <a href="#"><i class="fab fa-instagram"></i></a>
+                        {% endif %}
+                        {% if company_settings.social_linkedin %}
+                            <a href="{{ company_settings.social_linkedin }}" target="_blank"><i class="fab fa-linkedin-in"></i></a>
+                        {% else %}
+                            <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- العمود الثاني: روابط سريعة -->
+                <div class="col-lg-2 col-md-6">
+                    <div class="footer-links">
+                        <h6>{{ company_settings.footer_quick_links_title|default:"روابط سريعة" }}</h6>
+                        <ul>
+                            <li>
+                                <a href="{{ company_settings.quick_link_support|default:'#' }}" target="_blank">
+                                    <i class="fas fa-angle-left"></i> الدعم الفني
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ company_settings.quick_link_guide|default:'#' }}" target="_blank">
+                                    <i class="fas fa-angle-left"></i> دليل الاستخدام
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ company_settings.quick_link_faq|default:'#' }}" target="_blank">
+                                    <i class="fas fa-angle-left"></i> الأسئلة الشائعة
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- العمود الثالث: المميزات -->
+                <div class="col-lg-3 col-md-6">
+                    <div class="footer-links">
+                        <h6>{{ company_settings.footer_features_title|default:"المميزات" }}</h6>
+                        <ul>
+                            <li>
+                                <a href="{{ company_settings.feature_invoices|default:'#' }}" target="_blank">
+                                    <i class="fas fa-angle-left"></i> إدارة الفواتير
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ company_settings.feature_inventory|default:'#' }}" target="_blank">
+                                    <i class="fas fa-angle-left"></i> إدارة المخزون
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ company_settings.feature_reports|default:'#' }}" target="_blank">
+                                    <i class="fas fa-angle-left"></i> التقارير الذكية
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- العمود الرابع: تواصل معنا -->
+                <div class="col-lg-3 col-md-6">
+                    <div class="footer-links">
+                        <h6>{{ company_settings.footer_contact_title|default:"تواصل معنا" }}</h6>
+                        <ul class="footer-contact">
+                            {% if company_settings.contact_email %}
+                                <li><a href="mailto:{{ company_settings.contact_email }}"><i class="fas fa-envelope"></i><span>{{ company_settings.contact_email }}</span></a></li>
+                            {% else %}
+                                <li><a href="mailto:info@example.com"><i class="fas fa-envelope"></i><span>info@example.com</span></a></li>
+                            {% endif %}
+                            {% if company_settings.contact_phone %}
+                                <li><a href="tel:{{ company_settings.contact_phone }}"><i class="fas fa-phone"></i><span>{{ company_settings.contact_phone }}</span></a></li>
+                            {% else %}
+                                <li><a href="tel:+966123456789"><i class="fas fa-phone"></i><span>+966 12 345 6789</span></a></li>
+                            {% endif %}
+                            {% if company_settings.contact_address %}
+                                <li><a href="#"><i class="fas fa-map-marker-alt"></i><span>{{ company_settings.contact_address }}</span></a></li>
+                            {% else %}
+                                <li><a href="#"><i class="fas fa-map-marker-alt"></i><span>المملكة العربية السعودية</span></a></li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- أسفل الفوتر: حقوق النشر والإصدار -->
+            <div class="footer-bottom">
+                <div class="row align-items-center">
+                    <div class="col-md-6 text-md-start mb-1 mb-md-0">
+                        <span>الإصدار 2.1</span>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <p class="mb-0">{{ company_settings.footer_copyright_text|default:"جميع الحقوق محفوظة" }} &copy; {% now "Y" %} {{ company_settings.company_name|default:" أدخل أسم شركتك" }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+    {% endif %}
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // ========== المحدد المتحرك ==========
+        function animateSelector() {
+            var tabs = $('#navbarSupportedContent');
+            if (!tabs.length || tabs.is(':hidden')) return;
+            var activeItem = tabs.find('> ul > li.active');
+            if (!activeItem.length) return;
+            var h = activeItem.innerHeight();
+            var w = activeItem.outerWidth();
+            var pos = activeItem.position();
+            $(".hori-selector").css({
+                "top": pos.top + "px",
+                "left": pos.left + "px",
+                "height": h + "px",
+                "width": w + "px"
+            });
+        }
+
+        $(document).ready(function() { setTimeout(animateSelector, 100); });
+        $(window).on('resize', function() { setTimeout(animateSelector, 100); });
+
+        $("#navbarSupportedContent").on("click", "> ul > li", function(e) {
+            if ($(this).hasClass('has-submenu')) return;
+            $('#navbarSupportedContent > ul > li').removeClass("active");
+            $(this).addClass('active');
+            animateSelector();
+        });
+
+        // ========== الشريط الجانبي ==========
+        document.addEventListener('DOMContentLoaded', function() {
+            var menuToggle = document.getElementById('menuToggle');
+            var sidebar = document.getElementById('sidebar');
+            var sidebarOverlay = document.getElementById('sidebarOverlay');
+            var mainContent = document.getElementById('mainContent');
+            var footer = document.getElementById('footer');
+            var userMenuBtn = document.getElementById('userMenuBtn');
+            var userDropdown = document.getElementById('userDropdown');
+
+            if (menuToggle) menuToggle.style.display = 'inline-flex';
+
+            sidebar.classList.remove('active');
+            sidebarOverlay.classList.remove('active');
+            mainContent.classList.remove('sidebar-open');
+            footer.classList.remove('sidebar-open');
+            if (menuToggle) menuToggle.classList.remove('active');
+            var sidebarOpen = false;
+
+            function toggleSidebar(open) {
+                sidebarOpen = open;
+                if (open) {
+                    sidebar.classList.add('active');
+                    sidebarOverlay.classList.add('active');
+                    mainContent.classList.add('sidebar-open');
+                    footer.classList.add('sidebar-open');
+                    if (menuToggle) menuToggle.classList.add('active');
+                } else {
+                    sidebar.classList.remove('active');
+                    sidebarOverlay.classList.remove('active');
+                    mainContent.classList.remove('sidebar-open');
+                    footer.classList.remove('sidebar-open');
+                    if (menuToggle) menuToggle.classList.remove('active');
+                }
+            }
+
+            if (menuToggle) {
+                menuToggle.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    toggleSidebar(!sidebarOpen);
+                });
+            }
+
+            if (sidebarOverlay) {
+                sidebarOverlay.addEventListener('click', function() { toggleSidebar(false); });
+            }
+
+            document.querySelectorAll('.sidebar-link').forEach(function(link) {
+                link.addEventListener('click', function() {
+                    if (!this.parentElement.classList.contains('has-dropdown')) toggleSidebar(false);
+                });
+            });
+
+            document.querySelectorAll('.sidebar-item.has-dropdown > .sidebar-link').forEach(function(item) {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    var parent = this.parentElement;
+                    document.querySelectorAll('.sidebar-item.has-dropdown').forEach(function(el) {
+                        if (el !== parent) el.classList.remove('active');
+                    });
+                    parent.classList.toggle('active');
+                });
+            });
+
+            document.addEventListener('click', function(event) {
+                if (!event.target.closest('.sidebar') && !event.target.closest('.sidebar-toggle')) {
+                    if (sidebarOpen) toggleSidebar(false);
+                }
+                if (!event.target.closest('.user-dropdown')) {
+                    if (userDropdown) userDropdown.classList.remove('show');
+                }
+            });
+
+            if (userMenuBtn && userDropdown) {
+                userMenuBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    userDropdown.classList.toggle('show');
+                });
+            }
+
+            var notificationBtn = document.getElementById('notificationBtn');
+            if (notificationBtn) {
+                notificationBtn.addEventListener('click', function() {
+                    alert('عرض الإشعارات - هذه ميزة تجريبية');
+                });
+            }
+
+            setTimeout(function() {
+                document.querySelectorAll('.alert').forEach(function(alert) {
+                    try { new bootstrap.Alert(alert).close(); } catch(e) {}
+                });
+            }, 5000);
+
+            window.updateCartBadge = function(newCount) {
+                var cartBtn = document.getElementById('cartBtn');
+                if (!cartBtn) return;
+                var badge = cartBtn.querySelector('.nav-badge');
+                if (newCount > 0) {
+                    if (!badge) {
+                        badge = document.createElement('span');
+                        badge.className = 'nav-badge green';
+                        cartBtn.appendChild(badge);
+                    }
+                    badge.textContent = newCount;
+                } else {
+                    if (badge) badge.remove();
+                }
+            };
+        });
+
+        function confirmDelete(message) {
+            if (!message) message = 'هل أنت متأكد من أنك تريد الحذف؟';
+            return confirm(message);
+        }
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">{{ title }}</h1>
+        <a href="{% url 'accounts:register' %}" class="btn btn-primary">
+            <i class="fas fa-user-plus ms-2"></i>إضافة مستخدم جديد
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">جميع المستخدمين</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover text-center">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>اسم المستخدم</th>
+                            <th>الاسم الكامل</th>
+                            <th>البريد الإلكتروني</th>
+                            <th>نوع الحساب</th>
+                            <th>الحالة</th>
+                            <th>تاريخ الإنشاء</th>
+                            <th>إجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user_obj in users %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ user_obj.username }}</td>
+                            <td>{{ user_obj.get_full_name|default:"-" }}</td>
+                            <td>{{ user_obj.email|default:"-" }}</td>
+                            <td>
+                                {% if user_obj.is_superuser %}
+                                    <span class="badge bg-danger">مدير رئيسي</span>
+                                {% elif user_obj.is_staff %}
+                                    <span class="badge bg-warning text-dark">موظف</span>
+                                {% else %}
+                                    <span class="badge bg-info">مستخدم عادي</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if user_obj.is_active %}
+                                    <span class="badge bg-success">نشط</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">غير نشط</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ user_obj.date_joined|date:"Y-m-d" }}</td>
+                            <td>
+                                <a href="{% url 'accounts:user_edit' user_obj.pk %}" class="btn btn-sm btn-outline-primary" title="تحرير">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <!-- يمكنك إضافة زر الحذف لاحقًا -->
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8">لا يوجد مستخدمون لعرضهم.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

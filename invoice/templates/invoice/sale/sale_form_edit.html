@@ -1,0 +1,2570 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}تعديل فاتورة بيع: {{ sale.uniqueId }}{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ============================================
+   [CSS-01] إعدادات التصميم العامة بألوان الأزوردي
+   ============================================ */
+:root {
+  --aqua-1: #e0f7fa; /* خلفيات خفيفة */
+  --aqua-2: #b2ebf2; /* حدود / خطوط */
+  --aqua-3: #4dd0e1; /* عناصر تفاعلية */
+  --aqua-4: #0097a7; /* عناوين رئيسية وأزرار */
+  --text-dark: #006064;
+  --text-light: #ffffff;
+  --shadow-sm: 0 2px 8px rgba(0, 150, 167, 0.08);
+  --shadow-md: 0 4px 12px rgba(0, 150, 167, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--aqua-1);
+  font-family: 'Tajawal', sans-serif;
+  font-size: 0.85rem;
+}
+
+.container-fluid {
+  padding: 0.75rem;
+}
+
+/* البطاقات */
+.card {
+  border: none;
+  border-radius: 8px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 1rem;
+  overflow: hidden;
+}
+
+.card-header {
+  background: linear-gradient(135deg, var(--aqua-4) 0%, #006064 100%);
+  color: var(--text-light);
+  padding: 0.6rem 1rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-bottom: 1px solid var(--aqua-2);
+}
+
+.card-header i {
+  font-size: 0.9rem;
+}
+
+.card-body {
+  padding: 1rem;
+}
+
+/* الحقول */
+.form-label {
+  font-weight: 500;
+  font-size: 0.75rem;
+  margin-bottom: 0.2rem;
+  color: var(--text-dark);
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.form-control, .form-select {
+  border-radius: 4px;
+  border: 1px solid var(--aqua-2);
+  padding: 0.35rem 0.5rem;
+  font-size: 0.8rem;
+  transition: all 0.2s;
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: var(--aqua-3);
+  box-shadow: 0 0 0 2px rgba(77, 208, 225, 0.2);
+}
+
+/* الأزرار */
+.btn {
+  border-radius: 4px;
+  padding: 0.35rem 0.7rem;
+  font-weight: 600;
+  font-size: 0.8rem;
+  border: none;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.btn-sm {
+  padding: 0.2rem 0.5rem;
+  font-size: 0.7rem;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--aqua-4) 0%, #006064 100%);
+  color: white;
+}
+
+.btn-success {
+  background: linear-gradient(135deg, #00897b 0%, #00695c 100%);
+  color: white;
+}
+
+.btn-warning {
+  background: linear-gradient(135deg, #ffb300 0%, #ff8f00 100%);
+  color: white;
+}
+
+.btn-danger {
+  background: linear-gradient(135deg, #e53935 0%, #b71c1c 100%);
+  color: white;
+}
+
+.required-field::after {
+  content: " *";
+  color: #d32f2f;
+}
+
+.success-message {
+  background: linear-gradient(135deg, #00897b 0%, #00695c 100%);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  margin: 0.5rem 0;
+  display: none;
+  font-size: 0.8rem;
+}
+
+/* ============================================
+   [CSS-02] قسم معلومات الفاتورة الأساسية
+   ============================================ */
+.invoice-basic-info .row {
+  margin-bottom: 0.5rem;
+}
+
+/* إزالة أيقونة البحث */
+.customer-search-icon,
+.product-search-icon {
+  display: none !important;
+}
+
+#id_sale_notes {
+  height: 2.4rem;
+  resize: none;
+}
+
+/* حقل المبلغ المدفوع */
+.paid-amount-container {
+  transition: all 0.3s ease;
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+}
+
+.paid-amount-container.show {
+  opacity: 1;
+  max-height: 80px;
+  margin-bottom: 0.5rem;
+}
+
+.cash-balance-info .alert {
+  padding: 0.4rem 0.8rem;
+  margin-bottom: 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  background: var(--aqua-1);
+  border: 1px solid var(--aqua-2);
+  color: var(--text-dark);
+}
+
+/* ============================================
+   [CSS-03] قسم بنود الفاتورة
+   ============================================ */
+.items-section {
+  background: white;
+  border-radius: 8px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 1rem;
+}
+
+.items-header {
+  background: linear-gradient(135deg, var(--aqua-4) 0%, #006064 100%);
+  color: white;
+  padding: 0.5rem 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 8px 8px 0 0;
+}
+
+.items-header h5 {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.items-controls {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.items-count-container {
+  background: rgba(255,255,255,0.15);
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+}
+
+.items-count-container input {
+  width: 50px;
+  border: none;
+  border-radius: 3px;
+  padding: 0.1rem 0.2rem;
+  text-align: center;
+  background: white;
+  color: var(--text-dark);
+}
+
+.items-table-container {
+  overflow-x: auto;
+}
+
+.items-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.75rem;
+}
+
+.items-table thead th {
+  background: linear-gradient(135deg, var(--aqua-3) 0%, var(--aqua-4) 100%);
+  color: white;
+  font-weight: 600;
+  text-align: center;
+  padding: 0.4rem 0.2rem;
+  white-space: nowrap;
+  border-bottom: 2px solid var(--aqua-2);
+}
+
+.items-table tbody td {
+  padding: 0.3rem 0.2rem;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--aqua-1);
+}
+
+.items-table .form-control {
+  padding: 0.2rem 0.3rem;
+  font-size: 0.7rem;
+  height: auto;
+}
+
+.image-preview {
+  width: 35px;
+  height: 35px;
+  border: 2px dashed var(--aqua-2);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background: var(--aqua-1);
+  margin: 0 auto;
+}
+
+.image-preview i {
+  font-size: 0.9rem;
+  color: var(--aqua-4);
+}
+
+.image-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 3px;
+}
+
+.delete-btn {
+  background: linear-gradient(135deg, #e53935 0%, #b71c1c 100%);
+  color: white;
+  border: none;
+  border-radius: 3px;
+  padding: 0.15rem 0.25rem;
+  cursor: pointer;
+  font-size: 0.6rem;
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+.item-total {
+  background: var(--aqua-1);
+  font-weight: 600;
+  color: var(--text-dark);
+  text-align: center;
+}
+
+/* الباركودات - 7 أعمدة مع هوامش ضئيلة */
+.barcode-row {
+  background-color: var(--aqua-1);
+}
+.barcode-row td {
+  padding: 0 !important;
+  border: none !important;
+}
+.barcode-field-container {
+  padding: 0.2rem 0.5rem;
+}
+.barcode-fields-list {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.2rem;
+}
+.barcode-item {
+  display: flex;
+  align-items: center;
+  background: white;
+  border: 1px solid var(--aqua-2);
+  border-radius: 3px;
+  padding: 0.1rem;
+}
+.barcode-input {
+  border: none;
+  background: transparent;
+  padding: 0.1rem;
+  font-size: 0.65rem;
+  font-family: monospace;
+  width: 100%;
+  transition: all 0.3s ease;
+}
+.barcode-remove-btn {
+  background: none;
+  border: none;
+  color: #e53935;
+  padding: 0 0.1rem;
+  cursor: pointer;
+  font-size: 0.6rem;
+}
+
+/* ===== [CSS-NEW] أنماط التحقق من الباركود (نيون أحمر) ===== */
+.barcode-input.invalid-barcode {
+    border: 1px solid #ff0033 !important;
+    background-color: #fff0f0;
+    box-shadow: 0 0 8px rgba(255, 0, 51, 0.8);
+    color: #d32f2f;
+    animation: shake 0.4s;
+}
+
+.barcode-input.valid-barcode {
+    border: 1px solid #28a745 !important;
+    background-color: #f0fff4;
+    box-shadow: 0 0 6px rgba(40, 167, 69, 0.5);
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-3px); }
+  40%, 80% { transform: translateX(3px); }
+}
+
+@media (max-width: 768px) {
+  .barcode-fields-list {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+@media (max-width: 480px) {
+  .barcode-fields-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.table-footer-actions {
+  padding: 0.5rem;
+  text-align: left;
+  background: #f8f9fa;
+  border-top: 1px solid var(--aqua-2);
+}
+#add-single-item {
+  background: linear-gradient(135deg, #00897b 0%, #00695c 100%);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.3rem 0.8rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+/* ============================================
+   [CSS-04] أنظمة البحث التلقائي
+   ============================================ */
+.product-search-container,
+.customer-search-container {
+  position: relative;
+  width: 100%;
+}
+.autocomplete-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid var(--aqua-3);
+  border-radius: 0 0 4px 4px;
+  box-shadow: 0 4px 8px rgba(0,150,167,0.15);
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 9999;
+  display: none;
+}
+.autocomplete-dropdown.show {
+  display: block;
+}
+.autocomplete-item {
+  padding: 0.4rem 0.5rem;
+  cursor: pointer;
+  border-bottom: 1px solid var(--aqua-1);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+}
+.autocomplete-item:hover {
+  background-color: var(--aqua-1);
+}
+.autocomplete-item img {
+  width: 30px;
+  height: 30px;
+  object-fit: cover;
+  border-radius: 3px;
+}
+.autocomplete-item-title {
+  font-weight: 600;
+  color: var(--text-dark);
+}
+.autocomplete-item-details {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.65rem;
+  color: #555;
+}
+.autocomplete-item-price {
+  color: #00897b;
+  font-weight: 600;
+}
+.stock-indicator {
+  padding: 0.1rem 0.3rem;
+  border-radius: 8px;
+  font-size: 0.6rem;
+  font-weight: 600;
+}
+.stock-indicator.high { background: #d4edda; color: #155724; }
+.stock-indicator.medium { background: #fff3cd; color: #856404; }
+.stock-indicator.low { background: #f8d7da; color: #721c24; }
+
+/* ============================================
+   [CSS-05] صورة الفاتورة - تم تصغير الحجم
+   ============================================ */
+.invoice-image-preview {
+  width: 70px;
+  height: 70px;
+  border-radius: 6px;
+  border: 2px dashed var(--aqua-2);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  color: var(--text-dark);
+  margin: 0 auto 0.5rem;
+}
+.invoice-image-preview i {
+  font-size: 1rem;
+  color: var(--aqua-4);
+}
+.invoice-image-preview small {
+  font-size: 0.6rem;
+}
+.invoice-image-preview.has-image {
+  border: 2px solid var(--aqua-4);
+  background: white;
+}
+.invoice-image-preview.has-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 6px;
+}
+.hidden-file-input {
+  display: none !important;
+}
+
+/* ============================================
+   [CSS-06] القسم المالي
+   ============================================ */
+.financial-content {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+.financial-image {
+  width: 90px;
+  flex-shrink: 0;
+}
+.financial-calculations {
+  flex: 1;
+}
+.financial-section {
+  background: white;
+  border-radius: 8px;
+  padding: 0.75rem;
+  border: 1px solid var(--aqua-2);
+}
+.financial-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+.financial-column {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.financial-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--aqua-1);
+  border-radius: 4px;
+  padding: 0.3rem 0.5rem;
+  border-left: 3px solid var(--aqua-3);
+  font-size: 0.75rem;
+}
+.financial-row input {
+  width: 80px;
+  padding: 0.2rem;
+  font-size: 0.75rem;
+  border-radius: 3px;
+  border: 1px solid var(--aqua-2);
+}
+.financial-label {
+  font-weight: 600;
+  color: var(--text-dark);
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+.financial-value {
+  font-weight: 700;
+  color: var(--text-dark);
+}
+.grand-total {
+  grid-column: 1 / -1;
+  background: #fff3e0;
+  border-left-color: #ff9800;
+  font-size: 0.85rem;
+  padding: 0.4rem 0.5rem;
+}
+.remaining-amount {
+  grid-column: 1 / -1;
+  background: #fff8e1;
+  border-left-color: #f57c00;
+}
+.remaining-amount-in-words-container {
+  grid-column: 1 / -1;
+  background: white;
+  border: 1px solid var(--aqua-2);
+  border-radius: 4px;
+  padding: 0.4rem;
+  margin-top: 0.3rem;
+}
+.remaining-amount-in-words {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+}
+.remaining-words-label {
+  font-weight: 600;
+  color: var(--text-dark);
+  font-size: 0.75rem;
+}
+.remaining-words-value {
+  flex: 1;
+  font-size: 0.8rem;
+  background: var(--aqua-1);
+  padding: 0.2rem 0.4rem;
+  border-radius: 3px;
+  min-height: 1.8rem;
+  display: flex;
+  align-items: center;
+}
+.refresh-remaining-words-btn {
+  background: none;
+  border: none;
+  color: var(--aqua-4);
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 0 0.2rem;
+}
+@media (max-width: 992px) {
+  .financial-content {
+    flex-direction: column;
+  }
+  .financial-image {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+  .financial-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================
+   [CSS-07] أزرار الحفظ
+   ============================================ */
+.form-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+.btn-success, .btn-secondary {
+  padding: 0.4rem 1rem;
+  font-size: 0.85rem;
+}
+
+/* ============================================
+   [CSS-08] الحقول المخفية
+   ============================================ */
+.item-name-field,
+.product-search-value,
+.product-image-url-field,
+.auto-image-field {
+  display: none !important;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-2">
+    <!-- معلومات الفاتورة -->
+    <div class="alert alert-info mb-3">
+        <i class="fas fa-edit"></i> تعديل فاتورة بيع رقم: <strong>{{ sale.uniqueId }}</strong> - تاريخ الإنشاء: {{ sale.date_created|date:"Y-m-d" }}
+    </div>
+
+    <!-- نموذج فاتورة البيع -->
+    <form method="post" enctype="multipart/form-data" id="sale-form">
+        {% csrf_token %}
+
+        <!-- معلومات الفاتورة الأساسية -->
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-info-circle"></i> معلومات الفاتورة الأساسية
+                <div class="ms-auto"></div>
+                <a href="{% url 'invoice:sale_list' %}" class="btn btn-sm btn-primary">
+                    <i class="fas fa-arrow-right"></i> رجوع
+                </a>
+            </div>
+            <div class="card-body invoice-basic-info">
+                <div class="row g-2">
+                    <div class="col-md-3">
+                        <label class="form-label required-field"><i class="fas fa-user"></i> العميل</label>
+                        <div class="customer-search-container">
+                            <input type="text" class="form-control customer-search-input" id="customer-search" placeholder="ابحث بالاسم..." autocomplete="off" value="{{ sale.sale_customer.get_full_name|default:'' }}">
+                            <div class="autocomplete-dropdown" id="customer-results"></div>
+                        </div>
+                        {{ form.sale_customer }}
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label"><i class="fas fa-phone"></i> الهاتف</label>
+                        {{ form.sale_customer_phone }}
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label"><i class="fas fa-map-marker-alt"></i> العنوان</label>
+                        {{ form.sale_address }}
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label"><i class="fas fa-file-invoice"></i> رقم فاتورة العميل</label>
+                        {{ form.sale_invoice_number }}
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label"><i class="fas fa-calendar-alt"></i> التاريخ</label>
+                        {{ form.sale_date }}
+                    </div>
+                </div>
+
+                <div class="row g-2">
+                    <div class="col-md-3">
+                        <label class="form-label"><i class="fas fa-tasks"></i> حالة الفاتورة</label>
+                        {{ form.sale_status }}
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label"><i class="fas fa-money-bill-wave"></i> العملة</label>
+                        {{ form.sale_currency }}
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label"><i class="fas fa-credit-card"></i> طريقة الدفع</label>
+                        {{ form.sale_payment_method }}
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label"><i class="fas fa-shipping-fast"></i> شركة الشحن</label>
+                        {{ form.sale_shipping_company }}
+                    </div>
+                </div>
+
+                <div class="row g-2">
+                    <div class="col-12" id="notes-col">
+                        <label class="form-label"><i class="fas fa-sticky-note"></i> ملاحظات</label>
+                        {{ form.sale_notes }}
+                    </div>
+                    <div class="col-md-3 shipping-number-container d-none" id="shipping-num-col">
+                        <label class="form-label"><i class="fas fa-barcode"></i> رقم الشحنة</label>
+                        {{ form.sale_shipping_num }}
+                    </div>
+                </div>
+
+                <div class="cash-balance-info mt-2">
+                    <div class="alert alert-info d-flex align-items-center p-2">
+                        <i class="fas fa-wallet me-2"></i>
+                        <span><strong>رصيد الصندوق الحالي:</strong> <span id="current-cash-balance">0.00</span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- بنود الفاتورة -->
+        <div class="items-section">
+            <div class="items-header">
+                <h5><i class="fas fa-list"></i> بنود الفاتورة</h5>
+                <div class="items-controls">
+                    <div class="items-count-container">
+                        <label for="items-count">عدد البنود:</label>
+                        <input type="number" id="items-count" class="form-control" min="1" max="50" value="{{ formset.total_form_count }}">
+                    </div>
+                    <button type="button" class="btn btn-warning btn-sm" id="toggle-barcodes-btn">
+                        <i class="fas fa-eye"></i> إظهار الباركودات
+                    </button>
+                </div>
+            </div>
+
+            {{ formset.management_form }}
+
+            <div class="items-table-container">
+                <table class="items-table">
+                    <thead>
+                        <tr>
+                            <th width="4%">#</th>
+                            <th width="28%">المادة</th>
+                            <th width="8%">الكمية</th>
+                            <th width="10%">السعر</th>
+                            <th width="10%">الإجمالي</th>
+                            <th width="15%">ملاحظات</th>
+                            <th width="6%">صورة</th>
+                            <th width="5%"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="items-tbody">
+                        {% for form in formset.forms %}
+                        <tr class="item-row" data-item-index="{{ forloop.counter0 }}" data-item-id="{{ form.instance.id|default:'' }}">
+                            <td class="text-center fw-bold">{{ forloop.counter }}</td>
+                            <td>
+                                {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}
+                                <input type="hidden" name="items-{{ forloop.counter0 }}-item_name" class="item-name-field" value="{% if form.item_name.value %}{{ form.item_name.value }}{% endif %}">
+                                <input type="hidden" name="items-{{ forloop.counter0 }}-product_search" class="product-search-value" value="{% if form.product.value %}{{ form.instance.product.product_name }}{% elif form.item_name.value %}{{ form.item_name.value }}{% endif %}">
+                                <input type="hidden" name="items-{{ forloop.counter0 }}-product_image_url" class="product-image-url-field" value="{% if form.instance.product and form.instance.product.image %}{{ form.instance.product.image.url }}{% endif %}">
+                                <input type="hidden" name="items-{{ forloop.counter0 }}-is_auto_image" class="auto-image-field" value="{% if form.instance.product and form.instance.product.image %}true{% endif %}">
+                                <div class="product-search-container">
+                                    <input type="text" class="form-control product-search-input" placeholder="ابحث بالاسم أو الباركود..." value="{% if form.product.value %}{{ form.instance.product.product_name }}{% elif form.item_name.value %}{{ form.item_name.value }}{% endif %}" autocomplete="off">
+                                    <div class="autocomplete-dropdown product-results"></div>
+                                </div>
+                                {{ form.product }}
+                            </td>
+                            <td>{{ form.sold_quantity }}</td>
+                            <td>{{ form.unit_price }}</td>
+                            <td><input type="text" class="form-control item-total" readonly value="0.00"></td>
+                            <td>{{ form.notes }}</td>
+                            <td class="text-center">
+                                <div class="image-input-container">
+                                    <div id="product-image-preview-container-{{ forloop.counter0 }}" class="image-preview" title="اختر صورة">
+                                        {% if form.instance.sale_item_image %}
+                                            <img src="{{ form.instance.sale_item_image.url }}" alt="صورة">
+                                        {% elif form.instance.product and form.instance.product.image %}
+                                            <img src="{{ form.instance.product.image.url }}" alt="صورة">
+                                        {% else %}
+                                            <i class="fas fa-camera"></i>
+                                        {% endif %}
+                                    </div>
+                                    <input type="file" name="items-{{ forloop.counter0 }}-sale_item_image" class="hidden-file-input" accept="image/*" id="id_items-{{ forloop.counter0 }}-sale_item_image">
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                <button type="button" class="delete-btn" title="حذف البند"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>
+                        <tr class="barcode-row" data-item-index="{{ forloop.counter0 }}" style="display: none;">
+                            <td colspan="8">
+                                <div class="barcode-field-container">
+                                    <div class="barcode-fields-list"></div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="table-footer-actions">
+                <button type="button" class="btn btn-success" id="add-single-item">
+                    <i class="fas fa-plus-circle"></i> إضافة بند جديد
+                </button>
+            </div>
+        </div>
+
+        <!-- القسم المالي -->
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-calculator"></i> القسم المالي
+            </div>
+            <div class="card-body">
+                <div class="financial-content">
+                    <div class="financial-image">
+                        <div class="image-input-container">
+                            <div id="invoice-image-preview-container" class="invoice-image-preview" title="انقر لاختيار صورة الفاتورة">
+                                {% if sale.sale_image %}
+                                    <img src="{{ sale.sale_image.url }}" alt="صورة الفاتورة" style="width:100%;height:100%;object-fit:cover;">
+                                {% else %}
+                                    <i class="fas fa-camera"></i>
+                                    <small>صورة الفاتورة</small>
+                                {% endif %}
+                            </div>
+                            {{ form.sale_image }}
+                        </div>
+                    </div>
+
+                    <div class="financial-calculations">
+                        <div class="financial-section">
+                            <div class="financial-grid">
+                                <div class="financial-column">
+                                    <div class="financial-row">
+                                        <span class="financial-label"><i class="fas fa-receipt"></i> إجمالي البنود:</span>
+                                        <span class="financial-value" id="subtotal-amount">{{ sale.sale_subtotal|default:'0.00' }}</span>
+                                    </div>
+                                    <div class="financial-row">
+                                        <span class="financial-label"><i class="fas fa-percentage"></i> الضريبة %:</span>
+                                        <input type="number" class="form-control" id="tax-percentage" value="{{ sale.sale_tax_percentage|default:'0' }}" min="0" max="100" step="0.01">
+                                    </div>
+                                    <div class="financial-row">
+                                        <span class="financial-label"><i class="fas fa-money-bill-wave"></i> قيمة الضريبة:</span>
+                                        <span class="financial-value" id="tax-amount">{{ sale.sale_tax_amount|default:'0.00' }}</span>
+                                    </div>
+                                </div>
+
+                                <div class="financial-column">
+                                    <div class="financial-row">
+                                        <span class="financial-label"><i class="fas fa-plus-circle"></i> الإضافة:</span>
+                                        <input type="number" class="form-control" id="invoice-addition" value="{{ sale.sale_addition|default:'0' }}" min="0" step="0.01">
+                                    </div>
+                                    <div class="financial-row">
+                                        <span class="financial-label"><i class="fas fa-minus-circle"></i> الخصم:</span>
+                                        <input type="number" class="form-control" id="invoice-discount" value="{{ sale.sale_discount|default:'0' }}" min="0" step="0.01">
+                                    </div>
+
+                                    <!-- حقل المبلغ المدفوع (يظهر فقط للدفع النقدي) -->
+                                    <div class="paid-amount-container" id="paid-amount-container" {% if sale.sale_payment_method and sale.sale_payment_method.is_cash %}class="show"{% endif %}>
+                                        <div class="financial-row">
+                                            <span class="financial-label"><i class="fas fa-hand-holding-usd"></i> المبلغ المدفوع:</span>
+                                            <input type="number" class="form-control" id="paid-amount" name="paid_amount" value="{{ sale.paid_amount|default:'0' }}" min="0" step="0.01">
+                                        </div>
+                                        <div class="alert alert-warning mt-2 d-none" id="cash-balance-warning">
+                                            <i class="fas fa-exclamation-triangle"></i> المبلغ المدفوع يتجاوز رصيد الصندوق
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- الإجمالي العام -->
+                                <div class="financial-row grand-total">
+                                    <span class="financial-label"><i class="fas fa-file-invoice-dollar"></i> الإجمالي العام:</span>
+                                    <span class="financial-value" id="grand-total">{{ sale.sale_final_total|default:'0.00' }}</span>
+                                </div>
+
+                                <!-- المبلغ المتبقي -->
+                                <div class="financial-row remaining-amount">
+                                    <span class="financial-label"><i class="fas fa-clock"></i> المبلغ المتبقي:</span>
+                                    <span class="financial-value" id="remaining-amount">{{ sale.balance_due|default:'0.00' }}</span>
+                                </div>
+
+                                <!-- المبلغ المتبقي كتابة -->
+                                <div class="remaining-amount-in-words-container">
+                                    <div class="remaining-amount-in-words">
+                                        <div class="remaining-words-label">
+                                            <i class="fas fa-font"></i> كتابة:
+                                        </div>
+                                        <div class="remaining-words-value" id="remaining-words-value">
+                                            <div class="remaining-words-loading small">جاري التحويل...</div>
+                                        </div>
+                                        <button type="button" class="refresh-remaining-words-btn" id="refresh-remaining-words-btn" title="تحديث الكتابة">
+                                            <i class="fas fa-redo"></i>
+                                        </button>
+                                    </div>
+                                    <div class="text-muted small text-center mt-1">
+                                        <i class="fas fa-info-circle"></i> يتحدث تلقائياً
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- أزرار الحفظ -->
+        <div class="form-actions">
+            <button type="submit" class="btn btn-success">
+                <i class="fas fa-save"></i> حفظ التعديلات
+            </button>
+            <a href="{% url 'invoice:sale_list' %}" class="btn btn-secondary">
+                <i class="fas fa-times"></i> إلغاء
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// ============================================
+// [JS-00] المتغيرات العامة - تم إضافة جميع المتغيرات المفقودة
+// ============================================
+window.barcodeData = {};
+window.barcodesVisible = false;
+window.productsCache = {};
+window.customersCache = {};
+window.isPaymentMethodCash = {{ sale.sale_payment_method.is_cash|yesno:"true,false" }};
+window.paidAmountModified = false;
+window.initializationComplete = false;
+window.usedProductIds = new Set();
+
+// بيانات الباركودات الموجودة مسبقاً (للتعديل)
+window.existingBarcodes = {{ barcodes_data|safe }};
+
+// ============================================
+// [JS-01] البيانات العامة للتطبيق
+// ============================================
+
+// ============================================
+// [JS-02] دوال مساعدة عامة
+// ============================================
+
+function fetchCashBalance() {
+    return fetch('/invoice/get-cash-balance/')
+        .then(response => response.json())
+        .then(data => {
+            const cashBalanceElement = document.getElementById('current-cash-balance');
+            if (cashBalanceElement) {
+                cashBalanceElement.textContent = parseFloat(data.balance).toFixed(2);
+            }
+            return data.balance;
+        })
+        .catch(error => {
+            console.error('❌ خطأ في جلب رصيد الصندوق:', error);
+            return 0;
+        });
+}
+
+function checkCashBalance(paidAmount) {
+    fetchCashBalance().then(cashBalance => {
+        const cashBalanceWarning = document.getElementById('cash-balance-warning');
+        if (parseFloat(paidAmount) > parseFloat(cashBalance)) {
+            cashBalanceWarning.classList.remove('d-none');
+        } else {
+            cashBalanceWarning.classList.add('d-none');
+        }
+    });
+}
+
+function checkPaymentMethod(value) {
+    console.log('🔍 التحقق من طريقة الدفع:', value);
+    
+    const paidAmountContainer = document.getElementById('paid-amount-container');
+    const paidAmountInput = document.getElementById('paid-amount');
+    
+    if (value) {
+        fetch(`/invoice/get-payment-method/${value}/`)
+            .then(response => response.json())
+            .then(data => {
+                console.log('📊 بيانات طريقة الدفع:', data);
+                
+                if (data.is_cash) {
+                    console.log('💰 طريقة الدفع نقداً - إظهار حقل المبلغ المدفوع');
+                    paidAmountContainer.classList.add('show');
+                    window.isPaymentMethodCash = true;
+                    
+                    setTimeout(() => {
+                        copyGrandTotalToPaidAmount();
+                    }, 100);
+                } else {
+                    console.log('💳 طريقة الدفع أخرى - إخفاء حقل المبلغ المدفوع');
+                    paidAmountContainer.classList.remove('show');
+                    window.isPaymentMethodCash = false;
+                    paidAmountInput.value = '0';
+                    paidAmountInput.classList.remove('auto-updated');
+                    window.paidAmountModified = false;
+                    updateRemainingAmount();
+                }
+            })
+            .catch(error => {
+                console.error('❌ خطأ في جلب بيانات طريقة الدفع:', error);
+                paidAmountContainer.classList.remove('show');
+                window.isPaymentMethodCash = false;
+                paidAmountInput.value = '0';
+                paidAmountInput.classList.remove('auto-updated');
+                window.paidAmountModified = false;
+                updateRemainingAmount();
+            });
+    } else {
+        console.log('⚠️ لم يتم اختيار طريقة دفع');
+        paidAmountContainer.classList.remove('show');
+        window.isPaymentMethodCash = false;
+        paidAmountInput.value = '0';
+        paidAmountInput.classList.remove('auto-updated');
+        window.paidAmountModified = false;
+        updateRemainingAmount();
+    }
+}
+
+function copyGrandTotalToPaidAmount() {
+    console.log('💲 نسخ قيمة الإجمالي العام إلى المبلغ المدفوع...');
+    
+    if (!window.isPaymentMethodCash) {
+        console.log('⚠️ طريقة الدفع ليست نقداً - إلغاء النسخ');
+        return;
+    }
+    
+    const paidAmountInput = document.getElementById('paid-amount');
+    const grandTotalElement = document.getElementById('grand-total');
+    
+    if (paidAmountInput && grandTotalElement) {
+        const grandTotalValue = parseFloat(grandTotalElement.textContent) || 0;
+        console.log('📊 قيمة الإجمالي العام:', grandTotalValue);
+        
+        if (!window.paidAmountModified) {
+            paidAmountInput.value = grandTotalValue.toFixed(2);
+            console.log('✅ تم نسخ قيمة الإجمالي العام إلى المبلغ المدفوع:', grandTotalValue.toFixed(2));
+            
+            paidAmountInput.classList.add('auto-updated');
+            
+            setTimeout(() => {
+                paidAmountInput.classList.remove('auto-updated');
+            }, 3000);
+            
+            updateRemainingAmount();
+        } else {
+            console.log('ℹ️ المبلغ المدفوع تم تعديله يدوياً - لا يتم النسخ التلقائي');
+        }
+    } else {
+        console.error('❌ لم يتم العثور على حقول المبلغ المدفوع أو الإجمالي العام');
+    }
+}
+
+function updateRemainingAmount() {
+    const grandTotalElement = document.getElementById('grand-total');
+    const paidAmountInput = document.getElementById('paid-amount');
+    const remainingAmountElement = document.getElementById('remaining-amount');
+    
+    if (grandTotalElement && paidAmountInput && remainingAmountElement) {
+        const grandTotalValue = parseFloat(grandTotalElement.textContent) || 0;
+        const paidAmountValue = parseFloat(paidAmountInput.value) || 0;
+        const remainingAmount = Math.max(0, grandTotalValue - paidAmountValue);
+        
+        remainingAmountElement.textContent = remainingAmount.toFixed(2);
+        
+        document.dispatchEvent(new Event('remainingAmountUpdated'));
+    }
+}
+
+function showSuccessMessage(message) {
+    const oldMessages = document.querySelectorAll('.success-message');
+    oldMessages.forEach(msg => msg.remove());
+    
+    const successMsg = document.createElement('div');
+    successMsg.className = 'success-message';
+    successMsg.innerHTML = `
+        <i class="fas fa-check-circle me-2"></i>
+        ${message}
+    `;
+    
+    const container = document.querySelector('.container-fluid');
+    container.insertBefore(successMsg, container.firstChild);
+    
+    setTimeout(() => {
+        successMsg.style.opacity = '0';
+        setTimeout(() => successMsg.remove(), 500);
+    }, 3000);
+}
+
+function showErrorMessage(message) {
+    const oldMessages = document.querySelectorAll('.error-message');
+    oldMessages.forEach(msg => msg.remove());
+    
+    const errorMsg = document.createElement('div');
+    errorMsg.className = 'alert alert-danger error-message';
+    errorMsg.innerHTML = `
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        ${message}
+    `;
+    
+    const container = document.querySelector('.container-fluid');
+    container.insertBefore(errorMsg, container.firstChild);
+    
+    setTimeout(() => {
+        errorMsg.style.opacity = '0';
+        setTimeout(() => errorMsg.remove(), 500);
+    }, 3000);
+}
+
+// ============================================
+// [JS-03] نظام تحويل المبلغ المتبقي إلى كلمات
+// ============================================
+let remainingAmountConverter = {
+    cache: {},
+    currentRemainingAmount: 0,
+    currentCurrencyId: null,
+    isLoading: false,
+    
+    init: function() {
+        console.log('🔤 تهيئة نظام تحويل المبلغ المتبقي إلى كلمات...');
+        this.updateFromPage();
+        this.setupEventListeners();
+        this.convert();
+    },
+    
+    updateFromPage: function() {
+        this.remainingElement = document.getElementById('remaining-amount');
+        this.currencySelect = document.getElementById('id_sale_currency');
+        this.displayElement = document.getElementById('remaining-words-value');
+        this.refreshBtn = document.getElementById('refresh-remaining-words-btn');
+        
+        if (this.remainingElement) {
+            const remainingText = this.remainingElement.textContent.replace(/,/g, '').trim();
+            this.currentRemainingAmount = parseFloat(remainingText) || 0;
+        }
+        
+        if (this.currencySelect) {
+            this.currentCurrencyId = this.currencySelect.value;
+        }
+        
+        console.log(`📊 المبلغ المتبقي الحالي: ${this.currentRemainingAmount}, العملة: ${this.currentCurrencyId}`);
+    },
+    
+    setupEventListeners: function() {
+        if (this.currencySelect) {
+            this.currencySelect.addEventListener('change', () => {
+                this.currentCurrencyId = this.currencySelect.value;
+                this.convert();
+            });
+        }
+        
+        if (this.refreshBtn) {
+            this.refreshBtn.addEventListener('click', () => {
+                this.convert();
+                showSuccessMessage('تم تحديث المبلغ المكتوب');
+            });
+        }
+        
+        document.addEventListener('financialCalculationsUpdated', () => {
+            this.updateFromPage();
+            this.convert();
+        });
+        
+        document.addEventListener('remainingAmountUpdated', () => {
+            this.updateFromPage();
+            this.convert();
+        });
+    },
+    
+    showLoading: function() {
+        if (!this.displayElement) return;
+        
+        this.displayElement.innerHTML = `
+            <div class="remaining-words-loading">
+                <i class="fas fa-spinner"></i>
+                <span>جاري التحويل...</span>
+            </div>
+        `;
+    },
+    
+    showAmountZero: function() {
+        if (!this.displayElement) return;
+        
+        this.displayElement.innerHTML = `
+            <div class="remaining-words-zero">
+                <i class="fas fa-check-circle me-1"></i>
+                <span>المبلغ المتبقي صفر</span>
+            </div>
+        `;
+    },
+    
+    showError: function(message) {
+        if (!this.displayElement) return;
+        
+        this.displayElement.innerHTML = `
+            <div class="remaining-words-error">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>${message}</span>
+            </div>
+        `;
+    },
+    
+    updateDisplay: function(data) {
+        if (!this.displayElement) return;
+        
+        const currencySymbol = data.currency?.symbol || 'ل.س';
+        
+        this.displayElement.innerHTML = `
+            <div>
+                ${data.amount_in_words}
+                <span class="remaining-words-currency">(${currencySymbol})</span>
+            </div>
+        `;
+        
+        console.log('✅ تم تحديث العرض بالمبلغ المتبقي المكتوب');
+    },
+    
+    convert: function() {
+        this.updateFromPage();
+        
+        if (!this.remainingElement || !this.displayElement) {
+            console.error('❌ عناصر العرض غير موجودة');
+            return;
+        }
+        
+        if (this.currentRemainingAmount <= 0) {
+            this.showAmountZero();
+            return;
+        }
+        
+        if (this.isLoading) {
+            console.log('⏳ النظام قيد التحميل، انتظر...');
+            return;
+        }
+        
+        const cacheKey = `${this.currentRemainingAmount.toFixed(2)}-${this.currentCurrencyId}`;
+        if (this.cache[cacheKey]) {
+            console.log('💾 استخدام البيانات من التخزين المؤقت');
+            this.updateDisplay(this.cache[cacheKey]);
+            return;
+        }
+        
+        this.isLoading = true;
+        this.showLoading();
+        
+        this.fetchAmountInWords(this.currentRemainingAmount, this.currentCurrencyId)
+            .then(response => {
+                if (response.success) {
+                    this.cache[cacheKey] = response;
+                    this.updateDisplay(response);
+                } else {
+                    throw new Error(response.error || 'حدث خطأ في التحويل');
+                }
+            })
+            .catch(error => {
+                console.error('❌ خطأ في التحويل:', error);
+                this.showError('تعذر تحويل المبلغ المتبقي إلى كلمات');
+            })
+            .finally(() => {
+                this.isLoading = false;
+            });
+    },
+    
+    fetchAmountInWords: async function(amount, currencyId) {
+        const url = `/invoice/api/convert-to-words/?amount=${amount}&currency_id=${currencyId || ''}`;
+        console.log(`🌐 جلب البيانات من: ${url}`);
+        
+        try {
+            const response = await fetch(url, {
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error(`خطأ في الشبكة: ${response.status}`);
+            }
+            
+            return await response.json();
+        } catch (error) {
+            throw error;
+        }
+    }
+};
+
+// ============================================
+// [JS-04] تحميل الباركودات الموجودة مسبقاً
+// ============================================
+function loadExistingBarcodes() {
+    console.log('🔍 تحميل الباركودات الموجودة...', window.existingBarcodes);
+    
+    Object.keys(window.existingBarcodes).forEach(itemId => {
+        const itemRow = document.querySelector(`.item-row[data-item-id="${itemId}"]`);
+        if (itemRow) {
+            const itemIndex = itemRow.getAttribute('data-item-index');
+            const barcodes = window.existingBarcodes[itemId];
+            
+            if (barcodes && barcodes.length > 0) {
+                window.barcodeData[itemIndex] = barcodes;
+                
+                if (window.barcodesVisible) {
+                    generateBarcodeFields(itemRow, itemIndex, barcodes.length);
+                    
+                    const barcodeInputs = document.querySelectorAll(`.barcode-row[data-item-index="${itemIndex}"] .barcode-input`);
+                    barcodeInputs.forEach((input, idx) => {
+                        if (barcodes[idx]) {
+                            input.value = barcodes[idx];
+                            validateBarcodeInput(input, itemIndex);
+                        }
+                    });
+                }
+            }
+        }
+    });
+}
+
+// ============================================
+// [JS-NEW] دالة التحقق من الباركود (ذكية) - تم إضافتها
+// ============================================
+function validateBarcodeInput(inputElement, itemIndex) {
+    const barcodeValue = inputElement.value.trim();
+    const itemRow = document.querySelector(`.item-row[data-item-index="${itemIndex}"]`);
+    
+    if (!barcodeValue) {
+        inputElement.classList.remove('invalid-barcode', 'valid-barcode');
+        return;
+    }
+
+    const productHidden = itemRow.querySelector('input[name$="-product"]');
+    const productId = productHidden ? productHidden.value : null;
+    const itemId = itemRow.getAttribute('data-item-id');
+
+    if (!productId) {
+        inputElement.classList.add('invalid-barcode');
+        inputElement.title = "اختر المنتج أولاً";
+        return;
+    }
+
+    const url = `/invoice/get-product-barcodes/${productId}/?check_barcode=${encodeURIComponent(barcodeValue)}&sale_item_id=${itemId || ''}`;
+
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            if (data.is_valid) {
+                inputElement.classList.remove('invalid-barcode');
+                inputElement.classList.add('valid-barcode');
+                inputElement.title = data.message || "صالح";
+            } else {
+                inputElement.classList.remove('valid-barcode');
+                inputElement.classList.add('invalid-barcode');
+                inputElement.title = data.message || "غير صالح";
+            }
+        })
+        .catch(error => {
+            console.error('خطأ في التحقق:', error);
+        });
+}
+
+// ============================================
+// [JS-05] التهيئة الرئيسية عند تحميل الصفحة
+// ============================================
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 بدء تهيئة صفحة تعديل فاتورة البيع...');
+    
+    initializeCustomerAutocomplete();
+    initializeAllItems();
+    loadExistingBarcodes();
+    setupGlobalEvents();
+    setupImagePreviews();
+    setupItemsCountInput();
+    setupBarcodeToggle();
+    setupFinancialCalculations();
+    updateFinancialCalculations();
+    setupShippingCompanyEvent();
+    setupPaymentMethodEvent();
+    
+    hideAllBarcodes();
+    
+    setTimeout(() => {
+        remainingAmountConverter.init();
+    }, 1500);
+    
+    setTimeout(function() {
+        updateItemsCountInput();
+        window.initializationComplete = true;
+        console.log('✅ اكتملت تهيئة الصفحة بنجاح');
+    }, 500);
+});
+
+// ============================================
+// [JS-06] نظام البحث التلقائي عن العملاء
+// ============================================
+function initializeCustomerAutocomplete() {
+    const searchInput = document.getElementById('customer-search');
+    const resultsContainer = document.getElementById('customer-results');
+    const customerHidden = document.getElementById('id_sale_customer');
+    const phoneInput = document.getElementById('id_sale_customer_phone');
+    const addressInput = document.getElementById('id_sale_address');
+
+    let searchTimeout;
+    let currentSearchQuery = '';
+
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        const query = this.value.trim();
+        currentSearchQuery = query;
+        
+        if (query.length < 2) {
+            resultsContainer.classList.remove('show');
+            return;
+        }
+
+        resultsContainer.innerHTML = '<div class="autocomplete-item"><i class="fas fa-spinner fa-spin me-2"></i>جاري البحث...</div>';
+        resultsContainer.classList.add('show');
+
+        searchTimeout = setTimeout(() => {
+            if (window.customersCache[query]) {
+                displayCustomerResults(window.customersCache[query], query);
+                return;
+            }
+
+            fetch(`/invoice/search-customers/?q=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => {
+                    window.customersCache[query] = data;
+                    displayCustomerResults(data, query);
+                })
+                .catch(error => {
+                    console.error('Error searching customers:', error);
+                    resultsContainer.innerHTML = '<div class="autocomplete-item text-danger"><i class="fas fa-exclamation-triangle me-2"></i>خطأ في البحث</div>';
+                });
+        }, 500);
+    });
+
+    function displayCustomerResults(data, query) {
+        if (query !== currentSearchQuery) return;
+        
+        resultsContainer.innerHTML = '';
+        
+        if (!data.results || data.results.length === 0) {
+            resultsContainer.innerHTML = '<div class="autocomplete-item text-muted"><i class="fas fa-search me-2"></i>لا توجد نتائج</div>';
+        } else {
+            data.results.forEach(customer => {
+                const item = document.createElement('div');
+                item.className = 'autocomplete-item';
+                item.innerHTML = `
+                    <div class="autocomplete-item-content">
+                        <div class="autocomplete-item-title">${customer.text}</div>
+                        <div class="autocomplete-item-details">
+                            ${customer.phone ? `<span class="autocomplete-item-price"><i class="fas fa-phone me-1"></i>${customer.phone}</span>` : ''}
+                            ${customer.address ? `<span class="autocomplete-item-stock"><i class="fas fa-map-marker-alt me-1"></i>${customer.address}</span>` : ''}
+                        </div>
+                    </div>
+                `;
+                
+                item.addEventListener('click', function() {
+                    customerHidden.value = customer.id;
+                    searchInput.value = customer.text;
+                    phoneInput.value = customer.phone || '';
+                    addressInput.value = customer.address || '';
+                    
+                    resultsContainer.classList.remove('show');
+                    
+                    phoneInput.classList.add('auto-updated');
+                    addressInput.classList.add('auto-updated');
+                    setTimeout(() => {
+                        phoneInput.classList.remove('auto-updated');
+                        addressInput.classList.remove('auto-updated');
+                    }, 2000);
+                    
+                    showSuccessMessage('تم اختيار العميل وملء بياناته تلقائياً');
+                });
+                
+                resultsContainer.appendChild(item);
+            });
+        }
+    }
+
+    document.addEventListener('click', function(e) {
+        if (!searchInput.contains(e.target) && !resultsContainer.contains(e.target)) {
+            resultsContainer.classList.remove('show');
+        }
+    });
+}
+
+// ============================================
+// [JS-07] نظام البحث التلقائي عن المنتجات مع منع التكرار
+// ============================================
+function initializeProductAutocomplete(productSearchInput, productHidden, priceInput, itemIndex) {
+    const resultsContainer = productSearchInput.parentNode.querySelector('.product-results');
+    const productSearchValue = productSearchInput.closest('.item-row').querySelector('.product-search-value');
+    const itemNameField = productSearchInput.closest('.item-row').querySelector('.item-name-field');
+    
+    let searchTimeout;
+    let currentSearchQuery = '';
+    let isProcessing = false;
+
+    productSearchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        const query = this.value.trim();
+        currentSearchQuery = query;
+        
+        if (productSearchValue) {
+            productSearchValue.value = query;
+        }
+        
+        if (itemNameField) {
+            itemNameField.value = query;
+        }
+        
+        if (query.length < 2) {
+            resultsContainer.classList.remove('show');
+            return;
+        }
+
+        if (isProcessing) return;
+        
+        resultsContainer.innerHTML = '<div class="autocomplete-item"><i class="fas fa-spinner fa-spin me-2"></i>جاري البحث عن المنتجات...</div>';
+        resultsContainer.classList.add('show');
+
+        searchTimeout = setTimeout(() => {
+            if (window.productsCache[query]) {
+                displayProductResults(window.productsCache[query], query);
+                return;
+            }
+
+            isProcessing = true;
+            fetch(`/invoice/search-products/?q=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => {
+                    window.productsCache[query] = data;
+                    displayProductResults(data, query);
+                })
+                .catch(error => {
+                    console.error('Error searching products:', error);
+                    resultsContainer.innerHTML = '<div class="autocomplete-item text-danger"><i class="fas fa-exclamation-triangle me-2"></i>خطأ في البحث عن المنتجات</div>';
+                })
+                .finally(() => {
+                    isProcessing = false;
+                });
+        }, 400);
+    });
+
+    function displayProductResults(data, query) {
+        if (query !== currentSearchQuery) return;
+        
+        resultsContainer.innerHTML = '';
+        
+        if (!data.results || data.results.length === 0) {
+            resultsContainer.innerHTML = `
+                <div class="autocomplete-item text-muted">
+                    <i class="fas fa-search me-2"></i>
+                    <div class="autocomplete-item-content">
+                        <div class="autocomplete-item-title">لا توجد منتجات مطابقة</div>
+                    </div>
+                </div>
+            `;
+        } else {
+            data.results.forEach(product => {
+                const item = document.createElement('div');
+                item.className = 'autocomplete-item';
+                
+                let imageHtml = '';
+                if (product.image_url) {
+                    imageHtml = `<img src="${product.image_url}" alt="${product.text}">`;
+                } else {
+                    imageHtml = `<div class="bg-light d-flex align-items-center justify-content-center" style="width:45px;height:45px;border-radius:6px;">
+                                   <i class="fas fa-box text-muted"></i>
+                                 </div>`;
+                }
+                
+                let stockIndicator = '';
+                if (product.stock !== undefined) {
+                    let stockClass = 'high';
+                    let stockText = 'متوفر';
+                    
+                    if (product.stock <= 0) {
+                        stockClass = 'out';
+                        stockText = 'نفد المخزون';
+                    } else if (product.stock < 10) {
+                        stockClass = 'low';
+                        stockText = 'مخزون منخفض';
+                    } else if (product.stock < 50) {
+                        stockClass = 'medium';
+                        stockText = 'مخزون متوسط';
+                    }
+                    
+                    stockIndicator = `<span class="stock-indicator ${stockClass}">${stockText}: ${product.stock}</span>`;
+                }
+                
+                const isUsed = window.usedProductIds.has(parseInt(product.id));
+                if (isUsed) {
+                    item.style.opacity = '0.6';
+                    item.style.backgroundColor = '#f8d7da';
+                }
+                
+                item.innerHTML = `
+                    ${imageHtml}
+                    <div class="autocomplete-item-content">
+                        <div class="autocomplete-item-title">${product.text} ${isUsed ? '(مستخدم مسبقاً)' : ''}</div>
+                        <div class="autocomplete-item-details">
+                            ${product.price ? `<span class="autocomplete-item-price"><i class="fas fa-tag me-1"></i>${product.price} ر.س</span>` : ''}
+                            ${stockIndicator}
+                        </div>
+                    </div>
+                `;
+                
+                item.dataset.id = product.id;
+                item.dataset.price = product.price || '0';
+                item.dataset.text = product.text;
+                item.dataset.image = product.image_url || '';
+                item.dataset.barcode = product.barcode || '';
+                item.dataset.used = isUsed;
+                
+                item.addEventListener('click', function() {
+                    const currentProductId = productHidden.value;
+                    if (this.dataset.used === 'true' && currentProductId != this.dataset.id) {
+                        showErrorMessage('هذه المادة مضمنة بالفعل في الفاتورة، لا يمكن إضافتها مرة أخرى.');
+                        return;
+                    }
+                    
+                    const productId = parseInt(this.dataset.id);
+                    
+                    productHidden.value = this.dataset.id;
+                    console.log(`✅ تم ربط المنتج: ${this.dataset.id} - ${this.dataset.text}`);
+                    
+                    if (priceInput) {
+                        priceInput.value = this.dataset.price;
+                        priceInput.dispatchEvent(new Event('input', { bubbles: true }));
+                    }
+                    productSearchInput.value = this.dataset.text;
+                    
+                    if (productSearchValue) {
+                        productSearchValue.value = this.dataset.text;
+                    }
+                    
+                    if (itemNameField) {
+                        itemNameField.value = this.dataset.text;
+                    }
+                    
+                    resultsContainer.classList.remove('show');
+                    
+                    const previewContainer = document.getElementById(`product-image-preview-container-${itemIndex}`);
+                    if (previewContainer) {
+                        if (this.dataset.image) {
+                            previewContainer.innerHTML = `<img src="${this.dataset.image}" alt="${this.dataset.text}">`;
+                            previewContainer.classList.add('has-image');
+                            
+                            let imageUrlField = productSearchInput.closest('.item-row').querySelector('.product-image-url-field');
+                            if (!imageUrlField) {
+                                imageUrlField = document.createElement('input');
+                                imageUrlField.type = 'hidden';
+                                imageUrlField.className = 'product-image-url-field';
+                                imageUrlField.name = `items-${itemIndex}-product_image_url`;
+                                productSearchInput.closest('.item-row').appendChild(imageUrlField);
+                            }
+                            imageUrlField.value = this.dataset.image;
+                            
+                            let autoImageField = productSearchInput.closest('.item-row').querySelector('.auto-image-field');
+                            if (!autoImageField) {
+                                autoImageField = document.createElement('input');
+                                autoImageField.type = 'hidden';
+                                autoImageField.className = 'auto-image-field';
+                                autoImageField.name = `items-${itemIndex}-is_auto_image`;
+                                autoImageField.value = 'true';
+                                productSearchInput.closest('.item-row').appendChild(autoImageField);
+                            }
+
+                            createFileFromImageUrl(this.dataset.image, this.dataset.text, itemIndex).then(() => {
+                                console.log(`✅ تم إنشاء ملف الصورة التلقائية للبند ${itemIndex}`);
+                            }).catch(error => {
+                                console.error(`❌ خطأ في إنشاء ملف الصورة: ${error}`);
+                            });
+
+                        } else {
+                            previewContainer.innerHTML = '<i class="fas fa-camera"></i>';
+                            previewContainer.classList.remove('has-image');
+                            
+                            const imageUrlField = productSearchInput.closest('.item-row').querySelector('.product-image-url-field');
+                            const autoImageField = productSearchInput.closest('.item-row').querySelector('.auto-image-field');
+                            if (imageUrlField) imageUrlField.remove();
+                            if (autoImageField) autoImageField.remove();
+                        }
+                    }
+                    
+                    if (this.dataset.barcode && window.barcodesVisible) {
+                        autoFillBarcode(itemIndex, this.dataset.barcode);
+                    }
+                    
+                    window.usedProductIds.add(productId);
+                    
+                    updateItemCalculations(productSearchInput.closest('.item-row'));
+                    showSuccessMessage('تم إضافة المنتج بنجاح');
+                });
+                
+                resultsContainer.appendChild(item);
+            });
+        }
+    }
+
+    document.addEventListener('click', function(e) {
+        if (!productSearchInput.contains(e.target) && !resultsContainer.contains(e.target)) {
+            resultsContainer.classList.remove('show');
+        }
+    });
+}
+
+// دالة إنشاء ملف الصورة
+async function createFileFromImageUrl(imageUrl, productName, itemIndex) {
+    try {
+        console.log(`🖼️ محاولة تحميل الصورة من: ${imageUrl}`);
+        const response = await fetch(imageUrl);
+        if (!response.ok) throw new Error(`فشل تحميل الصورة: ${response.status}`);
+        const blob = await response.blob();
+        let fileExtension = 'jpg';
+        const urlParts = imageUrl.split('.');
+        if (urlParts.length > 1) {
+            const ext = urlParts.pop().toLowerCase();
+            if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) fileExtension = ext;
+        }
+        const fileName = `product_${productName.replace(/[^a-zA-Z0-9]/g, '_')}.${fileExtension}`;
+        const file = new File([blob], fileName, { type: blob.type });
+        const fileInput = document.getElementById(`id_items-${itemIndex}-sale_item_image`);
+        if (fileInput) {
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            fileInput.files = dataTransfer.files;
+            fileInput.dispatchEvent(new Event('change', { bubbles: true }));
+            console.log(`✅ تم تعيين الملف في حقل الإدخال للبند ${itemIndex}`);
+        } else {
+            console.error(`❌ لم يتم العثور على حقل الملف للبند ${itemIndex}`);
+        }
+    } catch (error) {
+        console.error(`❌ خطأ في تحميل الصورة التلقائية: ${error}`);
+    }
+}
+
+// ============================================
+// [JS-08] نظام إدارة بنود الفاتورة
+// ============================================
+function addNewItem() {
+    const tbody = document.getElementById('items-tbody');
+    const totalForms = document.getElementById('id_items-TOTAL_FORMS');
+    const formNum = parseInt(totalForms.value);
+    
+    const newRow = document.createElement('tr');
+    newRow.className = 'item-row';
+    newRow.setAttribute('data-item-index', formNum);
+    
+    newRow.innerHTML = `
+        <td class="text-center fw-bold">${formNum + 1}</td>
+        <td>
+            <input type="hidden" name="items-${formNum}-id" id="id_items-${formNum}-id">
+            <input type="hidden" name="items-${formNum}-sale" id="id_items-${formNum}-sale">
+            
+            <input type="hidden" name="items-${formNum}-item_name" class="item-name-field" value="">
+            
+            <input type="hidden" name="items-${formNum}-product_search" class="product-search-value" value="">
+            
+            <input type="hidden" name="items-${formNum}-product_image_url" class="product-image-url-field" value="">
+            <input type="hidden" name="items-${formNum}-is_auto_image" class="auto-image-field" value="">
+            
+            <div class="product-search-container">
+                <input type="text" class="form-control product-search-input" 
+                       placeholder="ابحث عن المادة بالاسم أو الباركود..." 
+                       autocomplete="off">
+                <div class="autocomplete-dropdown product-results"></div>
+            </div>
+            <input type="hidden" name="items-${formNum}-product" id="id_items-${formNum}-product">
+        </td>
+        <td>
+            <input type="number" name="items-${formNum}-sold_quantity" value="1" step="0.01" min="0.01" class="form-control" id="id_items-${formNum}-sold_quantity">
+        </td>
+        <td>
+            <input type="number" name="items-${formNum}-unit_price" value="0" step="0.01" min="0" class="form-control" id="id_items-${formNum}-unit_price">
+        </td>
+        <td>
+            <input type="text" class="form-control item-total" readonly value="0.00">
+        </td>
+        <td>
+            <input type="text" name="items-${formNum}-notes" class="form-control" id="id_items-${formNum}-notes">
+        </td>
+        <td class="text-center">
+            <div class="image-input-container">
+                <div id="product-image-preview-container-${formNum}" class="image-preview" title="انقر لاختيار صورة المادة">
+                    <i class="fas fa-camera"></i>
+                </div>
+                <input type="file" name="items-${formNum}-sale_item_image" class="hidden-file-input" accept="image/*" id="id_items-${formNum}-sale_item_image">
+            </div>
+        </td>
+        <td class="text-center">
+            <button type="button" class="delete-btn" title="حذف البند">
+                <i class="fas fa-trash"></i>
+            </button>
+        </td>
+    `;
+    
+    const barcodeRow = document.createElement('tr');
+    barcodeRow.className = 'barcode-row';
+    barcodeRow.setAttribute('data-item-index', formNum);
+    barcodeRow.style.display = window.barcodesVisible ? 'table-row' : 'none';
+    barcodeRow.innerHTML = `
+        <td colspan="8">
+            <div class="barcode-field-container">
+                <div class="barcode-fields-list"></div>
+            </div>
+        </td>
+    `;
+    
+    tbody.appendChild(newRow);
+    tbody.appendChild(barcodeRow);
+    totalForms.value = formNum + 1;
+    
+    window.barcodeData[formNum] = [];
+    
+    const productSearchInput = newRow.querySelector('.product-search-input');
+    const productHidden = newRow.querySelector(`input[name="items-${formNum}-product"]`);
+    const priceInput = newRow.querySelector(`input[name="items-${formNum}-unit_price"]`);
+    
+    if (productSearchInput && productHidden) {
+        initializeProductAutocomplete(productSearchInput, productHidden, priceInput, formNum);
+    }
+    
+    setupImagePreviewForItem(formNum);
+    setupItemEvents(newRow);
+    updateItemCalculations(newRow);
+    
+    updateItemsCountInput();
+    
+    if (window.barcodesVisible) {
+        const quantityInput = newRow.querySelector('input[name$="-sold_quantity"]');
+        const quantity = parseInt(quantityInput.value) || 1;
+        generateBarcodeFields(newRow, formNum, quantity);
+    }
+}
+
+function initializeAllItems() {
+    const items = document.querySelectorAll('.item-row');
+    
+    items.forEach((item, index) => {
+        const itemIndex = item.getAttribute('data-item-index');
+        
+        if (!window.barcodeData[itemIndex]) {
+            window.barcodeData[itemIndex] = [];
+        }
+        
+        const productSearchInput = item.querySelector('.product-search-input');
+        const productHidden = item.querySelector('input[name$="-product"]');
+        const priceInput = item.querySelector('input[name$="-unit_price"]');
+        
+        if (productHidden && productHidden.value) {
+            window.usedProductIds.add(parseInt(productHidden.value));
+        }
+        
+        if (productSearchInput && productHidden) {
+            initializeProductAutocomplete(productSearchInput, productHidden, priceInput, itemIndex);
+        }
+        
+        setupItemEvents(item);
+        updateItemCalculations(item);
+    });
+}
+
+function setupItemEvents(item) {
+    const quantityInput = item.querySelector('input[name$="-sold_quantity"]');
+    const priceInput = item.querySelector('input[name$="-unit_price"]');
+    
+    [quantityInput, priceInput].forEach(input => {
+        if (input) {
+            input.addEventListener('input', function() {
+                updateItemCalculations(item);
+                
+                if (input === quantityInput) {
+                    const itemIndex = item.getAttribute('data-item-index');
+                    const quantity = parseInt(quantityInput.value) || 1;
+                    generateBarcodeFields(item, itemIndex, quantity);
+                }
+            });
+        }
+    });
+    
+    const deleteBtn = item.querySelector('.delete-btn');
+    if (deleteBtn) {
+        deleteBtn.addEventListener('click', function() {
+            const itemIndex = item.getAttribute('data-item-index');
+            const productHidden = item.querySelector('input[name$="-product"]');
+            if (productHidden && productHidden.value) {
+                window.usedProductIds.delete(parseInt(productHidden.value));
+            }
+            delete window.barcodeData[itemIndex];
+            
+            const barcodeRow = document.querySelector(`.barcode-row[data-item-index="${itemIndex}"]`);
+            if (barcodeRow) barcodeRow.remove();
+            
+            item.remove();
+            updateTotalForms();
+            updateItemsNumbers();
+            updateItemsCountInput();
+            updateFinancialCalculations();
+        });
+    }
+}
+
+// ============================================
+// [JS-09] نظام إدارة الصور
+// ============================================
+function setupImagePreviews() {
+    const invoiceFileInput = document.getElementById('id_sale_image');
+    const invoicePreviewContainer = document.getElementById('invoice-image-preview-container');
+    
+    if (invoiceFileInput && invoicePreviewContainer) {
+        invoiceFileInput.style.display = 'none';
+        invoicePreviewContainer.addEventListener('click', function() {
+            invoiceFileInput.click();
+        });
+        invoiceFileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    invoicePreviewContainer.innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;">`;
+                    invoicePreviewContainer.classList.add('has-image');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+    document.querySelectorAll('.item-row').forEach(item => {
+        const itemIndex = item.getAttribute('data-item-index');
+        setupImagePreviewForItem(itemIndex);
+    });
+}
+
+function setupImagePreviewForItem(itemIndex) {
+    const productImageInput = document.getElementById(`id_items-${itemIndex}-sale_item_image`);
+    const previewContainer = document.getElementById(`product-image-preview-container-${itemIndex}`);
+    
+    if (productImageInput && previewContainer) {
+        productImageInput.style.display = 'none';
+        previewContainer.addEventListener('click', function() {
+            productImageInput.click();
+        });
+        productImageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewContainer.innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;">`;
+                    previewContainer.classList.add('has-image');
+                    
+                    const manualImageField = document.createElement('input');
+                    manualImageField.type = 'hidden';
+                    manualImageField.name = `items-${itemIndex}-manual_image_upload`;
+                    manualImageField.value = 'true';
+                    previewContainer.appendChild(manualImageField);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+}
+
+// ============================================
+// [JS-10] نظام إدارة الباركودات (محدث) - تم إضافة جميع الدوال المفقودة
+// ============================================
+function generateBarcodeFields(itemElement, itemIndex, quantity) {
+    const barcodeRow = document.querySelector(`.barcode-row[data-item-index="${itemIndex}"]`);
+    if (!barcodeRow) return;
+    
+    if (window.barcodesVisible) {
+        barcodeRow.style.display = 'table-row';
+    }
+    
+    const barcodeFieldsList = barcodeRow.querySelector('.barcode-fields-list');
+    if (!barcodeFieldsList) return;
+    
+    barcodeFieldsList.innerHTML = '';
+    
+    if (!window.barcodeData[itemIndex]) {
+        window.barcodeData[itemIndex] = [];
+    }
+    
+    while (window.barcodeData[itemIndex].length < quantity) {
+        window.barcodeData[itemIndex].push('');
+    }
+    
+    if (window.barcodeData[itemIndex].length > quantity) {
+        window.barcodeData[itemIndex] = window.barcodeData[itemIndex].slice(0, quantity);
+    }
+    
+    for (let i = 0; i < quantity; i++) {
+        const barcodeField = document.createElement('div');
+        barcodeField.className = 'barcode-item';
+        
+        const existingValue = window.barcodeData[itemIndex][i] || '';
+        
+        barcodeField.innerHTML = `
+            <button type="button" class="barcode-remove-btn" 
+                    data-barcode-index="${i}" data-item-index="${itemIndex}" title="حذف الباركود">
+                <i class="fas fa-times"></i>
+            </button>
+            <input type="text" class="barcode-input" 
+                   placeholder="باركود ${i + 1}" 
+                   value="${existingValue}"
+                   data-barcode-index="${i}"
+                   data-item-index="${itemIndex}">
+        `;
+        
+        barcodeFieldsList.appendChild(barcodeField);
+    }
+    
+    setupBarcodeFieldsEvents(itemElement, itemIndex);
+}
+
+function setupBarcodeFieldsEvents(itemElement, itemIndex) {
+    const barcodeRow = document.querySelector(`.barcode-row[data-item-index="${itemIndex}"]`);
+    if (!barcodeRow) return;
+    
+    const barcodeInputs = barcodeRow.querySelectorAll('.barcode-input');
+    const removeButtons = barcodeRow.querySelectorAll('.barcode-remove-btn');
+    
+    if (!window.barcodeData[itemIndex]) {
+        window.barcodeData[itemIndex] = [];
+    }
+    
+    barcodeInputs.forEach(input => {
+        const barcodeIndex = parseInt(input.getAttribute('data-barcode-index'));
+        
+        if (window.barcodeData[itemIndex][barcodeIndex]) {
+            input.value = window.barcodeData[itemIndex][barcodeIndex];
+        }
+        
+        input.addEventListener('input', function() {
+            window.barcodeData[itemIndex][barcodeIndex] = this.value.trim();
+            this.classList.remove('invalid-barcode', 'valid-barcode');
+        });
+
+        input.addEventListener('blur', function() {
+            validateBarcodeInput(this, itemIndex);
+        });
+    });
+    
+    removeButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const barcodeIndex = parseInt(this.getAttribute('data-barcode-index'));
+            const barcodeField = this.closest('.barcode-item');
+            
+            if (barcodeField) {
+                if (window.barcodeData[itemIndex]) {
+                    window.barcodeData[itemIndex].splice(barcodeIndex, 1);
+                }
+                
+                barcodeField.remove();
+                
+                const quantityInput = itemElement.querySelector('input[name$="-sold_quantity"]');
+                if (quantityInput) {
+                    const newQuantity = Math.max(1, window.barcodeData[itemIndex].length);
+                    quantityInput.value = newQuantity;
+                    updateItemCalculations(itemElement);
+                }
+                
+                renumberBarcodeFields(itemElement, itemIndex);
+            }
+        });
+    });
+}
+
+function renumberBarcodeFields(itemElement, itemIndex) {
+    const barcodeRow = document.querySelector(`.barcode-row[data-item-index="${itemIndex}"]`);
+    if (!barcodeRow) return;
+    
+    const barcodeFields = barcodeRow.querySelectorAll('.barcode-item');
+    
+    barcodeFields.forEach((field, index) => {
+        const barcodeInput = field.querySelector('.barcode-input');
+        const removeBtn = field.querySelector('.barcode-remove-btn');
+        
+        if (barcodeInput) {
+            barcodeInput.setAttribute('data-barcode-index', index);
+            barcodeInput.placeholder = `باركود ${index + 1}`;
+        }
+        if (removeBtn) {
+            removeBtn.setAttribute('data-barcode-index', index);
+        }
+    });
+}
+
+function autoFillBarcode(itemIndex, barcode) {
+    if (!window.barcodeData[itemIndex] || window.barcodeData[itemIndex].length === 0) {
+        window.barcodeData[itemIndex] = [barcode];
+    } else {
+        window.barcodeData[itemIndex][0] = barcode;
+    }
+    
+    if (window.barcodesVisible) {
+        const barcodeRow = document.querySelector(`.barcode-row[data-item-index="${itemIndex}"]`);
+        if (barcodeRow) {
+            const firstBarcodeInput = barcodeRow.querySelector('.barcode-input');
+            if (firstBarcodeInput) {
+                firstBarcodeInput.value = barcode;
+                validateBarcodeInput(firstBarcodeInput, itemIndex);
+            }
+        }
+    }
+}
+
+function hideAllBarcodes() {
+    document.querySelectorAll('.barcode-row').forEach(row => {
+        row.style.display = 'none';
+    });
+}
+
+function showAllBarcodes() {
+    document.querySelectorAll('.barcode-row').forEach(row => {
+        row.style.display = 'table-row';
+    });
+    
+    document.querySelectorAll('.item-row').forEach(item => {
+        const itemIndex = item.getAttribute('data-item-index');
+        const quantityInput = item.querySelector('input[name$="-sold_quantity"]');
+        if (quantityInput) {
+            const quantity = parseInt(quantityInput.value) || 0;
+            if (quantity > 0) {
+                generateBarcodeFields(item, itemIndex, quantity);
+            }
+        }
+    });
+}
+
+// ============================================
+// [JS-11] نظام الحسابات المالية
+// ============================================
+function setupFinancialCalculations() {
+    const inputs = ['tax-percentage', 'invoice-addition', 'invoice-discount'];
+    inputs.forEach(id => {
+        const input = document.getElementById(id);
+        if (input) {
+            input.addEventListener('input', function() {
+                updateFinancialCalculations();
+                updateRemainingAmount();
+            });
+        }
+    });
+    
+    const paidAmountInput = document.getElementById('paid-amount');
+    if (paidAmountInput) {
+        paidAmountInput.addEventListener('input', function() {
+            window.paidAmountModified = true;
+            this.classList.remove('auto-updated');
+            checkCashBalance(this.value);
+            updateRemainingAmount();
+        });
+    }
+}
+
+function updateFinancialCalculations() {
+    console.log('🧮 تحديث الحسابات المالية...');
+    
+    let subtotal = 0;
+    document.querySelectorAll('.item-total').forEach(totalInput => {
+        subtotal += parseFloat(totalInput.value) || 0;
+    });
+    
+    const taxPercentage = parseFloat(document.getElementById('tax-percentage').value) || 0;
+    const additionAmount = parseFloat(document.getElementById('invoice-addition').value) || 0;
+    const discountAmount = parseFloat(document.getElementById('invoice-discount').value) || 0;
+    
+    const taxAmount = subtotal * (taxPercentage / 100);
+    const grandTotal = subtotal + taxAmount + additionAmount - discountAmount;
+    
+    document.getElementById('subtotal-amount').textContent = subtotal.toFixed(2);
+    document.getElementById('tax-amount').textContent = taxAmount.toFixed(2);
+    document.getElementById('grand-total').textContent = grandTotal.toFixed(2);
+    
+    console.log('📊 الإجمالي العام:', grandTotal.toFixed(2));
+    
+    if (window.isPaymentMethodCash && !window.paidAmountModified) {
+        copyGrandTotalToPaidAmount();
+    }
+    
+    updateRemainingAmount();
+    
+    const paidAmountContainer = document.getElementById('paid-amount-container');
+    if (paidAmountContainer && paidAmountContainer.classList.contains('show')) {
+        const paidAmountInput = document.getElementById('paid-amount');
+        if (paidAmountInput) {
+            checkCashBalance(paidAmountInput.value);
+        }
+    }
+    
+    document.dispatchEvent(new Event('financialCalculationsUpdated'));
+}
+
+function setupPaymentMethodEvent() {
+    console.log('⚙️ إعداد حدث طريقة الدفع...');
+    
+    const paymentMethodSelect = document.getElementById('id_sale_payment_method');
+    const paidAmountContainer = document.getElementById('paid-amount-container');
+    const paidAmountInput = document.getElementById('paid-amount');
+    
+    fetchCashBalance();
+    
+    if (paymentMethodSelect && paidAmountContainer) {
+        checkPaymentMethod(paymentMethodSelect.value);
+        
+        paymentMethodSelect.addEventListener('change', function() {
+            console.log('🔄 تم تغيير طريقة الدفع إلى:', this.value);
+            checkPaymentMethod(this.value);
+        });
+    }
+    
+    if (paidAmountInput) {
+        paidAmountInput.addEventListener('input', function() {
+            window.paidAmountModified = true;
+            this.classList.remove('auto-updated');
+            checkCashBalance(this.value);
+            updateRemainingAmount();
+        });
+    }
+}
+
+function updateItemCalculations(item) {
+    const quantityInput = item.querySelector('input[name$="-sold_quantity"]');
+    const priceInput = item.querySelector('input[name$="-unit_price"]');
+    const totalInput = item.querySelector('.item-total');
+    
+    const quantity = parseFloat(quantityInput?.value) || 0;
+    const price = parseFloat(priceInput?.value) || 0;
+    const total = quantity * price;
+    
+    if (totalInput) {
+        totalInput.value = total.toFixed(2);
+    }
+    
+    updateFinancialCalculations();
+}
+
+// ============================================
+// [JS-12] إدارة الأحداث العامة
+// ============================================
+function setupGlobalEvents() {
+    document.getElementById('add-single-item').addEventListener('click', function() {
+        addNewItem();
+        updateItemsCountInput();
+    });
+    
+    document.getElementById('sale-form').addEventListener('submit', function(e) {
+        if (!prepareFormForSubmit(this)) {
+            e.preventDefault();
+        }
+    });
+}
+
+function setupItemsCountInput() {
+    const itemsCountInput = document.getElementById('items-count');
+    
+    if (itemsCountInput) {
+        itemsCountInput.addEventListener('input', function() {
+            const count = parseInt(this.value) || 1;
+            adjustItemCount(count);
+        });
+        
+        setTimeout(() => {
+            updateItemsCountInput();
+        }, 100);
+    }
+}
+
+function adjustItemCount(targetCount) {
+    if (targetCount < 1) targetCount = 1;
+    if (targetCount > 50) targetCount = 50;
+    
+    const currentItems = document.querySelectorAll('.item-row');
+    const currentCount = currentItems.length;
+    
+    if (targetCount === currentCount) return;
+    
+    if (targetCount > currentCount) {
+        const itemsToAdd = targetCount - currentCount;
+        for (let i = 0; i < itemsToAdd; i++) {
+            addNewItem();
+        }
+    } else {
+        const itemsToRemove = currentCount - targetCount;
+        const items = Array.from(currentItems).reverse();
+        
+        for (let i = 0; i < itemsToRemove; i++) {
+            const item = items[i];
+            const itemIndex = item.getAttribute('data-item-index');
+            const productHidden = item.querySelector('input[name$="-product"]');
+            if (productHidden && productHidden.value) {
+                window.usedProductIds.delete(parseInt(productHidden.value));
+            }
+            delete window.barcodeData[itemIndex];
+            
+            const barcodeRow = document.querySelector(`.barcode-row[data-item-index="${itemIndex}"]`);
+            if (barcodeRow) barcodeRow.remove();
+            
+            item.remove();
+        }
+        
+        updateTotalForms();
+        updateItemsNumbers();
+    }
+    
+    updateItemsCountInput();
+}
+
+function updateItemsCountInput() {
+    const itemsCountInput = document.getElementById('items-count');
+    const currentItems = document.querySelectorAll('.item-row').length;
+    if (itemsCountInput) {
+        itemsCountInput.value = currentItems;
+    }
+}
+
+function updateItemsNumbers() {
+    const items = document.querySelectorAll('.item-row');
+    items.forEach((item, index) => {
+        const numberCell = item.querySelector('td:first-child');
+        if (numberCell) {
+            numberCell.textContent = index + 1;
+        }
+    });
+}
+
+function updateTotalForms() {
+    const totalForms = document.getElementById('id_items-TOTAL_FORMS');
+    const forms = document.querySelectorAll('.item-row');
+    totalForms.value = forms.length;
+    
+    const initialForms = document.getElementById('id_items-INITIAL_FORMS');
+    if (initialForms) {
+        initialForms.value = forms.length;
+    }
+}
+
+function setupShippingCompanyEvent() {
+    const shippingCompanySelect = document.getElementById('id_sale_shipping_company');
+    const shippingNumberCol = document.getElementById('shipping-num-col');
+    const notesCol = document.getElementById('notes-col');
+    
+    if (shippingCompanySelect && shippingNumberCol && notesCol) {
+        if (shippingCompanySelect.value) {
+            shippingNumberCol.classList.remove('d-none');
+            shippingNumberCol.classList.add('col-md-3');
+            notesCol.classList.remove('col-12');
+            notesCol.classList.add('col-md-9');
+        } else {
+            shippingNumberCol.classList.add('d-none');
+            shippingNumberCol.classList.remove('col-md-3');
+            notesCol.classList.add('col-12');
+            notesCol.classList.remove('col-md-9');
+        }
+        
+        shippingCompanySelect.addEventListener('change', function() {
+            if (this.value) {
+                shippingNumberCol.classList.remove('d-none');
+                shippingNumberCol.classList.add('col-md-3');
+                notesCol.classList.remove('col-12');
+                notesCol.classList.add('col-md-9');
+            } else {
+                shippingNumberCol.classList.add('d-none');
+                shippingNumberCol.classList.remove('col-md-3');
+                notesCol.classList.add('col-12');
+                notesCol.classList.remove('col-md-9');
+            }
+        });
+    }
+}
+
+function setupBarcodeToggle() {
+    const toggleBtn = document.getElementById('toggle-barcodes-btn');
+    
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', function() {
+            window.barcodesVisible = !window.barcodesVisible;
+            
+            if (window.barcodesVisible) {
+                showAllBarcodes();
+                this.innerHTML = '<i class="fas fa-eye-slash me-1"></i>إخفاء الباركودات';
+                showSuccessMessage('تم إظهار الباركودات');
+            } else {
+                hideAllBarcodes();
+                this.innerHTML = '<i class="fas fa-eye me-1"></i>إظهار الباركودات';
+                showSuccessMessage('تم إخفاء الباركودات');
+            }
+        });
+    }
+}
+
+// ============================================
+// [JS-13] نظام التحقق من صحة النموذج
+// ============================================
+function validateProductSelection() {
+    let hasErrors = false;
+    const items = document.querySelectorAll('.item-row');
+    
+    items.forEach((item, index) => {
+        const productHidden = item.querySelector('input[name$="-product"]');
+        const productSearchInput = item.querySelector('.product-search-input');
+        
+        if (!productHidden.value && productSearchInput.value.trim() === '') {
+            console.log(`❌ البند ${index + 1}: لم يتم اختيار منتج`);
+            hasErrors = true;
+        }
+    });
+    
+    return !hasErrors;
+}
+
+function prepareFormForSubmit(form) {
+    console.log("🔧 تجهيز النموذج للإرسال...");
+    
+    if (!validateProductSelection()) {
+        alert('يرجى اختيار منتج لكل بند من بنود الفاتورة');
+        return false;
+    }
+    
+    const errors = validateForm();
+    if (errors.length > 0) {
+        showFormErrors(errors);
+        return false;
+    }
+    
+    document.querySelectorAll('.item-row').forEach((item, index) => {
+        const productSearchInput = item.querySelector('.product-search-input');
+        const itemNameField = item.querySelector('.item-name-field');
+        const productSearchValue = item.querySelector('.product-search-value');
+        
+        if (productSearchInput && itemNameField) {
+            if (!itemNameField.value && productSearchInput.value.trim()) {
+                itemNameField.value = productSearchInput.value.trim();
+            }
+        }
+        
+        if (productSearchValue && productSearchInput) {
+            productSearchValue.value = productSearchInput.value.trim();
+        }
+    });
+    
+    const financialFields = [
+        { name: 'sale_tax_percentage', value: document.getElementById('tax-percentage').value || '0' },
+        { name: 'sale_discount', value: document.getElementById('invoice-discount').value || '0' },
+        { name: 'sale_addition', value: document.getElementById('invoice-addition').value || '0' }
+    ];
+    
+    const paidAmountContainer = document.getElementById('paid-amount-container');
+    if (paidAmountContainer && paidAmountContainer.classList.contains('show')) {
+        financialFields.push({
+            name: 'paid_amount', 
+            value: document.getElementById('paid-amount').value || '0'
+        });
+    }
+    
+    financialFields.forEach(field => {
+        const existingField = form.querySelector(`input[name="${field.name}"]`);
+        if (!existingField) {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = field.name;
+            input.value = field.value;
+            form.appendChild(input);
+        } else {
+            existingField.value = field.value;
+        }
+    });
+    
+    Object.keys(window.barcodeData).forEach(itemIndex => {
+        if (window.barcodeData[itemIndex] && Array.isArray(window.barcodeData[itemIndex])) {
+            window.barcodeData[itemIndex].forEach((barcode) => {
+                if (barcode && barcode.trim() !== '') {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = `item_${itemIndex}_barcodes`;
+                    input.value = barcode;
+                    form.appendChild(input);
+                }
+            });
+        }
+    });
+    
+    return true;
+}
+
+function validateForm() {
+    const errors = [];
+    
+    const customerHidden = document.getElementById('id_sale_customer');
+    if (!customerHidden || !customerHidden.value) {
+        errors.push('يجب اختيار عميل');
+    }
+    
+    const items = document.querySelectorAll('.item-row');
+    if (items.length === 0) {
+        errors.push('يجب إضافة بند واحد على الأقل');
+    }
+    
+    items.forEach((item, index) => {
+        const productHidden = item.querySelector('input[name$="-product"]');
+        const productSearchInput = item.querySelector('.product-search-input');
+        const quantityInput = item.querySelector('input[name$="-sold_quantity"]');
+        const priceInput = item.querySelector('input[name$="-unit_price"]');
+        
+        if ((!productHidden || !productHidden.value) && (!productSearchInput || !productSearchInput.value)) {
+            errors.push(`البند ${index + 1}: يجب اختيار مادة`);
+        }
+        
+        if (!quantityInput || parseFloat(quantityInput.value) <= 0) {
+            errors.push(`البند ${index + 1}: يجب إدخال كمية صحيحة`);
+        }
+        
+        if (!priceInput || parseFloat(priceInput.value) < 0) {
+            errors.push(`البند ${index + 1}: يجب إدخال سعر صحيح`);
+        }
+    });
+    
+    return errors;
+}
+
+function showFormErrors(errors) {
+    document.querySelectorAll('.form-errors').forEach(el => el.remove());
+    
+    const firstSection = document.querySelector('.items-section');
+    if (firstSection) {
+        const errorContainer = document.createElement('div');
+        errorContainer.className = 'alert alert-danger form-errors';
+        errorContainer.innerHTML = `
+            <h5 class="alert-heading">يوجد أخطاء في النموذج:</h5>
+            <ul class="mb-0">
+                ${errors.map(error => `<li>${error}</li>`).join('')}
+            </ul>
+        `;
+        firstSection.parentNode.insertBefore(errorContainer, firstSection);
+        
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+}
+</script>
+{% endblock %}

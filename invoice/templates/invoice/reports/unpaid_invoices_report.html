@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-danger text-white">
+            <h5 class="mb-0"><i class="fas fa-exclamation-triangle ml-2"></i> تقرير الفواتير غير المسددة (المستحقات)</h5>
+        </div>
+        <div class="card-body">
+            
+            <!-- ملخص الرصيد -->
+            <div class="row text-center mb-4">
+                <div class="col-md-4">
+                    <div class="card border-success h-100">
+                        <div class="card-body">
+                            <h6 class="text-muted">لنا عند العملاء (مبيعات)</h6>
+                            <h3 class="text-success">{{ total_customers_debt|floatformat:2 }}</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-danger h-100">
+                        <div class="card-body">
+                            <h6 class="text-muted">علينا للموردين (مشتريات)</h6>
+                            <h3 class="text-danger">{{ total_suppliers_debt|floatformat:2 }}</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-primary h-100">
+                        <div class="card-body">
+                            <h6 class="text-muted">صافي الرصيد</h6>
+                            <h3 class="{% if net_balance >= 0 %}text-success{% else %}text-danger{% endif %}">
+                                {{ net_balance|floatformat:2 }}
+                            </h3>
+                            <small>{% if net_balance >= 0 %}صافي لصالحنا{% else %}صافي ضدنا{% endif %}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <hr>
+
+            <!-- قسم المبيعات غير المسددة -->
+            <h5 class="text-right mb-3 text-success"><i class="fas fa-arrow-left ml-1"></i> مبيعات غير مسددة (مدينون)</h5>
+            <div class="table-responsive mb-5">
+                <table class="table table-sm table-bordered table-hover">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>رقم الفاتورة</th>
+                            <th>العميل</th>
+                            <th>التاريخ</th>
+                            <th>الإجمالي</th>
+                            <th>المدفوع</th>
+                            <th>المتبقي</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sale in unpaid_sales %}
+                        <tr>
+                            <td><a href="{% url 'invoice:sale_detail' sale.slug %}">{{ sale.uniqueId }}</a></td>
+                            <td>{{ sale.sale_customer }}</td>
+                            <td>{{ sale.sale_date }}</td>
+                            <td>{{ sale.sale_final_total|floatformat:2 }}</td>
+                            <td class="text-success">{{ sale.paid_amount|floatformat:2 }}</td>
+                            <td class="text-danger font-weight-bold">{{ sale.balance_due|floatformat:2 }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="6" class="text-center">لا توجد مبيعات غير مسددة</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- قسم المشتريات غير المسددة -->
+            <h5 class="text-right mb-3 text-danger"><i class="fas fa-arrow-right ml-1"></i> مشتريات غير مسددة (دائنون)</h5>
+            <div class="table-responsive">
+                <table class="table table-sm table-bordered table-hover">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>رقم الفاتورة</th>
+                            <th>المورد</th>
+                            <th>التاريخ</th>
+                            <th>الإجمالي</th>
+                            <th>المدفوع</th>
+                            <th>المتبقي</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for purch in unpaid_purchases %}
+                        <tr>
+                            <td><a href="{% url 'invoice:purch_detail' purch.slug %}">{{ purch.uniqueId }}</a></td>
+                            <td>{{ purch.purch_supplier }}</td>
+                            <td>{{ purch.purch_date }}</td>
+                            <td>{{ purch.purch_final_total|floatformat:2 }}</td>
+                            <td class="text-success">{{ purch.paid_amount|floatformat:2 }}</td>
+                            <td class="text-danger font-weight-bold">
+                                {% widthratio purch.purch_final_total 1 purch.paid_amount as balance %}
+                                {{ balance|floatformat:2 }}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="6" class="text-center">لا توجد مشتريات غير مسددة</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
