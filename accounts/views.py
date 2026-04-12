@@ -38,25 +38,19 @@ from django.core.cache import cache
 # ============================================
 
 def index(request):
-    """
-    الصفحة الرئيسية:
-    - إذا كان المستخدم مسجلاً دخوله، نعرض لوحة التحكم.
-    - إذا كان زائرًا، نوجهه مباشرة إلى صفحة تسجيل الدخول.
-    """
     if request.user.is_authenticated:
-        # ===== فخ تغيير كلمة المرور =====
+        # ===== تجهيز معلومة الشاشة الحمراء =====
+        show_force_change = False
         if request.user.check_password('Admin@123456'):
             request.session['force_change'] = True
-            return redirect('accounts:force_password_change')
-        # ==================================
+            show_force_change = True
+        elif request.session.get('force_change'):
+            show_force_change = True
+        # ==========================================
         
-        # المستخدم مسجل دخوله، اعرض لوحة التحكم
-        return render(request, 'accounts/dashboard.html')
+        return render(request, 'accounts/dashboard.html', {'show_force_change': show_force_change})
     else:
-        # الزائر، وجهه مباشرة إلى صفحة تسجيل الدخول
         return redirect('accounts:login')
-
-
 
 # ============================================
 # صفحة الشروط والأحكام (عرض ثابت)
