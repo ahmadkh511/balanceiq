@@ -2,6 +2,20 @@ from django.contrib import admin
 from django.urls import path, include
 from accounts import views as accounts_views
 
+import os
+from django.core.management import call_command
+
+# إنشاء الجداول تلقائياً على السيرفر إذا لم تكن موجودة
+if os.environ.get('RENDER'):
+    if not os.path.exists('db.sqlite3'):
+        call_command('migrate', '--run-syncdb')
+        call_command('createsuperuser', '--noinput', username='admin', email='admin@admin.com')
+
+
+
+
+
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
