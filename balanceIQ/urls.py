@@ -5,12 +5,19 @@ from accounts import views as accounts_views
 import os
 from django.core.management import call_command
 
-# إنشاء الجداول تلقائياً على السيرفر إذا لم تكن موجودة
+import os
+from django.core.management import call_command
+from django.contrib.auth import get_user_model
+
+# إنشاء الجداول والمستخدم تلقائياً على السيرفر
 if os.environ.get('RENDER'):
     if not os.path.exists('db.sqlite3'):
         call_command('migrate', '--run-syncdb')
-        call_command('createsuperuser', '--noinput', username='admin', email='admin@admin.com')
-
+        
+        # إنشاء المستخدم مع كلمة مرور صريحة
+        User = get_user_model()
+        if not User.objects.filter(username='admin').exists():
+            user = User.objects.create_superuser(username='admin', email='admin@admin.com', password='Admin@123456')
 
 
 
