@@ -69,6 +69,7 @@ urlpatterns = [
 
     path('profile/', views.profile_view, name='profile'),
     
+    
     # === مسارات تغيير كلمة المرور (الأسلوب الموصى به) ===
     path('change-password/', 
          auth_views.PasswordChangeView.as_view(
