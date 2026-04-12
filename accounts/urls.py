@@ -91,7 +91,7 @@ urlpatterns = [
 
     path('company-settings/', views.company_settings_view, name='company_settings'),
 
-    path('force-change-password/', views.force_password_change, name='force_password_change'),
+    #path('force-change-password/', views.force_password_change, name='force_password_change'),
 
 
 ]

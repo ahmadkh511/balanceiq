@@ -431,26 +431,3 @@ def company_settings_view(request):
 
 
 
-
-# اجبار المدير  على تغير كلمة المرور لاول مرة 
-from django.shortcuts import redirect, render
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth import update_session_auth_hash
-
-@login_required
-def force_password_change(request):
-    if request.method == 'POST':
-        pass1 = request.POST.get('new_password1')
-        pass2 = request.POST.get('new_password2')
-        
-        if pass1 == pass2 and len(pass1) >= 8:
-            request.user.set_password(pass1)
-            request.user.save()
-            update_session_auth_hash(request, request.user) # يبقيك مسجل دخول بعد التغيير
-            request.session['force_change'] = False # إيقاف التنبيه
-            return redirect('accounts:index')  # عدّل هذا السطر فقط داخل الدالة
-        else:
-            error = "كلمتا المرور غير متطابقتين أو أقل من 8 أحرف."
-            return render(request, 'accounts/force_password_change.html', {'error': error})
-            
-    return render(request, 'accounts/force_password_change.html')
