@@ -1081,5 +1081,20 @@
     {% block extra_js %}{% endblock %}
 
 
+
+    {% if show_force_change %}
+<div style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(220, 53, 69, 0.95); z-index: 9999999; display: flex; justify-content: center; align-items: center;">
+    <div style="background: #fff; padding: 40px; border-radius: 15px; max-width: 500px; width: 90%; text-align: center; box-shadow: 0 0 30px #000;">
+        <h2 style="color: #dc3545; margin-bottom: 20px;">⚠️ تنبيه أمني خطير!</h2>
+        <p style="margin: 20px 0; font-size: 1.2rem;">كلمة مرورك لا تزال مؤقتة. يجب تغييرها الآن لاستخدام النظام.</p>
+        
+        <a href="/accounts/password_change/" class="btn btn-danger btn-lg w-100 mt-3">تغيير كلمة المرور الآن</button>
+    </a>
+    </div>
+</div>
+{% endif %}
+
+
+
 </body>
 </html>

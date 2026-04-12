@@ -37,20 +37,19 @@ from django.core.cache import cache
 # الصفحة الرئيسية (index)
 # ============================================
 
+
 def index(request):
     if request.user.is_authenticated:
-        # ===== تجهيز معلومة الشاشة الحمراء =====
+        # ===== إعداد متغير الشاشة الحمراء =====
         show_force_change = False
         if request.user.check_password('Admin@123456'):
-            request.session['force_change'] = True
-            show_force_change = True
-        elif request.session.get('force_change'):
             show_force_change = True
         # ==========================================
         
         return render(request, 'accounts/dashboard.html', {'show_force_change': show_force_change})
     else:
         return redirect('accounts:login')
+
 
 # ============================================
 # صفحة الشروط والأحكام (عرض ثابت)
