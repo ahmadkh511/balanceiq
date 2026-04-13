@@ -240,6 +240,31 @@ class CompanySettings(models.Model):
     feature_inventory = models.URLField(blank=True, null=True, verbose_name="رابط إدارة المخزون")
     feature_reports = models.URLField(blank=True, null=True, verbose_name="رابط التقارير الذكية")
     
+    # ==========  إعدادات الواتس أب ==========
+    whatsapp_number = models.CharField(max_length=20, blank=True, null=True, verbose_name="رقم الواتساب (مع رمز الدولة، مثال: 966501234567)")
+    whatsapp_message = models.CharField(max_length=255, blank=True, null=True, default="مرحباً، أتواصل معكم من المتجر، كيف يمكنكم مساعدتي؟", verbose_name="رسالة واتساب التلقائية")
+
+
+
+    # ==========================================
+    # إعدادات دمج الفيسبوك (Facebook Integration)
+    # ==========================================
+    fb_page_id = models.CharField(
+        max_length=100, 
+        blank=True, 
+        null=True, 
+        verbose_name="معرف صفحة الفيسبوك (Page ID)",
+        help_text="أدخل رقم المعرف الخاص بصفحتك على فيسبوك فقط."
+    )
+    
+    fb_access_token = models.CharField(
+        max_length=500, 
+        blank=True, 
+        null=True, 
+        verbose_name="رمز الوصول الدائم (Access Token)",
+        help_text="أدخل الرمز الذي تحصل عليه من موقع مطوري فيسبوك (Developers Facebook). تنبيه: هذا الرمز سري، لا تشاركه مع أحد."
+    )
+
     # ========== حقول إضافية ==========
     updated_at = models.DateTimeField(auto_now=True, verbose_name="آخر تحديث")
     

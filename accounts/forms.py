@@ -275,8 +275,6 @@ class CustomPasswordResetForm(PasswordResetForm):
 from .models import CompanySettings
 
 
-
-
 class CompanySettingsForm(forms.ModelForm):
     class Meta:
         model = CompanySettings
@@ -306,6 +304,14 @@ class CompanySettingsForm(forms.ModelForm):
             'feature_invoices': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://example.com/invoices'}),
             'feature_inventory': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://example.com/inventory'}),
             'feature_reports': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://example.com/reports'}),
+            
+            # ========== الحقول الجديدة (واتساب الدعم الفني) ==========
+            'whatsapp_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '966501234567'}),
+            'whatsapp_message': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'مرحباً، أتواصل معكم من المتجر، كيف يمكنكم مساعدتي؟'}),
+            
+            # ========== الحقول الجديدة (دمج الفيسبوك) ==========
+            'fb_page_id': forms.TextInput(attrs={'class': 'form-control', 'dir': 'ltr', 'placeholder': 'مثال: 123456789012345'}),
+            'fb_access_token': forms.TextInput(attrs={'class': 'form-control', 'dir': 'ltr', 'placeholder': 'مثال: EAAxxxxxxxxxxxxx...'}),
         }
         labels = {
             # الحقول الموجودة سابقاً
@@ -323,13 +329,19 @@ class CompanySettingsForm(forms.ModelForm):
             'footer_contact_title': 'عنوان التواصل',
             'footer_copyright_text': 'نص حقوق النشر',
             
-            # الحقول الجديدة
+            # الحقول الجديدة (روابط)
             'quick_link_support': 'رابط الدعم الفني',
             'quick_link_guide': 'رابط دليل الاستخدام',
             'quick_link_faq': 'رابط الأسئلة الشائعة',
             'feature_invoices': 'رابط إدارة الفواتير',
             'feature_inventory': 'رابط إدارة المخزون',
             'feature_reports': 'رابط التقارير الذكية',
+            
+            # الحقول الجديدة (واتساب)
+            'whatsapp_number': 'رقم الواتساب (مع رمز الدولة)',
+            'whatsapp_message': 'رسالة واتساب التلقائية',
+            
+            # الحقول الجديدة (فيسبوك)
+            'fb_page_id': 'معرف صفحة الفيسبوك (Page ID)',
+            'fb_access_token': 'رمز الوصول لفيسبوك (Access Token)',
         }
-
-
