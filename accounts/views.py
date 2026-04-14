@@ -62,15 +62,76 @@ class TermsView(TemplateView):
 # لوحة التحكم (dashboard)
 # ============================================
 
+
+import requests
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+
+# ==========================================
+# استيراد CompanySettings من نفس التطبيق (accounts)
+# ==========================================
+from .models import CompanySettings
+
 @login_required
 def dashboard(request):
-    """عرض لوحة التحكم الرئيسية (محمية بتسجيل الدخول)"""
+    """عرض لوحة التحكم الرئيسية مع تعليقات الفيسبوك"""
+    
     # ===== فخ تغيير كلمة المرور =====
     if request.session.get('force_change'):
         return redirect('accounts:force_password_change')
     # ==================================
     
-    return render(request, 'accounts/dashboard.html')
+    # --- 1. جلب إعدادات الشركة ---
+    settings = CompanySettings.get_settings()
+    
+    # --- 2. جلب تعليقات الفيسبوك (التركيز هنا) ---
+    fb_comments = []
+    
+    # نتأكد من وجود معرف الصفحة والرمز
+    if settings.fb_page_id and settings.fb_access_token:
+        try:
+            # رابط API فيسبوك
+            url = f"https://graph.facebook.com/v18.0/{settings.fb_page_id}/feed"
+            params = {
+                'fields': 'from{name,picture},message,created_time,permalink_url',
+                'access_token': settings.fb_access_token,
+                'limit': 5 # عرض آخر 5 تعليقات/منشورات
+            }
+            response = requests.get(url, params=params)
+            
+            if response.status_code == 200:
+                data = response.json()
+                # استخراج البيانات
+                for post in data.get('data', []):
+                    # نتأكد أن المنشور يحتوي على نص (ليس مجرد صورة)
+                    if 'message' in post:
+                        fb_comments.append(post)
+            else:
+                # طباعة الخطأ في السيرفر للمساعدة في التصحيح لاحقاً
+                print(f"Facebook Error: {response.status_code} - {response.text}")
+                
+        except Exception as e:
+            print(f"Connection Error: {e}")
+
+    # --- 3. إعداد المتغيرات للإحصائيات (كما كانت أو قيم افتراضية) ---
+    # ملاحظة: لم ألمس هذا الجزء بناءً على طلبك للتركيز على الفيسبوك فقط
+    context_stats = {
+        'purch_count': 0, # يمكنك وضع الأكواد الحقيقية للاحصائيات هنا لاحقاً
+        'sale_count': 0,
+        'return_count': 0,
+        'product_count': 0,
+        'new_orders_count': 0,
+    }
+
+    # --- 4. دمج كل شيء وإرساله للقالب ---
+    context = {
+        'user': request.user,
+        'settings': settings,           # لإرسال إعدادات الشركة (اسم الشركة، الفيسبوك..)
+        'fb_comments': fb_comments,     # تعليقات الفيسبوك الحية
+        **context_stats,                # دمج الإحصائيات (الصفرية حالياً)
+    }
+    
+    return render(request, 'accounts/dashboard.html', context)
 
 # ============================================
 # رفع شعار الشركة (API endpoint)
