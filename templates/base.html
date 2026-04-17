@@ -188,12 +188,15 @@
 
         #navbarSupportedContent>ul>li { z-index: 1; }
 
-        /* ===== القوائم المنسدلة ===== */
+        /* ===== القوائم المنسدلة (تعديل التمركز) ===== */
         .menu-submenu {
             position: absolute;
             top: 100%;
-            right: 0;
-            min-width: 240px; /* زيادة العرض قليلاً */
+            /* التعديل: جعل القائمة في المنتصف تماماً */
+            right: 50%;
+            transform: translateX(50%);
+            
+            min-width: 240px;
             background: white;
             border-radius: 0 0 4px 4px;
             box-shadow: var(--shadow-md);
@@ -202,15 +205,20 @@
             padding: 6px 0;
             opacity: 0;
             visibility: hidden;
-            transform: translateY(-6px);
+            /* تعديل التحريك ليكون من الأعلى للأسفل فقط */
+            transform-origin: top center; 
+            transform: translateX(50%) translateY(-6px);
             transition: all 0.25s ease;
             z-index: 1060;
             max-height: 80vh;
             overflow-y: auto;
+            text-align: right;
         }
 
         #navbarSupportedContent li.has-submenu:hover>.menu-submenu {
-            opacity: 1; visibility: visible; transform: translateY(0);
+            opacity: 1; 
+            visibility: visible; 
+            transform: translateX(50%) translateY(0);
         }
 
         .menu-submenu li { float: none !important; }
@@ -310,7 +318,10 @@
         .user-dropdown-menu {
             position: absolute;
             top: calc(100% + 10px);
-            left: 0;
+            /* التعديل: جعل القائمة في المنتصف بالنسبة للزر */
+            left: 50%;
+            transform: translateX(-50%);
+            
             min-width: 230px;
             background: white;
             border-radius: 4px;
@@ -318,12 +329,18 @@
             border: 1px solid var(--aqua-2);
             padding: 0;
             opacity: 0; visibility: hidden;
-            transform: scale(0.95) translateY(-4px);
+            /* إضافة transform للانيميشن */
+            transform-origin: top center;
+            transform: translateX(-50%) scale(0.95) translateY(-4px);
             transition: all 0.2s ease;
             z-index: 1070;
             overflow: hidden;
         }
-        .user-dropdown-menu.show { opacity: 1; visibility: visible; transform: scale(1) translateY(0); }
+        .user-dropdown-menu.show { 
+            opacity: 1; 
+            visibility: visible; 
+            transform: translateX(-50%) scale(1) translateY(0); 
+        }
 
         .user-dropdown-menu .ud-header {
             padding: 12px 16px;
@@ -708,7 +725,7 @@
                             <a href="#"><i class="fas fa-wallet nav-icon"></i>الصندوق</a>
                             <ul class="menu-submenu">
                                
-                                <li class="{% if request.resolver_match.url_name == 'cash_transaction_list' %}sub-active{% endif %}"><a href="{% url 'invoice:cash_transaction_list' %}"><i class="fas fa-exchange-alt"></i>معاملات الصندوق</a></li>
+                                <li class="{% if request.resolver_match.url_name == 'cash_transaction_list' %}sub-active{% endif %}"><a href="{% url 'invoice:cash_transaction_list' %}"><i class="fas fa-exchange-alt"></i>حركة الصندوق </a></li>
                                 <li class="{% if request.resolver_match.url_name == 'cash_transaction_create' %}sub-active{% endif %}"><a href="{% url 'invoice:cash_transaction_create' %}"><i class="fas fa-hand-holding-usd"></i>حركة مالية</a></li>
                             </ul>
                         </li>
@@ -861,17 +878,28 @@
                     <li class="sidebar-item"><a href="{% url 'invoice:control_store' %}" class="sidebar-link"><i class="fas fa-sliders-h sidebar-icon"></i><span class="sidebar-text">إدارة المتجر  </span></a></li>
                     <li class="sidebar-item"><a href="{% url 'invoice:store_front' %}" class="sidebar-link" target="_blank"><i class="fas fa-external-link-alt sidebar-icon"></i><span class="sidebar-text">واجهة المتجر</span></a></li>
                     <li class="sidebar-item"><a href="{% url 'invoice:checkout' %}" class="sidebar-link"><i class="fas fa-credit-card sidebar-icon"></i><span class="sidebar-text">صفحة الدفع</span></a></li>
+
+                    <li class="sidebar-item">
+                        <a href="{% url 'invoice:cart_detail' %}" class="sidebar-link">
+                            <i class="fas fa-shopping-cart sidebar-icon"></i><span class="sidebar-text">سلة التسوق</span>
+                            {% if cart_count > 0 %}
+                            <span class="sidebar-cart-count">{{ cart_count }}</span>
+                            {% endif %}
+                        </a>
+                    </li>
+
+
                 </ul>
+
+                
+
+
+
+
+
             </li>
 
-            <li class="sidebar-item">
-                <a href="{% url 'invoice:cart_detail' %}" class="sidebar-link">
-                    <i class="fas fa-shopping-cart sidebar-icon"></i><span class="sidebar-text">سلة التسوق</span>
-                    {% if cart_count > 0 %}
-                    <span class="sidebar-cart-count">{{ cart_count }}</span>
-                    {% endif %}
-                </a>
-            </li>
+           
 
             <li class="sidebar-item has-dropdown {% if 'cash' in request.resolver_match.url_name %}active{% endif %}">
                 <a href="#" class="sidebar-link">
@@ -880,7 +908,7 @@
                 </a>
                 <ul class="sidebar-dropdown">
                 
-                    <li class="sidebar-item"><a href="{% url 'invoice:cash_transaction_list' %}" class="sidebar-link"><i class="fas fa-exchange-alt sidebar-icon"></i><span class="sidebar-text">معاملات الصندوق</span></a></li>
+                    <li class="sidebar-item"><a href="{% url 'invoice:cash_transaction_list' %}" class="sidebar-link"><i class="fas fa-exchange-alt sidebar-icon"></i><span class="sidebar-text">حركة الصندوق </span></a></li>
                     <li class="sidebar-item"><a href="{% url 'invoice:cash_transaction_create' %}" class="sidebar-link"><i class="fas fa-hand-holding-usd sidebar-icon"></i><span class="sidebar-text">حركة مالية</span></a></li>
                 </ul>
             </li>
@@ -1268,4 +1296,4 @@
 {% endif %}
 
 </body>
-</html>
+</html>100/100
