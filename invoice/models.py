@@ -388,7 +388,7 @@ class Product(models.Model):
         unique=True, 
         blank=True, 
         null=True, 
-        verbose_name=_("الباركود الأساسي"),
+        verbose_name=_("الباركودالأساسي"),
         help_text=_("ادخل الرمز الشريطي الرئيسي للمنتج")
     )
 
