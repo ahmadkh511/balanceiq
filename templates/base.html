@@ -663,13 +663,13 @@
                         <li class="{% if request.resolver_match.url_name == 'index' %}active{% endif %}">
                             <a href="{% url 'index' %}"><i class="fas fa-home nav-icon"></i>الرئيسية</a>
                         </li>
-                        <li class="has-submenu {% if 'invoice' in request.resolver_match.url_name or 'purch' in request.resolver_match.url_name %}active{% endif %}">
+                        <li class="has-submenu {% if 'invoice' in request.resolver_match.url_name or 'purch' in request.resolver_match.url_name or 'sale' in request.resolver_match.url_name %}active{% endif %}">
                             <a href="#"><i class="fas fa-file-invoice nav-icon"></i>الفواتير</a>
                             <ul class="menu-submenu">
                                 <li class="{% if request.resolver_match.url_name == 'purch_create' %}sub-active{% endif %}"><a href="{% url 'invoice:purch_create' %}"><i class="fas fa-plus-circle"></i>إنشاء فاتورة شراء</a></li>
                                 <li class="{% if request.resolver_match.url_name == 'purch_list' %}sub-active{% endif %}"><a href="{% url 'invoice:purch_list' %}"><i class="fas fa-list"></i>قائمة فواتير المشتريات</a></li>
-                                <li><a href="#"><i class="fas fa-plus-circle"></i>إنشاء فاتورة بيع</a></li>
-                                <li><a href="#"><i class="fas fa-list"></i>قائمة فواتير المبيعات</a></li>
+                                <li class="{% if request.resolver_match.url_name == 'sale_create' %}sub-active{% endif %}"><a href="{% url 'invoice:sale_create' %}"><i class="fas fa-plus-circle"></i>إنشاء فاتورة بيع</a></li>
+                                <li class="{% if request.resolver_match.url_name == 'sale_list' %}sub-active{% endif %}"><a href="{% url 'invoice:sale_list' %}"><i class="fas fa-list"></i>قائمة فواتير المبيعات</a></li>
                                 <li class="{% if request.resolver_match.url_name == 'purchase_return_list' %}sub-active{% endif %}"><a href="{% url 'invoice:purchase_return_list' %}"><i class="fas fa-undo"></i>مرتجعات المشتريات</a></li>
                             </ul>
                         </li>
@@ -701,13 +701,13 @@
                                 <li class="{% if request.resolver_match.url_name == 'price_type_list' %}sub-active{% endif %}"><a href="{% url 'invoice:price_type_list' %}"><i class="fas fa-tags"></i>أنواع الأسعار</a></li>
                             </ul>
                         </li>
-                        <li><a href="#"><i class="fas fa-chart-bar nav-icon"></i>التقارير</a></li>
+                        <li class="{% if 'profit_report' in request.resolver_match.url_name or 'statement_report' in request.resolver_match.url_name %}active{% endif %}"><a href="{% url 'invoice:profit_report' %}"><i class="fas fa-chart-bar nav-icon"></i>التقارير</a></li>
                     </ul>
                 </div>
             </div>
 
             <div class="navbar-left-section">
-                <a href="/invoice/cart/" id="cartBtn" class="nav-action-btn tw-hidden sm:tw-inline-flex" title="سلة التسوق">
+                <a href="{% url 'invoice:cart_detail' %}" id="cartBtn" class="nav-action-btn tw-hidden sm:tw-inline-flex" title="سلة التسوق">
                     <i class="fas fa-shopping-cart"></i>
                     {% if cart_count > 0 %}
                     <span class="nav-badge green">{{ cart_count }}</span>
@@ -741,8 +741,8 @@
                             {% if user.is_superuser %}
                             <a href="{% url 'accounts:company_settings' %}"><i class="fas fa-building"></i>إعدادات الشركة</a>
                             {% endif %}
-                            <a href="#"><i class="fas fa-cog"></i>الإعدادات</a>
-                            <a href="#"><i class="fas fa-bell"></i>الإشعارات</a>
+                            <a href="{% url 'accounts:company_settings' %}"><i class="fas fa-cog"></i>الإعدادات العامة</a>
+                            <a href="{% url 'invoice:admin_stock_notifications' %}"><i class="fas fa-bell"></i>الإشعارات</a>
                             <hr>
                             <form action="{% url 'accounts:logout' %}" method="post">
                                 {% csrf_token %}
@@ -768,7 +768,7 @@
                     <i class="fas fa-home sidebar-icon"></i><span class="sidebar-text">الرئيسية</span>
                 </a>
             </li>
-            <li class="sidebar-item has-dropdown {% if 'invoice' in request.resolver_match.url_name or 'purch' in request.resolver_match.url_name %}active{% endif %}">
+            <li class="sidebar-item has-dropdown {% if 'invoice' in request.resolver_match.url_name or 'purch' in request.resolver_match.url_name or 'sale' in request.resolver_match.url_name %}active{% endif %}">
                 <a href="#" class="sidebar-link">
                     <i class="fas fa-file-invoice sidebar-icon"></i><span class="sidebar-text">الفواتير</span>
                     <i class="fas fa-chevron-left sidebar-arrow"></i>
@@ -776,8 +776,8 @@
                 <ul class="sidebar-dropdown">
                     <li class="sidebar-item"><a href="{% url 'invoice:purch_create' %}" class="sidebar-link"><i class="fas fa-plus-circle sidebar-icon"></i><span class="sidebar-text">إنشاء فاتورة شراء</span></a></li>
                     <li class="sidebar-item"><a href="{% url 'invoice:purch_list' %}" class="sidebar-link"><i class="fas fa-list sidebar-icon"></i><span class="sidebar-text">قائمة فواتير المشتريات</span></a></li>
-                    <li class="sidebar-item"><a href="#" class="sidebar-link"><i class="fas fa-plus-circle sidebar-icon"></i><span class="sidebar-text">إنشاء فاتورة بيع</span></a></li>
-                    <li class="sidebar-item"><a href="#" class="sidebar-link"><i class="fas fa-list sidebar-icon"></i><span class="sidebar-text">قائمة فواتير المبيعات</span></a></li>
+                    <li class="sidebar-item"><a href="{% url 'invoice:sale_create' %}" class="sidebar-link"><i class="fas fa-plus-circle sidebar-icon"></i><span class="sidebar-text">إنشاء فاتورة بيع</span></a></li>
+                    <li class="sidebar-item"><a href="{% url 'invoice:sale_list' %}" class="sidebar-link"><i class="fas fa-list sidebar-icon"></i><span class="sidebar-text">قائمة فواتير المبيعات</span></a></li>
                     <li class="sidebar-item"><a href="{% url 'invoice:purchase_return_list' %}" class="sidebar-link"><i class="fas fa-undo sidebar-icon"></i><span class="sidebar-text">مرتجعات المشتريات</span></a></li>
                 </ul>
             </li>
@@ -787,7 +787,7 @@
                 </a>
             </li>
             <li class="sidebar-item">
-                <a href="/invoice/cart/" class="sidebar-link">
+                <a href="{% url 'invoice:cart_detail' %}" class="sidebar-link">
                     <i class="fas fa-shopping-cart sidebar-icon"></i><span class="sidebar-text">سلة التسوق</span>
                     {% if cart_count > 0 %}
                     <span class="sidebar-cart-count">{{ cart_count }}</span>
@@ -833,7 +833,7 @@
                 </a>
             </li>
             <li class="sidebar-item">
-                <a href="#" class="sidebar-link">
+                <a href="{% url 'invoice:profit_report' %}" class="sidebar-link {% if 'profit_report' in request.resolver_match.url_name or 'statement_report' in request.resolver_match.url_name %}active{% endif %}">
                     <i class="fas fa-chart-bar sidebar-icon"></i><span class="sidebar-text">التقارير</span>
                 </a>
             </li>
