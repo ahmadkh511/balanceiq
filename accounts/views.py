@@ -37,68 +37,38 @@ from django.core.cache import cache
 # الصفحة الرئيسية (index)
 # ============================================
 
-
 def index(request):
-    if request.user.is_authenticated:
-        # ===== إعداد متغير الشاشة الحمراء =====
-        show_force_change = False
-        if request.user.check_password('Admin@123456'):
-            show_force_change = True
-        # ==========================================
-        
-        return render(request, 'accounts/dashboard.html', {'show_force_change': show_force_change})
-    else:
+    """الصفحة الرئيسية - لوحة التحكم الكاملة مع جميع الإحصائيات والرسوم البيانية وأفضل المنتجات"""
+    
+    # ===== التحقق من تسجيل الدخول =====
+    if not request.user.is_authenticated:
         return redirect('accounts:login')
-
-
-# ============================================
-# صفحة الشروط والأحكام (عرض ثابت)
-# ============================================
-class TermsView(TemplateView):
-    """عرض صفحة الشروط والأحكام"""
-    template_name = 'accounts/terms.html'
-
-# ============================================
-# لوحة التحكم (dashboard)
-# ============================================
-
-
-import requests
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
-
-# ==========================================
-# استيراد CompanySettings من نفس التطبيق (accounts)
-# ==========================================
-from .models import CompanySettings
-
-
-# أضف هذه الاستيرادات مع باقي الاستيرادات في أعلى الملف
-from invoice.models import (
-    Purch, Sale, SaleReturn, PurchaseReturn, 
-    Product, WebsiteOrder
-)
-from django.utils import timezone
-from datetime import timedelta
-from decimal import Decimal
-from django.db.models import Sum
-from django.urls import reverse
-
-
-@login_required
-def dashboard(request):
-    """لوحة التحكم الرئيسية - إحصائيات ديناميكية من تطبيق invoice"""
+    
+    # ===== إعداد متغير الشاشة الحمراء (تغيير كلمة المرور الافتراضية) =====
+    show_force_change = False
+    if request.user.check_password('Admin@123456'):
+        show_force_change = True
     
     # فخ تغيير كلمة المرور
     if request.session.get('force_change'):
         return redirect('accounts:force_password_change')
     
-    # جلب إعدادات الشركة
+    # ===== الاستيرادات اللازمة =====
+    from datetime import timedelta, date
+    from decimal import Decimal
+    from django.db.models import Sum, Q, F
+    from django.urls import reverse
+    from django.utils import timezone
+    from invoice.models import (
+        Purch, Sale, SaleReturn, PurchaseReturn, 
+        Product, WebsiteOrder, SaleItem, CashTransaction
+    )
+    from accounts.models import CompanySettings
+    
+    # ===== جلب إعدادات الشركة =====
     settings = CompanySettings.get_settings()
     
-    # ============================================
-    # حساب الفترات الزمنية
-    # ============================================
+    # ===== حساب الفترات الزمنية =====
     today = timezone.now().date()
     thirty_days_ago = today - timedelta(days=30)
     sixty_days_ago = thirty_days_ago - timedelta(days=30)
@@ -113,7 +83,7 @@ def dashboard(request):
         return round(change, 1)
     
     # ============================================
-    # 1. إحصائيات فواتير الشراء (من تطبيق invoice)
+    # 1. إحصائيات فواتير الشراء
     # ============================================
     current_purch = Purch.objects.filter(purch_date__gte=thirty_days_ago).count()
     previous_purch = Purch.objects.filter(
@@ -123,7 +93,7 @@ def dashboard(request):
     purch_trend = calc_trend(current_purch, previous_purch)
     
     # ============================================
-    # 2. إحصائيات فواتير البيع (من تطبيق invoice)
+    # 2. إحصائيات فواتير البيع
     # ============================================
     current_sale = Sale.objects.filter(sale_date__gte=thirty_days_ago).count()
     previous_sale = Sale.objects.filter(
@@ -133,7 +103,7 @@ def dashboard(request):
     sale_trend = calc_trend(current_sale, previous_sale)
     
     # ============================================
-    # 3. إحصائيات المرتجعات (من تطبيق invoice)
+    # 3. إحصائيات المرتجعات
     # ============================================
     current_return = (
         SaleReturn.objects.filter(return_date__gte=thirty_days_ago).count() +
@@ -152,12 +122,12 @@ def dashboard(request):
     return_trend = calc_trend(current_return, previous_return, reverse=True)
     
     # ============================================
-    # 4. عدد المنتجات (من تطبيق invoice)
+    # 4. عدد المنتجات
     # ============================================
     product_count = Product.objects.count()
     
     # ============================================
-    # 5. طلبات المتجر الجديدة (من تطبيق invoice)
+    # 5. طلبات المتجر الجديدة
     # ============================================
     new_orders_count = WebsiteOrder.objects.filter(status='new').count()
     
@@ -181,7 +151,120 @@ def dashboard(request):
         chart_values.append(float(daily_total))
     
     # ============================================
-    # 7. تنبيهات النظام (من تطبيق invoice)
+    # 7. الرسم البياني المتكامل (آخر 30 يوماً)
+    # ============================================
+    def get_advanced_chart_data(days=30):
+        """جلب بيانات متكاملة للرسم البياني"""
+        adv_labels = []
+        sales_data = []
+        profit_data = []
+        expenses_data = []
+        
+        for i in range(days - 1, -1, -1):
+            target_date = today - timedelta(days=i)
+            adv_labels.append(weekday_names.get(target_date.weekday(), str(target_date)))
+            
+            # المبيعات اليومية
+            daily_sales = Sale.objects.filter(
+                sale_date=target_date
+            ).aggregate(total=Sum('sale_final_total'))['total'] or Decimal('0.00')
+            sales_data.append(float(daily_sales))
+            
+            # تكلفة البضاعة المباعة (COGS)
+            daily_sale_items = SaleItem.objects.filter(
+                sale__sale_date=target_date
+            ).select_related('product')
+            
+            daily_cogs = Decimal('0.00')
+            for item in daily_sale_items:
+                if item.product:
+                    cost_price = item.product.average_purchase_cost or item.product.purch_price or Decimal('0.00')
+                    daily_cogs += item.sold_quantity * cost_price
+            
+            # صافي الربح = المبيعات - التكلفة
+            daily_profit = daily_sales - daily_cogs
+            profit_data.append(float(daily_profit))
+            
+            # المصروفات اليومية
+            daily_expenses = CashTransaction.objects.filter(
+                transaction_date__date=target_date,
+                transaction_type__in=['expense', 'withdrawal']
+            ).aggregate(total=Sum('amount_out'))['total'] or Decimal('0.00')
+            expenses_data.append(float(daily_expenses))
+        
+        return {
+            'labels': adv_labels,
+            'sales': sales_data,
+            'profit': profit_data,
+            'expenses': expenses_data,
+        }
+    
+    advanced_chart_data = get_advanced_chart_data(days=30)
+    
+    # ============================================
+    # 8. أفضل المنتجات مبيعاً (Top Products)
+    # ============================================
+    def get_top_products(limit=10):
+        """جلب أفضل المنتجات مبيعاً من حيث الكمية والقيمة"""
+        
+        # أفضل المنتجات من حيث الكمية المباعة
+        top_by_quantity = SaleItem.objects.filter(
+            product__isnull=False
+        ).values(
+            'product__id',
+            'product__product_name',
+            'product__product_image'
+        ).annotate(
+            total_quantity=Sum('sold_quantity'),
+            total_value=Sum(F('sold_quantity') * F('unit_price'))
+        ).filter(
+            total_quantity__gt=0
+        ).order_by('-total_quantity')[:limit]
+        
+        # أفضل المنتجات من حيث القيمة المالية
+        top_by_value = SaleItem.objects.filter(
+            product__isnull=False
+        ).values(
+            'product__id',
+            'product__product_name',
+            'product__product_image'
+        ).annotate(
+            total_value=Sum(F('sold_quantity') * F('unit_price')),
+            total_quantity=Sum('sold_quantity')
+        ).filter(
+            total_value__gt=0
+        ).order_by('-total_value')[:limit]
+        
+        # تنسيق البيانات للعرض (نسخة آمنة)
+        def format_product(item):
+            # معالجة الصورة بشكل آمن
+            image_field = item.get('product__product_image')
+            image_url = None
+            if image_field:
+                if hasattr(image_field, 'url'):
+                    image_url = image_field.url
+                elif isinstance(image_field, str):
+                    image_url = image_field
+                else:
+                    image_url = None
+            
+            return {
+                'id': item['product__id'],
+                'name': item['product__product_name'],
+                'quantity': float(item['total_quantity']),
+                'value': float(item['total_value']),
+                'image': image_url,
+            }
+        
+        return {
+            'top_by_quantity': [format_product(item) for item in top_by_quantity],
+            'top_by_value': [format_product(item) for item in top_by_value],
+        }
+    
+    top_products = get_top_products(limit=10)
+    
+    # ============================================
+    # 9. تنبيهات النظام
     # ============================================
     alerts = []
     
@@ -243,7 +326,7 @@ def dashboard(request):
         })
     
     # ============================================
-    # 8. تعليقات الفيسبوك (اختياري)
+    # 10. تعليقات الفيسبوك
     # ============================================
     fb_comments = []
     if settings.fb_page_id and settings.fb_access_token:
@@ -271,7 +354,8 @@ def dashboard(request):
         'user': request.user,
         'settings': settings,
         'fb_comments': fb_comments,
-        # الإحصائيات
+        'show_force_change': show_force_change,
+        # الإحصائيات الأساسية
         'purch_count': current_purch,
         'purch_trend': purch_trend,
         'sale_count': current_sale,
@@ -280,15 +364,65 @@ def dashboard(request):
         'return_trend': return_trend,
         'product_count': product_count,
         'new_orders_count': new_orders_count,
-        # الرسم البياني
+        # الرسم البياني الأساسي
         'chart_labels': chart_labels,
         'chart_values': chart_values,
-        # التنبيهات
+        # الرسم البياني المتكامل
+        'advanced_chart_data': advanced_chart_data,
+        # أفضل المنتجات مبيعاً
+        'top_products': top_products,
+        # تنبيهات النظام
         'alerts': alerts,
     }
     
     return render(request, 'accounts/dashboard.html', context)
 
+# ============================================
+# صفحة الشروط والأحكام (عرض ثابت)
+# ============================================
+class TermsView(TemplateView):
+    """عرض صفحة الشروط والأحكام"""
+    template_name = 'accounts/terms.html'
+
+
+
+# ============================================
+# لوحة التحكم (dashboard)
+# ============================================
+
+
+import requests
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+
+# ==========================================
+# استيراد CompanySettings من نفس التطبيق (accounts)
+# ==========================================
+from .models import CompanySettings
+
+
+# أضف هذه الاستيرادات مع باقي الاستيرادات في أعلى الملف
+from invoice.models import (
+    Purch, Sale, SaleReturn, PurchaseReturn, 
+    Product, WebsiteOrder
+)
+from django.utils import timezone
+from datetime import timedelta
+from decimal import Decimal
+from django.db.models import Sum
+from django.urls import reverse
+
+
+
+# ==========================================
+# دالة لجلب البيانات المتكاملة
+# ==========================================
+
+
+
+# ==========================================
+# أفضل المنتجات مبيعاً
+# ==========================================
 
 
 

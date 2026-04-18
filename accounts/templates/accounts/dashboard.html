@@ -1,11 +1,12 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}لوحة التحكم |  أدخل أسم شركتك{% endblock %}
+{% block title %}لوحة التحكم | {{ settings.company_name|default:"شركتك" }}{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
     /* ============================================
@@ -20,6 +21,9 @@
         --text-light: #ffffff;
         --shadow-sm: 0 2px 8px rgba(0, 150, 167, 0.08);
         --shadow-md: 0 4px 12px rgba(0, 150, 167, 0.12);
+        --trend-up: #00c853;
+        --trend-down: #ff1744;
+        --trend-neutral: #78909c;
     }
 
     * { box-sizing: border-box; }
@@ -96,27 +100,6 @@
         color: white;
     }
     .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
-
-    .btn-success {
-        background: linear-gradient(135deg, #00897b 0%, #00695c 100%);
-        color: white;
-    }
-    .btn-success:hover { opacity: 0.9; transform: translateY(-1px); }
-
-    .btn-warning {
-        background: linear-gradient(135deg, #ffb300 0%, #ff8f00 100%);
-        color: white;
-    }
-
-    .btn-danger {
-        background: linear-gradient(135deg, #e53935 0%, #b71c1c 100%);
-        color: white;
-    }
-
-    .btn-secondary {
-        background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
-        color: white;
-    }
 
     /* ============================================
        [HEADER] رأس لوحة التحكم
@@ -217,6 +200,8 @@
         flex-shrink: 0;
     }
 
+    .stat-info { flex: 1; }
+
     .stat-val {
         font-size: 1.4rem;
         font-weight: 700;
@@ -229,6 +214,18 @@
         color: #546e7a;
         font-weight: 500;
     }
+
+    .stat-trend {
+        font-size: 0.65rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 3px;
+        margin-top: 4px;
+    }
+    .trend-up { color: var(--trend-up); }
+    .trend-down { color: var(--trend-down); }
+    .trend-neutral { color: var(--trend-neutral); }
 
     .stat-card.c-aqua::after { background: var(--aqua-4); }
     .stat-card.c-teal::after { background: #00897b; }
@@ -354,6 +351,15 @@
     }
 
     /* ============================================
+       [CHART] الرسم البياني
+       ============================================ */
+    .chart-container {
+        position: relative;
+        height: 250px;
+        width: 100%;
+    }
+
+    /* ============================================
        [SIDE-LINK] روابط الشريط الجانبي
        ============================================ */
     .side-section-title {
@@ -448,6 +454,35 @@
     .side-link-group .side-add-btn:hover { opacity: 0.85; transform: scale(1.05); }
 
     /* ============================================
+       [ALERTS] تنبيهات
+       ============================================ */
+    .alert-item {
+        display: flex;
+        gap: 0.5rem;
+        align-items: flex-start;
+        padding: 0.5rem;
+        border-radius: 6px;
+        transition: background 0.2s;
+    }
+    .alert-item:hover { background: var(--aqua-1); }
+    .alert-warning { border-right: 3px solid #ffb300; }
+    .alert-danger { border-right: 3px solid #e53935; }
+    .alert-info { border-right: 3px solid #00897b; }
+    .alert-success { border-right: 3px solid #00c853; }
+
+    /* ============================================
+       [TOP PRODUCTS] أفضل المنتجات
+       ============================================ */
+    .top-products-tab.active {
+        color: var(--text-dark) !important;
+        border-bottom: 2px solid var(--aqua-4) !important;
+    }
+    
+    .top-product-item:hover {
+        background: var(--aqua-1);
+    }
+
+    /* ============================================
        [COMMENTS] التعليقات
        ============================================ */
     .comment-item {
@@ -523,12 +558,12 @@
     .col-gap { display: flex; flex-direction: column; gap: 1.25rem; }
 
     /* ============================================
-       [TOAST NOTIFICATIONS] نظام الإشعارات الجميل
+       [TOAST NOTIFICATIONS] نظام الإشعارات
        ============================================ */
     .toast-container {
         position: fixed;
         top: 20px;
-        left: 20px; /* لليسار لأن الموقع عربي */
+        left: 20px;
         z-index: 10000;
         display: flex;
         flex-direction: column;
@@ -676,41 +711,70 @@
         {% endif %}
     </header>
 
-    <!-- ==================== الإحصائيات ==================== -->
+    <!-- ==================== الإحصائيات الديناميكية ==================== -->
     <section class="stats-row">
         <div class="stat-card c-aqua">
             <div class="stat-icon ic-aqua"><i class="fas fa-shopping-cart"></i></div>
-            <div>
+            <div class="stat-info">
                 <div class="stat-val">{{ purch_count|default:"0" }}</div>
                 <div class="stat-lbl">فواتير الشراء</div>
+                <div class="stat-trend {% if purch_trend > 0 %}trend-up{% elif purch_trend < 0 %}trend-down{% else %}trend-neutral{% endif %}">
+                    {% if purch_trend > 0 %}
+                        <i class="fas fa-arrow-up"></i> {{ purch_trend|floatformat:1 }}%
+                    {% elif purch_trend < 0 %}
+                        <i class="fas fa-arrow-down"></i> {{ purch_trend|floatformat:1 }}%
+                    {% else %}
+                        <i class="fas fa-minus"></i> 0%
+                    {% endif %}
+                </div>
             </div>
         </div>
         <div class="stat-card c-teal">
             <div class="stat-icon ic-teal"><i class="fas fa-cash-register"></i></div>
-            <div>
+            <div class="stat-info">
                 <div class="stat-val">{{ sale_count|default:"0" }}</div>
                 <div class="stat-lbl">فواتير البيع</div>
+                <div class="stat-trend {% if sale_trend > 0 %}trend-up{% elif sale_trend < 0 %}trend-down{% else %}trend-neutral{% endif %}">
+                    {% if sale_trend > 0 %}
+                        <i class="fas fa-arrow-up"></i> {{ sale_trend|floatformat:1 }}%
+                    {% elif sale_trend < 0 %}
+                        <i class="fas fa-arrow-down"></i> {{ sale_trend|floatformat:1 }}%
+                    {% else %}
+                        <i class="fas fa-minus"></i> 0%
+                    {% endif %}
+                </div>
             </div>
         </div>
         <div class="stat-card c-amber">
             <div class="stat-icon ic-amber"><i class="fas fa-undo"></i></div>
-            <div>
+            <div class="stat-info">
                 <div class="stat-val">{{ return_count|default:"0" }}</div>
                 <div class="stat-lbl">المرتجعات</div>
+                <div class="stat-trend {% if return_trend > 0 %}trend-up{% elif return_trend < 0 %}trend-down{% else %}trend-neutral{% endif %}">
+                    {% if return_trend > 0 %}
+                        <i class="fas fa-arrow-up"></i> {{ return_trend|floatformat:1 }}%
+                    {% elif return_trend < 0 %}
+                        <i class="fas fa-arrow-down"></i> {{ return_trend|floatformat:1 }}%
+                    {% else %}
+                        <i class="fas fa-minus"></i> 0%
+                    {% endif %}
+                </div>
             </div>
         </div>
         <div class="stat-card c-purple">
             <div class="stat-icon ic-purple"><i class="fas fa-boxes"></i></div>
-            <div>
+            <div class="stat-info">
                 <div class="stat-val">{{ product_count|default:"0" }}</div>
                 <div class="stat-lbl">المنتجات</div>
+                <div class="stat-trend trend-neutral"><i class="fas fa-database"></i> إجمالي</div>
             </div>
         </div>
         <div class="stat-card c-rose">
             <div class="stat-icon ic-pink"><i class="fas fa-store"></i></div>
-            <div>
+            <div class="stat-info">
                 <div class="stat-val">{{ new_orders_count|default:"0" }}</div>
                 <div class="stat-lbl">طلبات المتجر</div>
+                <div class="stat-trend trend-neutral"><i class="fas fa-clock"></i> جديدة</div>
             </div>
         </div>
     </section>
@@ -720,6 +784,135 @@
 
         <!-- ========== العمود الأيمن ========== -->
         <div class="col-gap">
+
+            <!-- الرسم البياني الأساسي (آخر 7 أيام) -->
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-chart-line"></i> المبيعات اليومية (آخر 7 أيام)
+                    <span class="header-badge">مباشر</span>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="salesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- الرسم البياني المتكامل (آخر 30 يوماً) -->
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-chart-line"></i> التحليل المتكامل (آخر 30 يوماً)
+                    <span class="header-badge">مبيعات | أرباح | مصروفات</span>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" style="height: 300px;">
+                        <canvas id="advancedChart"></canvas>
+                    </div>
+                    <div class="chart-legend" style="display: flex; justify-content: center; gap: 1.5rem; margin-top: 1rem; flex-wrap: wrap;">
+                        <span style="display: flex; align-items: center; gap: 0.3rem;">
+                            <span style="width: 20px; height: 20px; background: rgba(0, 151, 167, 0.7); border-radius: 3px;"></span>
+                            <span style="font-size: 0.7rem;">المبيعات</span>
+                        </span>
+                        <span style="display: flex; align-items: center; gap: 0.3rem;">
+                            <span style="width: 20px; height: 3px; background: #00c853;"></span>
+                            <span style="font-size: 0.7rem;">صافي الربح</span>
+                        </span>
+                        <span style="display: flex; align-items: center; gap: 0.3rem;">
+                            <span style="width: 20px; height: 3px; background: #ff1744;"></span>
+                            <span style="font-size: 0.7rem;">المصروفات</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- أفضل المنتجات مبيعاً -->
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-trophy"></i> أفضل المنتجات مبيعاً
+                    <span class="header-badge">الـ 10 الأوائل</span>
+                </div>
+                <div class="card-body" style="padding: 0;">
+                    <!-- تبويبات للتبديل بين الكمية والقيمة -->
+                    <div style="display: flex; border-bottom: 1px solid var(--aqua-1);">
+                        <button class="top-products-tab active" data-tab="quantity" style="flex: 1; padding: 0.6rem; background: none; border: none; font-weight: 600; color: var(--text-dark); cursor: pointer; transition: all 0.2s; border-bottom: 2px solid var(--aqua-4);">
+                            <i class="fas fa-chart-simple"></i> الأكثر مبيعاً (كمية)
+                        </button>
+                        <button class="top-products-tab" data-tab="value" style="flex: 1; padding: 0.6rem; background: none; border: none; font-weight: 600; color: #78909c; cursor: pointer; transition: all 0.2s; border-bottom: 2px solid transparent;">
+                            <i class="fas fa-chart-line"></i> الأعلى قيمة (مالياً)
+                        </button>
+                    </div>
+                    
+                    <!-- قائمة أفضل المنتجات من حيث الكمية -->
+                    <div id="top-products-quantity" class="top-products-list" style="display: block;">
+                        {% if top_products.top_by_quantity %}
+                            {% for product in top_products.top_by_quantity %}
+                            <div class="top-product-item" style="display: flex; align-items: center; gap: 0.75rem; padding: 0.7rem 1rem; border-bottom: 1px solid var(--aqua-1); transition: background 0.2s;">
+                                <div style="width: 2rem; text-align: center; font-weight: 700; color: var(--aqua-4);">
+                                    #{{ forloop.counter }}
+                                </div>
+                                <div style="width: 2.5rem; height: 2.5rem; border-radius: 6px; background: var(--aqua-1); display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                                    {% if product.image %}
+                                    <img src="{{ product.image }}" alt="{{ product.name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                                    {% else %}
+                                    <i class="fas fa-box" style="color: var(--aqua-4); font-size: 1.2rem;"></i>
+                                    {% endif %}
+                                </div>
+                                <div style="flex: 1; min-width: 0;">
+                                    <div style="font-weight: 600; font-size: 0.8rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ product.name }}</div>
+                                    <div style="display: flex; gap: 1rem; margin-top: 0.2rem;">
+                                        <span style="font-size: 0.65rem; color: #00c853;"><i class="fas fa-cubes"></i> {{ product.quantity|floatformat:0 }} وحدة</span>
+                                        <span style="font-size: 0.65rem; color: var(--aqua-4);"><i class="fas fa-dollar-sign"></i> {{ product.value|floatformat:2 }} ل.س</span>
+                                    </div>
+                                </div>
+                                <div style="width: 60px; height: 4px; background: var(--aqua-1); border-radius: 2px; overflow: hidden;">
+                                    <div style="width: {% widthratio product.quantity top_products.top_by_quantity.0.quantity 100 %}%; height: 100%; background: var(--aqua-4);"></div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div style="text-align: center; padding: 2rem; color: #78909c;">
+                                <i class="fas fa-chart-line" style="font-size: 2rem; margin-bottom: 0.5rem; display: block;"></i>
+                                <span>لا توجد مبيعات حتى الآن</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- قائمة أفضل المنتجات من حيث القيمة -->
+                    <div id="top-products-value" class="top-products-list" style="display: none;">
+                        {% if top_products.top_by_value %}
+                            {% for product in top_products.top_by_value %}
+                            <div class="top-product-item" style="display: flex; align-items: center; gap: 0.75rem; padding: 0.7rem 1rem; border-bottom: 1px solid var(--aqua-1); transition: background 0.2s;">
+                                <div style="width: 2rem; text-align: center; font-weight: 700; color: var(--aqua-4);">
+                                    #{{ forloop.counter }}
+                                </div>
+                                <div style="width: 2.5rem; height: 2.5rem; border-radius: 6px; background: var(--aqua-1); display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                                    {% if product.image %}
+                                    <img src="{{ product.image }}" alt="{{ product.name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                                    {% else %}
+                                    <i class="fas fa-box" style="color: var(--aqua-4); font-size: 1.2rem;"></i>
+                                    {% endif %}
+                                </div>
+                                <div style="flex: 1; min-width: 0;">
+                                    <div style="font-weight: 600; font-size: 0.8rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ product.name }}</div>
+                                    <div style="display: flex; gap: 1rem; margin-top: 0.2rem;">
+                                        <span style="font-size: 0.65rem; color: #00c853;"><i class="fas fa-cubes"></i> {{ product.quantity|floatformat:0 }} وحدة</span>
+                                        <span style="font-size: 0.65rem; color: var(--aqua-4);"><i class="fas fa-dollar-sign"></i> {{ product.value|floatformat:2 }} ل.س</span>
+                                    </div>
+                                </div>
+                                <div style="width: 60px; height: 4px; background: var(--aqua-1); border-radius: 2px; overflow: hidden;">
+                                    <div style="width: {% widthratio product.value top_products.top_by_value.0.value 100 %}%; height: 100%; background: var(--aqua-4);"></div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div style="text-align: center; padding: 2rem; color: #78909c;">
+                                <i class="fas fa-chart-line" style="font-size: 2rem; margin-bottom: 0.5rem; display: block;"></i>
+                                <span>لا توجد مبيعات حتى الآن</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
 
             <!-- العمليات الأساسية -->
             <div class="card">
@@ -737,7 +930,6 @@
                             </div>
                             <i class="fas fa-chevron-left op-link-arrow"></i>
                         </a>
-
                         <a href="{% url 'invoice:sale_list' %}" class="op-link">
                             <div class="op-link-icon ic-teal"><i class="fas fa-cash-register"></i></div>
                             <div class="op-link-text">
@@ -746,7 +938,6 @@
                             </div>
                             <i class="fas fa-chevron-left op-link-arrow"></i>
                         </a>
-
                         <a href="{% url 'invoice:product_list' %}" class="op-link">
                             <div class="op-link-icon ic-purple"><i class="fas fa-boxes"></i></div>
                             <div class="op-link-text">
@@ -755,7 +946,6 @@
                             </div>
                             <i class="fas fa-chevron-left op-link-arrow"></i>
                         </a>
-
                         <a href="{% url 'invoice:product_list' %}#barcode-section" class="op-link">
                             <div class="op-link-icon ic-cyan"><i class="fas fa-barcode"></i></div>
                             <div class="op-link-text">
@@ -764,7 +954,6 @@
                             </div>
                             <i class="fas fa-chevron-left op-link-arrow"></i>
                         </a>
-
                         <a href="{% url 'invoice:product_bulk_update' %}" class="op-link">
                             <div class="op-link-icon ic-indigo"><i class="fas fa-tags"></i></div>
                             <div class="op-link-text">
@@ -773,9 +962,7 @@
                             </div>
                             <i class="fas fa-chevron-left op-link-arrow"></i>
                         </a>
-
                         <a href="{% url 'invoice:cash_transaction_list' %}" class="op-link">
-
                             <div class="op-link-icon ic-orange"><i class="fas fa-wallet"></i></div>
                             <div class="op-link-text">
                                 <span class="op-link-title">الصندوق</span>
@@ -783,16 +970,14 @@
                             </div>
                             <i class="fas fa-chevron-left op-link-arrow"></i>
                         </a>
-
                         <a href="{% url 'invoice:cash_transaction_list' %}" class="op-link">
                             <div class="op-link-icon ic-gray"><i class="fas fa-exchange-alt"></i></div>
                             <div class="op-link-text">
-                                <span class="op-link-title">حركة الصندوق </span>
+                                <span class="op-link-title">حركة الصندوق</span>
                                 <span class="op-link-desc">سجل حركات الخزينة</span>
                             </div>
                             <i class="fas fa-chevron-left op-link-arrow"></i>
                         </a>
-
                         <a href="{% url 'invoice:purchase_return_list' %}" class="op-link">
                             <div class="op-link-icon ic-amber"><i class="fas fa-truck-loading"></i></div>
                             <div class="op-link-text">
@@ -801,7 +986,6 @@
                             </div>
                             <i class="fas fa-chevron-left op-link-arrow"></i>
                         </a>
-
                         <a href="{% url 'invoice:sale_return_list' %}" class="op-link">
                             <div class="op-link-icon ic-red"><i class="fas fa-receipt"></i></div>
                             <div class="op-link-text">
@@ -818,7 +1002,6 @@
             <div class="card">
                 <div class="card-header">
                     <i class="fas fa-store-alt"></i> المتجر الإلكتروني
-                    <!-- تم تحديث العداد من 5 إلى 6 -->
                     <span class="header-badge">6 أقسام</span>
                 </div>
                 <div class="card-body">
@@ -831,8 +1014,6 @@
                             </div>
                             <i class="fas fa-chevron-left op-link-arrow"></i>
                         </a>
-
-                        <!-- === الرابط الجديد المضاف: تنبيهات المخزون === -->
                         <a href="{% url 'invoice:admin_stock_notifications' %}" class="op-link">
                             <div class="op-link-icon ic-orange"><i class="fas fa-bell"></i></div>
                             <div class="op-link-text">
@@ -840,25 +1021,15 @@
                                 <span class="op-link-desc">إشعارات توفر المواد للعملاء</span>
                             </div>
                             <i class="fas fa-chevron-left op-link-arrow"></i>
-
-                            <a href="{% url 'invoice:notification_archive' %}" class="op-link">
-                                <div class="op-link-icon ic-gray"><i class="fas fa-history"></i></div>
-                                <div class="op-link-text">
-                                    <span class="op-link-title">أرشيف الإشعارات</span>
-                                    <span class="op-link-desc">سجل الإشعارات المرسلة</span>
-                                </div>
-                                <i class="fas fa-chevron-left op-link-arrow"></i>
-                            </a>
-
-
-
-
-
-
-
-
                         </a>
-
+                        <a href="{% url 'invoice:notification_archive' %}" class="op-link">
+                            <div class="op-link-icon ic-gray"><i class="fas fa-history"></i></div>
+                            <div class="op-link-text">
+                                <span class="op-link-title">أرشيف الإشعارات</span>
+                                <span class="op-link-desc">سجل الإشعارات المرسلة</span>
+                            </div>
+                            <i class="fas fa-chevron-left op-link-arrow"></i>
+                        </a>
                         <a href="{% url 'invoice:control_store' %}" class="op-link">
                             <div class="op-link-icon ic-indigo"><i class="fas fa-sliders-h"></i></div>
                             <div class="op-link-text">
@@ -867,7 +1038,6 @@
                             </div>
                             <i class="fas fa-chevron-left op-link-arrow"></i>
                         </a>
-
                         <a href="{% url 'invoice:store_front' %}" class="op-link">
                             <div class="op-link-icon ic-gray"><i class="fas fa-external-link-alt"></i></div>
                             <div class="op-link-text">
@@ -876,7 +1046,6 @@
                             </div>
                             <i class="fas fa-chevron-left op-link-arrow"></i>
                         </a>
-
                         <a href="{% url 'invoice:cart_detail' %}" class="op-link">
                             <div class="op-link-icon ic-amber"><i class="fas fa-shopping-basket"></i></div>
                             <div class="op-link-text">
@@ -885,7 +1054,6 @@
                             </div>
                             <i class="fas fa-chevron-left op-link-arrow"></i>
                         </a>
-
                         <a href="{% url 'invoice:checkout' %}" class="op-link">
                             <div class="op-link-icon ic-teal"><i class="fas fa-credit-card"></i></div>
                             <div class="op-link-text">
@@ -929,15 +1097,50 @@
         <!-- ========== العمود الأيسر ========== -->
         <div class="col-gap">
 
+            <!-- تنبيهات النظام -->
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-bell"></i> تنبيهات النظام
+                    <span class="header-badge">{{ alerts|length }}</span>
+                </div>
+                <div class="card-body">
+                    {% if alerts %}
+                        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                            {% for alert in alerts %}
+                            <div class="alert-item alert-{{ alert.type }}">
+                                <i class="fas {{ alert.icon }}" style="color: 
+                                    {% if alert.type == 'danger' %}#e53935
+                                    {% elif alert.type == 'warning' %}#ffb300
+                                    {% else %}#00897b{% endif %}; margin-top: 3px; flex-shrink: 0;"></i>
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 600; color: #333; font-size: 0.8rem;">{{ alert.title }}</div>
+                                    <div style="color: #666; font-size: 0.75rem; margin: 2px 0;">{{ alert.message }}</div>
+                                    {% if alert.link %}
+                                    <a href="{{ alert.link }}" style="font-size: 0.7rem; color: #0097a7; text-decoration: none; display: inline-flex; align-items: center; gap: 3px;">
+                                        {{ alert.link_text|default:"عرض التفاصيل" }} <i class="fas fa-arrow-left"></i>
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% if not forloop.last %}<div style="height: 1px; background: #eee;"></div>{% endif %}
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div style="text-align: center; padding: 1rem; color: #78909c;">
+                            <i class="fas fa-check-circle" style="color: #00c853; font-size: 1.5rem; margin-bottom: 0.5rem; display: block;"></i>
+                            <span>لا توجد تنبيهات جديدة</span>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
             <!-- التقارير المالية -->
             <div class="card">
                 <div class="card-header">
                     <i class="fas fa-chart-pie"></i> التقارير
                 </div>
                 <div class="card-body" style="padding: 0.75rem 1rem;">
-
                     <div class="side-section-title"><i class="fas fa-chart-line"></i> تقارير مالية</div>
-
                     <a href="{% url 'invoice:profit_report' %}" class="side-link">
                         <div class="side-link-icon ic-teal"><i class="fas fa-chart-line"></i></div>
                         <span class="side-link-name">تقرير الأرباح</span>
@@ -963,9 +1166,7 @@
                         <span class="side-link-name">فواتير غير مسددة</span>
                         <i class="fas fa-chevron-left side-link-arrow"></i>
                     </a>
-
                     <div class="side-section-title" style="margin-top: 0.75rem;"><i class="fas fa-warehouse"></i> تقارير المخزون</div>
-
                     <a href="{% url 'invoice:unpaid_sales_report' %}" class="side-link">
                         <div class="side-link-icon ic-red"><i class="fas fa-exclamation-triangle"></i></div>
                         <span class="side-link-name">الديون المتراكمة</span>
@@ -995,13 +1196,11 @@
                     <i class="fas fa-sliders-h"></i> إعدادات النظام
                 </div>
                 <div class="card-body" style="padding: 0.75rem 1rem;">
-
                     <a href="{% url 'invoice:email_settings' %}" class="side-link">
                         <div class="side-link-icon ic-red"><i class="fas fa-envelope-open-text"></i></div>
                         <span class="side-link-name">إعدادات البريد</span>
                         <i class="fas fa-chevron-left side-link-arrow"></i>
                     </a>
-
                     <div class="side-link-group">
                         <a href="{% url 'invoice:payment_method_list' %}" class="side-link">
                             <div class="side-link-icon ic-teal"><i class="fas fa-money-bill-wave"></i></div>
@@ -1010,7 +1209,6 @@
                         </a>
                         <a href="{% url 'invoice:payment_method_create' %}" class="side-add-btn" title="إضافة طريقة دفع"><i class="fas fa-plus"></i></a>
                     </div>
-
                     <div class="side-link-group">
                         <a href="{% url 'invoice:shipping_company_list' %}" class="side-link">
                             <div class="side-link-icon ic-cyan"><i class="fas fa-truck"></i></div>
@@ -1019,7 +1217,6 @@
                         </a>
                         <a href="{% url 'invoice:shipping_company_create' %}" class="side-add-btn" title="إضافة شركة شحن"><i class="fas fa-plus"></i></a>
                     </div>
-
                     <div class="side-link-group">
                         <a href="{% url 'invoice:status_list' %}" class="side-link">
                             <div class="side-link-icon ic-aqua"><i class="fas fa-flag"></i></div>
@@ -1028,7 +1225,6 @@
                         </a>
                         <a href="{% url 'invoice:status_create' %}" class="side-add-btn" title="إضافة حالة"><i class="fas fa-plus"></i></a>
                     </div>
-
                     <div class="side-link-group">
                         <a href="{% url 'invoice:currency_list' %}" class="side-link">
                             <div class="side-link-icon ic-gray"><i class="fas fa-dollar-sign"></i></div>
@@ -1037,7 +1233,6 @@
                         </a>
                         <a href="{% url 'invoice:currency_create' %}" class="side-add-btn" title="إضافة عملة"><i class="fas fa-plus"></i></a>
                     </div>
-
                     <div class="side-link-group">
                         <a href="{% url 'invoice:price_type_list' %}" class="side-link">
                             <div class="side-link-icon ic-purple"><i class="fas fa-tags"></i></div>
@@ -1046,15 +1241,12 @@
                         </a>
                         <a href="{% url 'invoice:price_type_create' %}" class="side-add-btn" title="إضافة نوع سعر"><i class="fas fa-plus"></i></a>
                     </div>
-
                     <div style="border-top: 1px solid var(--aqua-1); margin: 0.5rem 0;"></div>
-
                     <a href="{% url 'accounts:system_logs' %}" class="side-link">
                         <div class="side-link-icon ic-gray"><i class="fas fa-file-alt"></i></div>
                         <span class="side-link-name">سجلات النظام</span>
                         <i class="fas fa-chevron-left side-link-arrow"></i>
                     </a>
-
                     {% if user.is_staff %}
                     <a href="{% url 'accounts:user_list' %}" class="side-link">
                         <div class="side-link-icon ic-indigo"><i class="fas fa-users-cog"></i></div>
@@ -1083,7 +1275,6 @@
                             <div class="comment-time">منذ 5 دقائق</div>
                         </div>
                     </div>
-
                     <div class="comment-item">
                         <img src="https://i.pravatar.cc/40?img=2" alt="User" class="comment-avatar">
                         <div class="comment-body">
@@ -1095,7 +1286,6 @@
                             <div class="comment-time">منذ 20 دقيقة</div>
                         </div>
                     </div>
-
                     <div class="comment-item">
                         <img src="https://i.pravatar.cc/40?img=3" alt="User" class="comment-avatar">
                         <div class="comment-body">
@@ -1107,7 +1297,6 @@
                             <div class="comment-time">منذ ساعة</div>
                         </div>
                     </div>
-
                     <a href="#" style="display: block; text-align: center; padding: 0.4rem; font-size: 0.72rem; color: var(--aqua-4); font-weight: 600; text-decoration: none; border-top: 1px solid var(--aqua-1); margin-top: 0.25rem;">
                         عرض كل التعليقات <i class="fas fa-arrow-left" style="margin-right: 0.25rem; font-size: 0.6rem;"></i>
                     </a>
@@ -1118,7 +1307,7 @@
 
     <!-- ==================== ذيل الصفحة ==================== -->
     <div class="dash-footer">
-        <i class="fas fa-code-branch"></i> أدخل أسم شركتك  — BalanceIQ
+        <i class="fas fa-code-branch"></i> {{ settings.company_name|default:"نظام إدارة المبيعات" }} — الإصدار 2.0
     </div>
 </div>
 
@@ -1129,22 +1318,240 @@
 {% block extra_js %}
 <script>
     /**
-     * نظام الإشعارات الجميل (Beautiful Toasts)
-     * يستبدل alert() المزعجة بإشعارات عصرية
+     * الرسم البياني الأساسي (آخر 7 أيام)
+     */
+    document.addEventListener('DOMContentLoaded', function() {
+        const chartCanvas = document.getElementById('salesChart');
+        if (chartCanvas) {
+            const chartData = {
+                labels: {{ chart_labels|safe }},
+                values: {{ chart_values|safe }}
+            };
+            
+            new Chart(chartCanvas, {
+                type: 'line',
+                data: {
+                    labels: chartData.labels,
+                    datasets: [{
+                        label: 'المبيعات',
+                        data: chartData.values,
+                        borderColor: '#0097a7',
+                        backgroundColor: 'rgba(0, 151, 167, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: '#ffffff',
+                        pointBorderColor: '#0097a7',
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.parsed.y.toLocaleString() + ' ل.س';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: '#f0f0f0' },
+                            ticks: {
+                                font: { family: 'Tajawal' },
+                                callback: function(value) {
+                                    return value.toLocaleString();
+                                }
+                            }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { font: { family: 'Tajawal' } }
+                        }
+                    }
+                }
+            });
+        }
+    });
+
+    /**
+     * الرسم البياني المتكامل (مبيعات + أرباح + مصروفات)
+     */
+    const advancedChartCanvas = document.getElementById('advancedChart');
+    if (advancedChartCanvas) {
+        const advancedChartData = {{ advanced_chart_data|safe }};
+        
+        new Chart(advancedChartCanvas, {
+            type: 'line',
+            data: {
+                labels: advancedChartData.labels,
+                datasets: [
+                    {
+                        label: 'المبيعات',
+                        data: advancedChartData.sales,
+                        type: 'bar',
+                        backgroundColor: 'rgba(0, 151, 167, 0.6)',
+                        borderColor: 'rgba(0, 151, 167, 1)',
+                        borderWidth: 1,
+                        yAxisID: 'y',
+                        order: 2
+                    },
+                    {
+                        label: 'صافي الربح',
+                        data: advancedChartData.profit,
+                        type: 'line',
+                        borderColor: '#00c853',
+                        backgroundColor: 'transparent',
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: false,
+                        pointBackgroundColor: '#00c853',
+                        pointBorderColor: '#fff',
+                        pointRadius: 3,
+                        pointHoverRadius: 5,
+                        yAxisID: 'y1',
+                        order: 1
+                    },
+                    {
+                        label: 'المصروفات',
+                        data: advancedChartData.expenses,
+                        type: 'line',
+                        borderColor: '#ff1744',
+                        backgroundColor: 'transparent',
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: false,
+                        pointBackgroundColor: '#ff1744',
+                        pointBorderColor: '#fff',
+                        pointRadius: 3,
+                        pointHoverRadius: 5,
+                        yAxisID: 'y1',
+                        order: 0
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false,
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                let value = context.raw;
+                                return label + ': ' + value.toLocaleString() + ' ل.س';
+                            }
+                        }
+                    },
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            font: { family: 'Tajawal', size: 11 },
+                            usePointStyle: true,
+                            boxWidth: 8
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        position: 'right',
+                        title: {
+                            display: true,
+                            text: 'المبيعات (ل.س)',
+                            font: { family: 'Tajawal', size: 10 }
+                        },
+                        ticks: {
+                            callback: function(value) {
+                                return value.toLocaleString();
+                            }
+                        },
+                        grid: { color: '#e0e0e0' }
+                    },
+                    y1: {
+                        position: 'left',
+                        title: {
+                            display: true,
+                            text: 'الأرباح / المصروفات (ل.س)',
+                            font: { family: 'Tajawal', size: 10 }
+                        },
+                        ticks: {
+                            callback: function(value) {
+                                return value.toLocaleString();
+                            }
+                        },
+                        grid: { display: false }
+                    },
+                    x: {
+                        ticks: { font: { family: 'Tajawal' } },
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+    }
+
+    /**
+     * تبديل التبويبات (Tabs) لأفضل المنتجات مبيعاً
+     */
+    const tabs = document.querySelectorAll('.top-products-tab');
+    const quantityList = document.getElementById('top-products-quantity');
+    const valueList = document.getElementById('top-products-value');
+    
+    if (tabs.length) {
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                tabs.forEach(t => {
+                    t.classList.remove('active');
+                    t.style.color = '#78909c';
+                    t.style.borderBottom = '2px solid transparent';
+                });
+                
+                this.classList.add('active');
+                this.style.color = 'var(--text-dark)';
+                this.style.borderBottom = '2px solid var(--aqua-4)';
+                
+                const tabName = this.getAttribute('data-tab');
+                if (tabName === 'quantity') {
+                    if (quantityList) quantityList.style.display = 'block';
+                    if (valueList) valueList.style.display = 'none';
+                } else {
+                    if (quantityList) quantityList.style.display = 'none';
+                    if (valueList) valueList.style.display = 'block';
+                }
+            });
+        });
+    }
+
+    /**
+     * نظام الإشعارات (Toast Notifications)
      */
     function showToast(title, message, type = 'success') {
         const container = document.getElementById('toastContainer');
-        
-        // تحديد الأيقونة حسب النوع
         let iconClass = 'fa-check-circle';
-        if (type === 'error') iconClass = 'fa-times-circle';
-        if (type === 'warning') iconClass = 'fa-exclamation-circle';
+        let bgColor = '#00897b';
         
-        // إنشاء عنصر الإشعار
+        if (type === 'error') {
+            iconClass = 'fa-times-circle';
+            bgColor = '#e53935';
+        } else if (type === 'warning') {
+            iconClass = 'fa-exclamation-circle';
+            bgColor = '#ffb300';
+        }
+        
         const toast = document.createElement('div');
         toast.className = `custom-toast ${type}`;
         toast.innerHTML = `
-            <div class="toast-icon"><i class="fas ${iconClass}"></i></div>
+            <div class="toast-icon" style="background:${bgColor};"><i class="fas ${iconClass}"></i></div>
             <div class="toast-content">
                 <div class="toast-title">${title}</div>
                 <div class="toast-message">${message}</div>
@@ -1152,19 +1559,14 @@
             <button class="toast-close"><i class="fas fa-times"></i></button>
         `;
         
-        // إضافة الحدث للإغلاق
         toast.querySelector('.toast-close').addEventListener('click', () => {
             toast.classList.remove('show');
             setTimeout(() => toast.remove(), 400);
         });
         
-        // إضافة للحاوية
         container.appendChild(toast);
-        
-        // تفعيل الأنيميشن (تأخير بسيط للسماح للـ DOM بالتحديث)
         setTimeout(() => toast.classList.add('show'), 10);
         
-        // إخفاء تلقائي بعد 4 ثواني
         setTimeout(() => {
             if (toast.parentElement) {
                 toast.classList.remove('show');
@@ -1173,4 +1575,4 @@
         }, 4000);
     }
 </script>
-{% endblock %}999
+{% endblock %}
