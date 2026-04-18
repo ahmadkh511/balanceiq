@@ -72,66 +72,225 @@ from django.contrib.auth.decorators import login_required
 # ==========================================
 from .models import CompanySettings
 
+
+# أضف هذه الاستيرادات مع باقي الاستيرادات في أعلى الملف
+from invoice.models import (
+    Purch, Sale, SaleReturn, PurchaseReturn, 
+    Product, WebsiteOrder
+)
+from django.utils import timezone
+from datetime import timedelta
+from decimal import Decimal
+from django.db.models import Sum
+from django.urls import reverse
+
+
 @login_required
 def dashboard(request):
-    """عرض لوحة التحكم الرئيسية مع تعليقات الفيسبوك"""
+    """لوحة التحكم الرئيسية - إحصائيات ديناميكية من تطبيق invoice"""
     
-    # ===== فخ تغيير كلمة المرور =====
+    # فخ تغيير كلمة المرور
     if request.session.get('force_change'):
         return redirect('accounts:force_password_change')
-    # ==================================
     
-    # --- 1. جلب إعدادات الشركة ---
+    # جلب إعدادات الشركة
     settings = CompanySettings.get_settings()
     
-    # --- 2. جلب تعليقات الفيسبوك (التركيز هنا) ---
-    fb_comments = []
+    # ============================================
+    # حساب الفترات الزمنية
+    # ============================================
+    today = timezone.now().date()
+    thirty_days_ago = today - timedelta(days=30)
+    sixty_days_ago = thirty_days_ago - timedelta(days=30)
     
-    # نتأكد من وجود معرف الصفحة والرمز
+    # دالة مساعدة لحساب الاتجاه
+    def calc_trend(current, previous, reverse=False):
+        if previous == 0:
+            return 0 if current == 0 else (100 if not reverse else -100)
+        change = ((current - previous) / previous) * 100
+        if reverse:
+            change = -change
+        return round(change, 1)
+    
+    # ============================================
+    # 1. إحصائيات فواتير الشراء (من تطبيق invoice)
+    # ============================================
+    current_purch = Purch.objects.filter(purch_date__gte=thirty_days_ago).count()
+    previous_purch = Purch.objects.filter(
+        purch_date__gte=sixty_days_ago,
+        purch_date__lt=thirty_days_ago
+    ).count()
+    purch_trend = calc_trend(current_purch, previous_purch)
+    
+    # ============================================
+    # 2. إحصائيات فواتير البيع (من تطبيق invoice)
+    # ============================================
+    current_sale = Sale.objects.filter(sale_date__gte=thirty_days_ago).count()
+    previous_sale = Sale.objects.filter(
+        sale_date__gte=sixty_days_ago,
+        sale_date__lt=thirty_days_ago
+    ).count()
+    sale_trend = calc_trend(current_sale, previous_sale)
+    
+    # ============================================
+    # 3. إحصائيات المرتجعات (من تطبيق invoice)
+    # ============================================
+    current_return = (
+        SaleReturn.objects.filter(return_date__gte=thirty_days_ago).count() +
+        PurchaseReturn.objects.filter(return_date__gte=thirty_days_ago).count()
+    )
+    previous_return = (
+        SaleReturn.objects.filter(
+            return_date__gte=sixty_days_ago,
+            return_date__lt=thirty_days_ago
+        ).count() +
+        PurchaseReturn.objects.filter(
+            return_date__gte=sixty_days_ago,
+            return_date__lt=thirty_days_ago
+        ).count()
+    )
+    return_trend = calc_trend(current_return, previous_return, reverse=True)
+    
+    # ============================================
+    # 4. عدد المنتجات (من تطبيق invoice)
+    # ============================================
+    product_count = Product.objects.count()
+    
+    # ============================================
+    # 5. طلبات المتجر الجديدة (من تطبيق invoice)
+    # ============================================
+    new_orders_count = WebsiteOrder.objects.filter(status='new').count()
+    
+    # ============================================
+    # 6. الرسم البياني للمبيعات (آخر 7 أيام)
+    # ============================================
+    chart_labels = []
+    chart_values = []
+    weekday_names = {
+        0: 'الاثنين', 1: 'الثلاثاء', 2: 'الأربعاء',
+        3: 'الخميس', 4: 'الجمعة', 5: 'السبت', 6: 'الأحد'
+    }
+    
+    for i in range(6, -1, -1):
+        target_date = today - timedelta(days=i)
+        chart_labels.append(weekday_names.get(target_date.weekday(), str(target_date)))
+        
+        daily_total = Sale.objects.filter(sale_date=target_date).aggregate(
+            total=Sum('sale_final_total')
+        )['total'] or Decimal('0.00')
+        chart_values.append(float(daily_total))
+    
+    # ============================================
+    # 7. تنبيهات النظام (من تطبيق invoice)
+    # ============================================
+    alerts = []
+    
+    # أ. المنتجات منخفضة المخزون
+    low_stock_products = Product.objects.filter(
+        current_stock_quantity__lt=5,
+        current_stock_quantity__gt=0
+    )[:5]
+    
+    for product in low_stock_products:
+        alerts.append({
+            'type': 'warning',
+            'icon': 'fa-exclamation-triangle',
+            'title': 'مخزون منخفض',
+            'message': f'منتج "{product.product_name}" - المتبقي: {product.current_stock_quantity}',
+            'link': reverse('invoice:product_detail', args=[product.slug]),
+            'link_text': 'تحديث المخزون'
+        })
+    
+    # ب. المنتجات المنفذة
+    out_of_stock_products = Product.objects.filter(current_stock_quantity=0)[:3]
+    for product in out_of_stock_products:
+        alerts.append({
+            'type': 'danger',
+            'icon': 'fa-times-circle',
+            'title': 'منتج غير متوفر',
+            'message': f'منتج "{product.product_name}" نفد من المخزون',
+            'link': reverse('invoice:product_detail', args=[product.slug]),
+            'link_text': 'طلب شراء'
+        })
+    
+    # ج. فواتير غير مدفوعة
+    fifteen_days_ago = today - timedelta(days=15)
+    unpaid_sales = Sale.objects.filter(
+        is_paid=False,
+        sale_date__lte=fifteen_days_ago
+    )[:3]
+    
+    for sale in unpaid_sales:
+        alerts.append({
+            'type': 'danger',
+            'icon': 'fa-exclamation-circle',
+            'title': 'فاتورة غير مدفوعة',
+            'message': f'فاتورة {sale.uniqueId} - المتبقي: {sale.balance_due}',
+            'link': reverse('invoice:sale_detail', args=[sale.slug]),
+            'link_text': 'متابعة التحصيل'
+        })
+    
+    # د. طلبات متجر جديدة
+    new_website_orders = WebsiteOrder.objects.filter(status='new')[:3]
+    for order in new_website_orders:
+        alerts.append({
+            'type': 'info',
+            'icon': 'fa-shopping-cart',
+            'title': 'طلب جديد',
+            'message': f'طلب #{order.id} - {order.full_name} - {order.total_amount}',
+            'link': reverse('invoice:order_detail', args=[order.id]),
+            'link_text': 'معالجة الطلب'
+        })
+    
+    # ============================================
+    # 8. تعليقات الفيسبوك (اختياري)
+    # ============================================
+    fb_comments = []
     if settings.fb_page_id and settings.fb_access_token:
         try:
-            # رابط API فيسبوك
+            import requests
             url = f"https://graph.facebook.com/v18.0/{settings.fb_page_id}/feed"
             params = {
                 'fields': 'from{name,picture},message,created_time,permalink_url',
                 'access_token': settings.fb_access_token,
-                'limit': 5 # عرض آخر 5 تعليقات/منشورات
+                'limit': 5
             }
-            response = requests.get(url, params=params)
-            
+            response = requests.get(url, params=params, timeout=10)
             if response.status_code == 200:
                 data = response.json()
-                # استخراج البيانات
                 for post in data.get('data', []):
-                    # نتأكد أن المنشور يحتوي على نص (ليس مجرد صورة)
                     if 'message' in post:
                         fb_comments.append(post)
-            else:
-                # طباعة الخطأ في السيرفر للمساعدة في التصحيح لاحقاً
-                print(f"Facebook Error: {response.status_code} - {response.text}")
-                
         except Exception as e:
-            print(f"Connection Error: {e}")
-
-    # --- 3. إعداد المتغيرات للإحصائيات (كما كانت أو قيم افتراضية) ---
-    # ملاحظة: لم ألمس هذا الجزء بناءً على طلبك للتركيز على الفيسبوك فقط
-    context_stats = {
-        'purch_count': 0, # يمكنك وضع الأكواد الحقيقية للاحصائيات هنا لاحقاً
-        'sale_count': 0,
-        'return_count': 0,
-        'product_count': 0,
-        'new_orders_count': 0,
-    }
-
-    # --- 4. دمج كل شيء وإرساله للقالب ---
+            print(f"Facebook Error: {e}")
+    
+    # ============================================
+    # تجهيز السياق
+    # ============================================
     context = {
         'user': request.user,
-        'settings': settings,           # لإرسال إعدادات الشركة (اسم الشركة، الفيسبوك..)
-        'fb_comments': fb_comments,     # تعليقات الفيسبوك الحية
-        **context_stats,                # دمج الإحصائيات (الصفرية حالياً)
+        'settings': settings,
+        'fb_comments': fb_comments,
+        # الإحصائيات
+        'purch_count': current_purch,
+        'purch_trend': purch_trend,
+        'sale_count': current_sale,
+        'sale_trend': sale_trend,
+        'return_count': current_return,
+        'return_trend': return_trend,
+        'product_count': product_count,
+        'new_orders_count': new_orders_count,
+        # الرسم البياني
+        'chart_labels': chart_labels,
+        'chart_values': chart_values,
+        # التنبيهات
+        'alerts': alerts,
     }
     
     return render(request, 'accounts/dashboard.html', context)
+
+
+
 
 # ============================================
 # رفع شعار الشركة (API endpoint)

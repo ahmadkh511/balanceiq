@@ -94,5 +94,6 @@ urlpatterns = [
 
     #path('force-change-password/', views.force_password_change, name='force_password_change'),
 
+    path('dashboard/', views.dashboard, name='dashboard'),
 
 ]
