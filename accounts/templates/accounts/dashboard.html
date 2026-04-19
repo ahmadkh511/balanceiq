@@ -9,9 +9,6 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-    /* ============================================
-       [BASE] الإعدادات الأساسية
-       ============================================ */
     :root {
         --aqua-1: #e0f7fa;
         --aqua-2: #b2ebf2;
@@ -26,11 +23,7 @@
         --trend-neutral: #78909c;
     }
 
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
         background-color: var(--aqua-1);
@@ -40,9 +33,6 @@
         overflow-x: hidden;
     }
 
-    /* ============================================
-       [LAYOUT] الهيكل العام - هامش بسيط
-       ============================================ */
     .dashboard {
         max-width: 1400px;
         width: 100%;
@@ -50,13 +40,8 @@
         padding: 0.75rem 0.5rem;
     }
 
-    /* أقسام الصفحة الرئيسية */
-    .dashboard-stats {
-        margin-bottom: 1rem;
-        width: 100%;
-    }
+    .dashboard-stats { margin-bottom: 1rem; width: 100%; }
 
-    /* الهيكل الرئيسي - عمودين */
     .dashboard-content {
         display: grid;
         grid-template-columns: 1fr 340px;
@@ -65,24 +50,9 @@
         margin-bottom: 1rem;
     }
 
-    /* الأعمدة */
-    .col-right {
-        display: flex;
-        flex-direction: column;
-        gap: 0.75rem;
-        min-width: 0;
-    }
+    .col-right { display: flex; flex-direction: column; gap: 0.75rem; min-width: 0; }
+    .col-left { display: flex; flex-direction: column; gap: 0.75rem; min-width: 0; }
 
-    .col-left {
-        display: flex;
-        flex-direction: column;
-        gap: 0.75rem;
-        min-width: 0;
-    }
-
-    /* ============================================
-       [CARDS] البطاقات
-       ============================================ */
     .card {
         border: none;
         border-radius: 12px;
@@ -112,13 +82,9 @@
         font-weight: 500;
     }
 
-    .card-body {
-        padding: 0.875rem;
-    }
+    .card-body { padding: 0.875rem; }
+    .card-body-compact { padding: 0.6rem 0.8rem; }
 
-    /* ============================================
-       [HEADER] رأس الصفحة
-       ============================================ */
     .dash-header {
         background: linear-gradient(135deg, var(--aqua-4) 0%, #006064 100%);
         color: var(--text-light);
@@ -153,8 +119,7 @@
         flex-wrap: wrap;
     }
 
-    .date-chip,
-    .user-chip {
+    .date-chip, .user-chip {
         background: rgba(255, 255, 255, 0.15);
         padding: 0.2rem 0.6rem;
         border-radius: 20px;
@@ -164,9 +129,21 @@
         gap: 0.3rem;
     }
 
-    /* ============================================
-       [STATS] بطاقات الإحصائيات
-       ============================================ */
+    .btn-dash-header {
+        padding: 0.4rem 1rem;
+        font-size: 0.75rem;
+        border-radius: 8px;
+        background: linear-gradient(135deg, var(--aqua-4) 0%, #006064 100%);
+        color: white;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        transition: opacity 0.2s;
+    }
+
+    .btn-dash-header:hover { opacity: 0.9; }
+
     .stats-row {
         display: grid;
         grid-template-columns: repeat(5, 1fr);
@@ -197,10 +174,7 @@
         height: 3px;
     }
 
-    .stat-card:hover {
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-md);
-    }
+    .stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
 
     .stat-icon {
         width: 2.5rem;
@@ -214,9 +188,7 @@
         flex-shrink: 0;
     }
 
-    .stat-info {
-        flex: 1;
-    }
+    .stat-info { flex: 1; }
 
     .stat-val {
         font-size: 1.3rem;
@@ -225,11 +197,7 @@
         line-height: 1.2;
     }
 
-    .stat-lbl {
-        font-size: 0.65rem;
-        color: #546e7a;
-        font-weight: 500;
-    }
+    .stat-lbl { font-size: 0.65rem; color: #546e7a; font-weight: 500; }
 
     .stat-trend {
         font-size: 0.6rem;
@@ -240,41 +208,16 @@
         margin-top: 2px;
     }
 
-    .trend-up {
-        color: var(--trend-up);
-    }
+    .trend-up { color: var(--trend-up); }
+    .trend-down { color: var(--trend-down); }
+    .trend-neutral { color: var(--trend-neutral); }
 
-    .trend-down {
-        color: var(--trend-down);
-    }
+    .stat-card.c-aqua::after { background: var(--aqua-4); }
+    .stat-card.c-teal::after { background: #00897b; }
+    .stat-card.c-amber::after { background: #ffb300; }
+    .stat-card.c-purple::after { background: #8e24aa; }
+    .stat-card.c-rose::after { background: #e53935; }
 
-    .trend-neutral {
-        color: var(--trend-neutral);
-    }
-
-    .stat-card.c-aqua::after {
-        background: var(--aqua-4);
-    }
-
-    .stat-card.c-teal::after {
-        background: #00897b;
-    }
-
-    .stat-card.c-amber::after {
-        background: #ffb300;
-    }
-
-    .stat-card.c-purple::after {
-        background: #8e24aa;
-    }
-
-    .stat-card.c-rose::after {
-        background: #e53935;
-    }
-
-    /* ============================================
-       [OP-LINK] روابط العمليات
-       ============================================ */
     .ops-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
@@ -293,10 +236,7 @@
         border: 1px solid transparent;
     }
 
-    .op-link:hover {
-        background: var(--aqua-1);
-        border-color: var(--aqua-2);
-    }
+    .op-link:hover { background: var(--aqua-1); border-color: var(--aqua-2); }
 
     .op-link-icon {
         width: 2rem;
@@ -310,10 +250,7 @@
         flex-shrink: 0;
     }
 
-    .op-link-text {
-        flex: 1;
-        min-width: 0;
-    }
+    .op-link-text { flex: 1; min-width: 0; }
 
     .op-link-title {
         font-size: 0.75rem;
@@ -340,14 +277,8 @@
         transition: transform 0.2s;
     }
 
-    .op-link:hover .op-link-arrow {
-        transform: translateX(-3px);
-        color: var(--aqua-4);
-    }
+    .op-link:hover .op-link-arrow { transform: translateX(-3px); color: var(--aqua-4); }
 
-    /* ============================================
-       [QUICK-ACTION] الإجراءات السريعة
-       ============================================ */
     .quick-grid {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
@@ -388,20 +319,9 @@
         font-size: 0.8rem;
     }
 
-    .quick-btn span {
-        font-size: 0.65rem;
-        font-weight: 600;
-        line-height: 1.2;
-    }
+    .quick-btn span { font-size: 0.65rem; font-weight: 600; line-height: 1.2; }
 
-    /* ============================================
-       [CHARTS] الرسوم البيانية
-       ============================================ */
-    .chart-container {
-        position: relative;
-        height: 220px;
-        width: 100%;
-    }
+    .chart-container { position: relative; height: 220px; width: 100%; }
 
     .chart-legend {
         display: flex;
@@ -418,31 +338,84 @@
         gap: 0.3rem;
     }
 
-    /* ============================================
-       [TOP PRODUCTS] أفضل المنتجات
-       ============================================ */
+    .chart-legend-dot { display: inline-block; width: 12px; height: 12px; border-radius: 2px; }
+    .chart-legend-line { display: inline-block; width: 12px; height: 2px; }
+
+    .top-products-tabs {
+        display: flex;
+        border-bottom: 1px solid var(--aqua-1);
+    }
+
     .top-products-tab {
-        font-size: 0.7rem !important;
-        padding: 0.5rem !important;
+        flex: 1;
         background: none;
         border: none;
+        font-weight: 600;
         cursor: pointer;
+        font-size: 0.7rem;
+        padding: 0.5rem;
+        color: #78909c;
+        border-bottom: 2px solid transparent;
         transition: all 0.2s;
     }
 
-    .top-products-tab.active {
-        color: var(--text-dark) !important;
-        border-bottom: 2px solid var(--aqua-4) !important;
-    }
+    .top-products-tab.active { color: var(--text-dark); border-bottom-color: var(--aqua-4); }
+
+    .top-products-list { display: none; }
+    .top-products-list.is-active { display: block; }
 
     .top-product-item {
-        padding: 0.5rem 0.75rem !important;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 0.5rem 0.75rem;
+        border-bottom: 1px solid var(--aqua-1);
         cursor: pointer;
     }
 
-    /* ============================================
-       [SIDE-LINK] روابط الشريط الجانبي
-       ============================================ */
+    .top-product-rank { width: 1.8rem; text-align: center; font-weight: 700; color: var(--aqua-4); }
+
+    .top-product-thumb {
+        width: 2rem;
+        height: 2rem;
+        border-radius: 6px;
+        background: var(--aqua-1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+
+    .top-product-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .top-product-thumb i { color: var(--aqua-4); font-size: 1rem; }
+
+    .top-product-info { flex: 1; min-width: 0; }
+    .top-product-name { font-weight: 600; font-size: 0.75rem; }
+    .top-product-stats { display: flex; gap: 0.8rem; margin-top: 0.2rem; }
+    .top-product-stats span { font-size: 0.6rem; }
+    .stat-qty { color: #00c853; }
+    .stat-val-item { color: var(--aqua-4); }
+
+    .progress-bar-track {
+        width: 60px;
+        height: 3px;
+        background: var(--aqua-1);
+        border-radius: 3px;
+        overflow: hidden;
+    }
+
+    .progress-bar-fill {
+        height: 100%;
+        background: var(--aqua-4);
+        width: 0%;
+        transition: width 0.4s ease;
+    }
+
+    .top-products-empty { text-align: center; padding: 1.5rem; color: #78909c; }
+    .top-products-empty i { font-size: 1.5rem; margin-bottom: 0.3rem; display: block; }
+    .top-products-empty span { font-size: 0.7rem; }
+
     .side-section-title {
         font-size: 0.65rem;
         font-weight: 700;
@@ -470,9 +443,7 @@
         transition: all 0.15s;
     }
 
-    .side-link:hover {
-        background: var(--aqua-1);
-    }
+    .side-link:hover { background: var(--aqua-1); }
 
     .side-link-icon {
         width: 1.5rem;
@@ -486,9 +457,7 @@
         flex-shrink: 0;
     }
 
-    .side-link-name {
-        flex: 1;
-    }
+    .side-link-name { flex: 1; }
 
     .side-link-arrow {
         color: var(--aqua-3);
@@ -497,11 +466,8 @@
         transition: opacity 0.15s;
     }
 
-    .side-link:hover .side-link-arrow {
-        opacity: 1;
-    }
+    .side-link:hover .side-link-arrow { opacity: 1; }
 
-    /* مجموعة رابط مع زر إضافة */
     .side-link-group {
         display: flex;
         align-items: center;
@@ -511,14 +477,8 @@
         transition: background 0.15s;
     }
 
-    .side-link-group:hover {
-        background: var(--aqua-1);
-    }
-
-    .side-link-group .side-link {
-        flex: 1;
-        border-radius: 0;
-    }
+    .side-link-group:hover { background: var(--aqua-1); }
+    .side-link-group .side-link { flex: 1; border-radius: 0; }
 
     .side-link-group .side-add-btn {
         width: 1.6rem;
@@ -538,14 +498,11 @@
         transition: all 0.15s;
     }
 
-    .side-link-group .side-add-btn:hover {
-        opacity: 0.85;
-        transform: scale(1.05);
-    }
+    .side-link-group .side-add-btn:hover { opacity: 0.85; transform: scale(1.05); }
+    .side-divider { border-top: 1px solid var(--aqua-1); margin: 0.4rem 0; }
 
-    /* ============================================
-       [ALERTS] تنبيهات
-       ============================================ */
+    .alerts-list { display: flex; flex-direction: column; gap: 0.4rem; }
+
     .alert-item {
         display: flex;
         gap: 0.5rem;
@@ -555,33 +512,28 @@
         transition: background 0.2s;
     }
 
-    .alert-item:hover {
-        background: var(--aqua-1);
-    }
+    .alert-item:hover { background: var(--aqua-1); }
+    .alert-warning { border-right: 3px solid #ffb300; }
+    .alert-danger { border-right: 3px solid #e53935; }
+    .alert-info { border-right: 3px solid #00897b; }
+    .alert-success { border-right: 3px solid #00c853; }
 
-    .alert-warning {
-        border-right: 3px solid #ffb300;
-    }
+    .alert-item i { font-size: 0.8rem; margin-top: 2px; flex-shrink: 0; }
+    .alert-icon-danger { color: #e53935; }
+    .alert-icon-warning { color: #ffb300; }
+    .alert-icon-info { color: #00897b; }
+    .alert-icon-success { color: #00c853; }
+    .alert-title { font-weight: 600; color: #333; font-size: 0.7rem; }
+    .alert-message { color: #666; font-size: 0.65rem; margin: 1px 0; }
+    .alert-link { font-size: 0.6rem; color: #0097a7; text-decoration: none; }
+    .alert-divider { height: 1px; background: #eee; }
 
-    .alert-danger {
-        border-right: 3px solid #e53935;
-    }
+    .alert-empty { text-align: center; padding: 1rem; color: #78909c; }
+    .alert-empty i { color: #00c853; font-size: 1.2rem; margin-bottom: 0.3rem; display: block; }
+    .alert-empty span { font-size: 0.7rem; }
 
-    .alert-info {
-        border-right: 3px solid #00897b;
-    }
+    .comments-list { display: flex; flex-direction: column; gap: 0.4rem; padding: 0.6rem; }
 
-    .alert-success {
-        border-right: 3px solid #00c853;
-    }
-
-    .alert-item i {
-        font-size: 0.8rem;
-    }
-
-    /* ============================================
-       [COMMENTS] التعليقات
-       ============================================ */
     .comment-item {
         display: flex;
         gap: 0.5rem;
@@ -591,22 +543,10 @@
         transition: all 0.15s;
     }
 
-    .comment-item:hover {
-        background: var(--aqua-2);
-    }
+    .comment-item:hover { background: var(--aqua-2); }
 
-    .comment-avatar {
-        width: 1.8rem;
-        height: 1.8rem;
-        border-radius: 50%;
-        object-fit: cover;
-        flex-shrink: 0;
-    }
-
-    .comment-body {
-        flex: 1;
-        min-width: 0;
-    }
+    .comment-avatar { width: 1.8rem; height: 1.8rem; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+    .comment-body { flex: 1; min-width: 0; }
 
     .comment-meta {
         display: flex;
@@ -615,10 +555,7 @@
         margin-bottom: 0.1rem;
     }
 
-    .comment-user {
-        font-size: 0.65rem;
-        font-weight: 600;
-    }
+    .comment-user { font-size: 0.65rem; font-weight: 600; }
 
     .comment-source {
         font-size: 0.5rem;
@@ -627,73 +564,33 @@
         color: white;
     }
 
-    .comment-source.fb {
-        background: #1877f2;
-    }
+    .comment-source.fb { background: #1877f2; }
+    .comment-source.tg { background: #0088cc; }
+    .comment-text { font-size: 0.6rem; color: #455a64; margin: 0; line-height: 1.3; }
+    .comment-time { font-size: 0.55rem; color: #90a4ae; margin-top: 0.1rem; }
 
-    .comment-source.tg {
-        background: #0088cc;
-    }
-
-    .comment-text {
+    .comments-view-all {
+        display: block;
+        text-align: center;
+        padding: 0.3rem;
         font-size: 0.6rem;
-        color: #455a64;
-        margin: 0;
-        line-height: 1.3;
+        color: var(--aqua-4);
+        text-decoration: none;
+        border-top: 1px solid var(--aqua-1);
+        margin-top: 0.2rem;
     }
 
-    .comment-time {
-        font-size: 0.55rem;
-        color: #90a4ae;
-        margin-top: 0.1rem;
-    }
+    .ic-aqua { background: linear-gradient(135deg, var(--aqua-4), #006064); }
+    .ic-teal { background: linear-gradient(135deg, #00897b, #00695c); }
+    .ic-amber { background: linear-gradient(135deg, #ffb300, #ff8f00); }
+    .ic-red { background: linear-gradient(135deg, #e53935, #b71c1c); }
+    .ic-gray { background: linear-gradient(135deg, #6c757d, #495057); }
+    .ic-purple { background: linear-gradient(135deg, #8e24aa, #6a1b9a); }
+    .ic-cyan { background: linear-gradient(135deg, #00838f, #006064); }
+    .ic-indigo { background: linear-gradient(135deg, #3949ab, #283593); }
+    .ic-orange { background: linear-gradient(135deg, #f4511e, #d84315); }
+    .ic-pink { background: linear-gradient(135deg, #d81b60, #ad1457); }
 
-    /* ============================================
-       [ICON-COLORS]
-       ============================================ */
-    .ic-aqua {
-        background: linear-gradient(135deg, var(--aqua-4), #006064);
-    }
-
-    .ic-teal {
-        background: linear-gradient(135deg, #00897b, #00695c);
-    }
-
-    .ic-amber {
-        background: linear-gradient(135deg, #ffb300, #ff8f00);
-    }
-
-    .ic-red {
-        background: linear-gradient(135deg, #e53935, #b71c1c);
-    }
-
-    .ic-gray {
-        background: linear-gradient(135deg, #6c757d, #495057);
-    }
-
-    .ic-purple {
-        background: linear-gradient(135deg, #8e24aa, #6a1b9a);
-    }
-
-    .ic-cyan {
-        background: linear-gradient(135deg, #00838f, #006064);
-    }
-
-    .ic-indigo {
-        background: linear-gradient(135deg, #3949ab, #283593);
-    }
-
-    .ic-orange {
-        background: linear-gradient(135deg, #f4511e, #d84315);
-    }
-
-    .ic-pink {
-        background: linear-gradient(135deg, #d81b60, #ad1457);
-    }
-
-    /* ============================================
-       [TOAST NOTIFICATIONS]
-       ============================================ */
     .toast-container {
         position: fixed;
         top: 20px;
@@ -720,36 +617,13 @@
         direction: rtl;
     }
 
-    .custom-toast.show {
-        transform: translateX(0);
-    }
-
-    .custom-toast.success {
-        border-right-color: #00897b;
-    }
-
-    .custom-toast.success .toast-icon {
-        background: #00897b;
-        color: white;
-    }
-
-    .custom-toast.error {
-        border-right-color: #e53935;
-    }
-
-    .custom-toast.error .toast-icon {
-        background: #e53935;
-        color: white;
-    }
-
-    .custom-toast.warning {
-        border-right-color: #ffb300;
-    }
-
-    .custom-toast.warning .toast-icon {
-        background: #ffb300;
-        color: white;
-    }
+    .custom-toast.show { transform: translateX(0); }
+    .custom-toast.success { border-right-color: #00897b; }
+    .custom-toast.success .toast-icon { background: #00897b; color: white; }
+    .custom-toast.error { border-right-color: #e53935; }
+    .custom-toast.error .toast-icon { background: #e53935; color: white; }
+    .custom-toast.warning { border-right-color: #ffb300; }
+    .custom-toast.warning .toast-icon { background: #ffb300; color: white; }
 
     .toast-icon {
         width: 30px;
@@ -762,22 +636,9 @@
         font-size: 0.9rem;
     }
 
-    .toast-content {
-        flex: 1;
-    }
-
-    .toast-title {
-        font-weight: 700;
-        font-size: 0.8rem;
-        margin-bottom: 2px;
-        color: var(--text-dark);
-    }
-
-    .toast-message {
-        font-size: 0.7rem;
-        color: #546e7a;
-        line-height: 1.3;
-    }
+    .toast-content { flex: 1; }
+    .toast-title { font-weight: 700; font-size: 0.8rem; margin-bottom: 2px; color: var(--text-dark); }
+    .toast-message { font-size: 0.7rem; color: #546e7a; line-height: 1.3; }
 
     .toast-close {
         background: none;
@@ -788,13 +649,8 @@
         transition: color 0.2s;
     }
 
-    .toast-close:hover {
-        color: var(--text-dark);
-    }
+    .toast-close:hover { color: var(--text-dark); }
 
-    /* ============================================
-       [FOOTER]
-       ============================================ */
     .dash-footer {
         text-align: center;
         padding: 1rem;
@@ -805,111 +661,38 @@
         width: 100%;
     }
 
-    /* ============================================
-       [RESPONSIVE]
-       ============================================ */
     @media (max-width: 1200px) {
-        .stats-row {
-            grid-template-columns: repeat(3, 1fr);
-        }
+        .stats-row { grid-template-columns: repeat(3, 1fr); }
     }
 
     @media (max-width: 992px) {
-        .dashboard-content {
-            grid-template-columns: 1fr;
-        }
-        .ops-grid {
-            grid-template-columns: repeat(2, 1fr);
-        }
+        .dashboard-content { grid-template-columns: 1fr; }
+        .ops-grid { grid-template-columns: repeat(2, 1fr); }
     }
 
     @media (max-width: 768px) {
-        .dashboard {
-            padding: 0.5rem;
-        }
-
-        .stats-row {
-            grid-template-columns: repeat(2, 1fr);
-            gap: 0.5rem;
-        }
-
-        .ops-grid {
-            grid-template-columns: repeat(2, 1fr);
-        }
-
-        .quick-grid {
-            grid-template-columns: repeat(2, 1fr);
-        }
-
-        .dash-header {
-            flex-direction: column;
-            text-align: center;
-            padding: 0.75rem;
-        }
-
-        .dash-header-sub {
-            justify-content: center;
-        }
-
-        .stat-card {
-            padding: 0.6rem;
-        }
-
-        .stat-val {
-            font-size: 1.1rem;
-        }
-
-        .chart-container {
-            height: 200px;
-        }
+        .dashboard { padding: 0.5rem; }
+        .stats-row { grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
+        .ops-grid { grid-template-columns: repeat(2, 1fr); }
+        .quick-grid { grid-template-columns: repeat(2, 1fr); }
+        .dash-header { flex-direction: column; text-align: center; padding: 0.75rem; }
+        .dash-header-sub { justify-content: center; }
+        .stat-card { padding: 0.6rem; }
+        .stat-val { font-size: 1.1rem; }
+        .chart-container { height: 200px; }
     }
 
     @media (max-width: 576px) {
-        .stats-row {
-            grid-template-columns: 1fr 1fr;
-            gap: 0.5rem;
-        }
-
-        .ops-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .quick-grid {
-            grid-template-columns: 1fr 1fr;
-        }
-
-        .stat-card {
-            padding: 0.5rem;
-        }
-
-        .stat-val {
-            font-size: 1rem;
-        }
-
-        .stat-lbl {
-            font-size: 0.55rem;
-        }
-
-        .stat-icon {
-            width: 2rem;
-            height: 2rem;
-            font-size: 0.8rem;
-        }
-
-        .chart-container {
-            height: 180px;
-        }
-
-        .toast-container {
-            left: 10px;
-            right: 10px;
-            top: 10px;
-        }
-
-        .custom-toast {
-            width: 100%;
-            min-width: auto;
-        }
+        .stats-row { grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+        .ops-grid { grid-template-columns: 1fr; }
+        .quick-grid { grid-template-columns: 1fr 1fr; }
+        .stat-card { padding: 0.5rem; }
+        .stat-val { font-size: 1rem; }
+        .stat-lbl { font-size: 0.55rem; }
+        .stat-icon { width: 2rem; height: 2rem; font-size: 0.8rem; }
+        .chart-container { height: 180px; }
+        .toast-container { left: 10px; right: 10px; top: 10px; }
+        .custom-toast { width: 100%; min-width: auto; }
     }
 </style>
 {% endblock %}
@@ -917,7 +700,6 @@
 {% block content %}
 <div class="dashboard">
 
-    <!-- ==================== رأس الصفحة ==================== -->
     <header class="dash-header">
         <div>
             <h1><i class="fas fa-th-large"></i> لوحة التحكم</h1>
@@ -927,13 +709,12 @@
             </div>
         </div>
         {% if user.is_staff %}
-        <a href="{% url 'accounts:register' %}" class="btn btn-primary" style="padding: 0.4rem 1rem; font-size: 0.75rem; border-radius: 8px; background: linear-gradient(135deg, var(--aqua-4) 0%, #006064 100%); color: white; text-decoration: none;">
+        <a href="{% url 'accounts:register' %}" class="btn-dash-header">
             <i class="fas fa-user-plus"></i> مستخدم جديد
         </a>
         {% endif %}
     </header>
 
-    <!-- ==================== الإحصائيات ==================== -->
     <div class="dashboard-stats">
         <div class="stats-row">
             <div class="stat-card c-aqua">
@@ -941,15 +722,13 @@
                 <div class="stat-info">
                     <div class="stat-val">{{ purch_count|default:"0" }}</div>
                     <div class="stat-lbl">فواتير الشراء</div>
-                    <div class="stat-trend {% if purch_trend > 0 %}trend-up{% elif purch_trend < 0 %}trend-down{% else %}trend-neutral{% endif %}">
-                        {% if purch_trend > 0 %}
-                            <i class="fas fa-arrow-up"></i> {{ purch_trend|floatformat:1 }}%
-                        {% elif purch_trend < 0 %}
-                            <i class="fas fa-arrow-down"></i> {{ purch_trend|floatformat:1 }}%
-                        {% else %}
-                            <i class="fas fa-minus"></i> 0%
-                        {% endif %}
-                    </div>
+                    {% if purch_trend > 0 %}
+                    <div class="stat-trend trend-up"><i class="fas fa-arrow-up"></i> {{ purch_trend|floatformat:1 }}%</div>
+                    {% elif purch_trend < 0 %}
+                    <div class="stat-trend trend-down"><i class="fas fa-arrow-down"></i> {{ purch_trend|floatformat:1 }}%</div>
+                    {% else %}
+                    <div class="stat-trend trend-neutral"><i class="fas fa-minus"></i> 0%</div>
+                    {% endif %}
                 </div>
             </div>
             <div class="stat-card c-teal">
@@ -957,15 +736,13 @@
                 <div class="stat-info">
                     <div class="stat-val">{{ sale_count|default:"0" }}</div>
                     <div class="stat-lbl">فواتير البيع</div>
-                    <div class="stat-trend {% if sale_trend > 0 %}trend-up{% elif sale_trend < 0 %}trend-down{% else %}trend-neutral{% endif %}">
-                        {% if sale_trend > 0 %}
-                            <i class="fas fa-arrow-up"></i> {{ sale_trend|floatformat:1 }}%
-                        {% elif sale_trend < 0 %}
-                            <i class="fas fa-arrow-down"></i> {{ sale_trend|floatformat:1 }}%
-                        {% else %}
-                            <i class="fas fa-minus"></i> 0%
-                        {% endif %}
-                    </div>
+                    {% if sale_trend > 0 %}
+                    <div class="stat-trend trend-up"><i class="fas fa-arrow-up"></i> {{ sale_trend|floatformat:1 }}%</div>
+                    {% elif sale_trend < 0 %}
+                    <div class="stat-trend trend-down"><i class="fas fa-arrow-down"></i> {{ sale_trend|floatformat:1 }}%</div>
+                    {% else %}
+                    <div class="stat-trend trend-neutral"><i class="fas fa-minus"></i> 0%</div>
+                    {% endif %}
                 </div>
             </div>
             <div class="stat-card c-amber">
@@ -973,15 +750,13 @@
                 <div class="stat-info">
                     <div class="stat-val">{{ return_count|default:"0" }}</div>
                     <div class="stat-lbl">المرتجعات</div>
-                    <div class="stat-trend {% if return_trend > 0 %}trend-up{% elif return_trend < 0 %}trend-down{% else %}trend-neutral{% endif %}">
-                        {% if return_trend > 0 %}
-                            <i class="fas fa-arrow-up"></i> {{ return_trend|floatformat:1 }}%
-                        {% elif return_trend < 0 %}
-                            <i class="fas fa-arrow-down"></i> {{ return_trend|floatformat:1 }}%
-                        {% else %}
-                            <i class="fas fa-minus"></i> 0%
-                        {% endif %}
-                    </div>
+                    {% if return_trend > 0 %}
+                    <div class="stat-trend trend-up"><i class="fas fa-arrow-up"></i> {{ return_trend|floatformat:1 }}%</div>
+                    {% elif return_trend < 0 %}
+                    <div class="stat-trend trend-down"><i class="fas fa-arrow-down"></i> {{ return_trend|floatformat:1 }}%</div>
+                    {% else %}
+                    <div class="stat-trend trend-neutral"><i class="fas fa-minus"></i> 0%</div>
+                    {% endif %}
                 </div>
             </div>
             <div class="stat-card c-purple">
@@ -1003,11 +778,8 @@
         </div>
     </div>
 
-    <!-- ==================== المحتوى الرئيسي (عمودين) ==================== -->
     <div class="dashboard-content">
-        <!-- ========== العمود الأيمن (العمليات والرسوم البيانية) ========== -->
         <div class="col-right">
-            <!-- العمليات الأساسية -->
             <div class="card">
                 <div class="card-header">
                     <i class="fas fa-cogs"></i> العمليات الأساسية
@@ -1091,7 +863,6 @@
                 </div>
             </div>
 
-            <!-- المتجر الإلكتروني -->
             <div class="card">
                 <div class="card-header">
                     <i class="fas fa-store-alt"></i> المتجر الإلكتروني
@@ -1159,7 +930,6 @@
                 </div>
             </div>
 
-            <!-- الإجراءات السريعة -->
             <div class="card">
                 <div class="card-header">
                     <i class="fas fa-bolt"></i> إجراءات سريعة
@@ -1186,7 +956,6 @@
                 </div>
             </div>
 
-            <!-- المبيعات اليومية (آخر 7 أيام) -->
             <div class="card">
                 <div class="card-header">
                     <i class="fas fa-chart-line"></i> المبيعات اليومية (آخر 7 أيام)
@@ -1199,100 +968,98 @@
                 </div>
             </div>
 
-            <!-- التحليل المتكامل (آخر 30 يوماً) -->
             <div class="card">
                 <div class="card-header">
                     <i class="fas fa-chart-line"></i> التحليل المتكامل (آخر 30 يوماً)
                     <span class="header-badge">مبيعات | أرباح | مصروفات</span>
                 </div>
                 <div class="card-body">
-                    <div class="chart-container" style="height: 220px;">
+                    <div class="chart-container">
                         <canvas id="advancedChart"></canvas>
                     </div>
                     <div class="chart-legend">
-                        <span><span style="display: inline-block; width: 12px; height: 12px; background: rgba(0, 151, 167, 0.7); border-radius: 2px;"></span> المبيعات</span>
-                        <span><span style="display: inline-block; width: 12px; height: 2px; background: #00c853;"></span> صافي الربح</span>
-                        <span><span style="display: inline-block; width: 12px; height: 2px; background: #ff1744;"></span> المصروفات</span>
+                        <span><span class="chart-legend-dot" style="background: rgba(0, 151, 167, 0.7);"></span> المبيعات</span>
+                        <span><span class="chart-legend-line" style="background: #00c853;"></span> صافي الربح</span>
+                        <span><span class="chart-legend-line" style="background: #ff1744;"></span> المصروفات</span>
                     </div>
                 </div>
             </div>
 
-            <!-- أفضل المنتجات مبيعاً -->
             <div class="card">
                 <div class="card-header">
                     <i class="fas fa-trophy"></i> أفضل المنتجات مبيعاً
                     <span class="header-badge">الـ 10 الأوائل</span>
                 </div>
                 <div class="card-body" style="padding: 0;">
-                    <div style="display: flex; border-bottom: 1px solid var(--aqua-1);">
-                        <button class="top-products-tab active" data-tab="quantity" style="flex: 1; background: none; border: none; font-weight: 600; cursor: pointer;">
+                    <div class="top-products-tabs">
+                        <button class="top-products-tab active" data-tab="quantity">
                             <i class="fas fa-chart-simple"></i> الأكثر مبيعاً (كمية)
                         </button>
-                        <button class="top-products-tab" data-tab="value" style="flex: 1; background: none; border: none; font-weight: 600; cursor: pointer;">
+                        <button class="top-products-tab" data-tab="value">
                             <i class="fas fa-chart-line"></i> الأعلى قيمة (مالياً)
                         </button>
                     </div>
 
-                    <div id="top-products-quantity" class="top-products-list" style="display: block;">
+                    <div id="top-products-quantity" class="top-products-list is-active">
                         {% if top_products.top_by_quantity %}
                             {% for product in top_products.top_by_quantity %}
-                            <div class="top-product-item" style="display: flex; align-items: center; gap: 0.6rem; padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--aqua-1);">
-                                <div style="width: 1.8rem; text-align: center; font-weight: 700; color: var(--aqua-4);">#{{ forloop.counter }}</div>
-                                <div style="width: 2rem; height: 2rem; border-radius: 6px; background: var(--aqua-1); display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                            <div class="top-product-item">
+                                <div class="top-product-rank">#{{ forloop.counter }}</div>
+                                <div class="top-product-thumb">
                                     {% if product.image %}
-                                    <img src="{{ product.image }}" alt="{{ product.name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                                    <img src="{{ product.image }}" alt="{{ product.name }}">
                                     {% else %}
-                                    <i class="fas fa-box" style="color: var(--aqua-4); font-size: 1rem;"></i>
+                                    <i class="fas fa-box"></i>
                                     {% endif %}
                                 </div>
-                                <div style="flex: 1; min-width: 0;">
-                                    <div style="font-weight: 600; font-size: 0.75rem;">{{ product.name }}</div>
-                                    <div style="display: flex; gap: 0.8rem; margin-top: 0.2rem;">
-                                        <span style="font-size: 0.6rem; color: #00c853;"><i class="fas fa-cubes"></i> {{ product.quantity|floatformat:0 }}</span>
-                                        <span style="font-size: 0.6rem; color: var(--aqua-4);"><i class="fas fa-dollar-sign"></i> {{ product.value|floatformat:0 }}</span>
+                                <div class="top-product-info">
+                                    <div class="top-product-name">{{ product.name }}</div>
+                                    <div class="top-product-stats">
+                                        <span class="stat-qty"><i class="fas fa-cubes"></i> {{ product.quantity|floatformat:0 }}</span>
+                                        <span class="stat-val-item"><i class="fas fa-dollar-sign"></i> {{ product.value|floatformat:0 }}</span>
                                     </div>
                                 </div>
-                                <div style="width: 60px; height: 3px; background: var(--aqua-1); border-radius: 3px; overflow: hidden;">
-                                    <div style="width: {% widthratio product.quantity top_products.top_by_quantity.0.quantity 100 %}%; height: 100%; background: var(--aqua-4);"></div>
+                                <div class="progress-bar-track">
+                                    <div class="progress-bar-fill" data-pct="{% widthratio product.quantity top_products.top_by_quantity.0.quantity 100 %}"></div>
                                 </div>
                             </div>
                             {% endfor %}
                         {% else %}
-                            <div style="text-align: center; padding: 1.5rem; color: #78909c;">
-                                <i class="fas fa-chart-line" style="font-size: 1.5rem; margin-bottom: 0.3rem; display: block;"></i>
-                                <span style="font-size: 0.7rem;">لا توجد مبيعات حتى الآن</span>
+                            <div class="top-products-empty">
+                                <i class="fas fa-chart-line"></i>
+                                <span>لا توجد مبيعات حتى الآن</span>
                             </div>
                         {% endif %}
                     </div>
 
-                    <div id="top-products-value" class="top-products-list" style="display: none;">
+                    <div id="top-products-value" class="top-products-list">
                         {% if top_products.top_by_value %}
                             {% for product in top_products.top_by_value %}
-                            <div class="top-product-item" style="display: flex; align-items: center; gap: 0.6rem; padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--aqua-1);">
-                                <div style="width: 1.8rem; text-align: center; font-weight: 700; color: var(--aqua-4);">#{{ forloop.counter }}</div>
-                                <div style="width: 2rem; height: 2rem; border-radius: 6px; background: var(--aqua-1); display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                            <div class="top-product-item">
+                                <div class="top-product-rank">#{{ forloop.counter }}</div>
+                                <div class="top-product-thumb">
                                     {% if product.image %}
-                                    <img src="{{ product.image }}" alt="{{ product.name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                                    <img src="{{ product.image }}" alt="{{ product.name }}">
                                     {% else %}
-                                    <i class="fas fa-box" style="color: var(--aqua-4); font-size: 1rem;"></i>
+                                    <i class="fas fa-box"></i>
                                     {% endif %}
                                 </div>
-                                <div style="flex: 1; min-width: 0;">
-                                    <div style="font-weight: 600; font-size: 0.75rem;">{{ product.name }}</div>
-                                    <div style="display: flex; gap: 0.8rem; margin-top: 0.2rem;">
-                                        <span style="font-size: 0.6rem; color: #00c853;"><i class="fas fa-cubes"></i> {{ product.quantity|floatformat:0 }}</span>
-                                        <span style="font-size: 0.6rem; color: var(--aqua-4);"><i class="fas fa-dollar-sign"></i> {{ product.value|floatformat:0 }}</span>
+                                <div class="top-product-info">
+                                    <div class="top-product-name">{{ product.name }}</div>
+                                    <div class="top-product-stats">
+                                        <span class="stat-qty"><i class="fas fa-cubes"></i> {{ product.quantity|floatformat:0 }}</span>
+                                        <span class="stat-val-item"><i class="fas fa-dollar-sign"></i> {{ product.value|floatformat:0 }}</span>
                                     </div>
                                 </div>
-                                <div style="width: 60px; height: 3px; background: var(--aqua-1); border-radius: 3px; overflow: hidden;">
-                                    <div style="width: {% widthratio product.value top_products.top_by_value.0.value 100 %}%; height: 100%; background: var(--aqua-4);"></div>
+                                <div class="progress-bar-track">
+                                    <div class="progress-bar-fill" data-pct="{% widthratio product.value top_products.top_by_value.0.value 100 %}"></div>
                                 </div>
                             </div>
                             {% endfor %}
                         {% else %}
-                            <div style="text-align: center; padding: 1.5rem; color: #78909c;">
-                                <i class="fas fa-chart-line" style="font-size: 1.5rem; margin-bottom: 0.3rem; display: block;"></i>
-                                <span style="font-size: 0.7rem;">لا توجد مبيعات حتى الآن</span>
+                            <div class="top-products-empty">
+                                <i class="fas fa-chart-line"></i>
+                                <span>لا توجد مبيعات حتى الآن</span>
                             </div>
                         {% endif %}
                     </div>
@@ -1300,9 +1067,7 @@
             </div>
         </div>
 
-        <!-- ========== العمود الأيسر (التقارير والإعدادات والتنبيهات) ========== -->
         <div class="col-left">
-            <!-- تنبيهات النظام -->
             <div class="card">
                 <div class="card-header">
                     <i class="fas fa-bell"></i> تنبيهات النظام
@@ -1310,41 +1075,37 @@
                 </div>
                 <div class="card-body">
                     {% if alerts %}
-                        <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                        <div class="alerts-list">
                             {% for alert in alerts %}
                             <div class="alert-item alert-{{ alert.type }}">
-                                <i class="fas {{ alert.icon }}" style="color: 
-                                    {% if alert.type == 'danger' %}#e53935
-                                    {% elif alert.type == 'warning' %}#ffb300
-                                    {% else %}#00897b{% endif %}; margin-top: 2px; flex-shrink: 0;"></i>
+                                <i class="fas {{ alert.icon }} alert-icon-{{ alert.type }}"></i>
                                 <div style="flex: 1;">
-                                    <div style="font-weight: 600; color: #333; font-size: 0.7rem;">{{ alert.title }}</div>
-                                    <div style="color: #666; font-size: 0.65rem; margin: 1px 0;">{{ alert.message }}</div>
+                                    <div class="alert-title">{{ alert.title }}</div>
+                                    <div class="alert-message">{{ alert.message }}</div>
                                     {% if alert.link %}
-                                    <a href="{{ alert.link }}" style="font-size: 0.6rem; color: #0097a7; text-decoration: none;">
+                                    <a href="{{ alert.link }}" class="alert-link">
                                         {{ alert.link_text|default:"عرض التفاصيل" }} <i class="fas fa-arrow-left"></i>
                                     </a>
                                     {% endif %}
                                 </div>
                             </div>
-                            {% if not forloop.last %}<div style="height: 1px; background: #eee;"></div>{% endif %}
+                            {% if not forloop.last %}<div class="alert-divider"></div>{% endif %}
                             {% endfor %}
                         </div>
                     {% else %}
-                        <div style="text-align: center; padding: 1rem; color: #78909c;">
-                            <i class="fas fa-check-circle" style="color: #00c853; font-size: 1.2rem; margin-bottom: 0.3rem; display: block;"></i>
-                            <span style="font-size: 0.7rem;">لا توجد تنبيهات جديدة</span>
+                        <div class="alert-empty">
+                            <i class="fas fa-check-circle"></i>
+                            <span>لا توجد تنبيهات جديدة</span>
                         </div>
                     {% endif %}
                 </div>
             </div>
 
-            <!-- التقارير المالية -->
             <div class="card">
                 <div class="card-header">
                     <i class="fas fa-chart-pie"></i> التقارير
                 </div>
-                <div class="card-body" style="padding: 0.6rem 0.8rem;">
+                <div class="card-body card-body-compact">
                     <div class="side-section-title"><i class="fas fa-chart-line"></i> تقارير مالية</div>
                     <a href="{% url 'invoice:profit_report' %}" class="side-link">
                         <div class="side-link-icon ic-teal"><i class="fas fa-chart-line"></i></div>
@@ -1395,12 +1156,11 @@
                 </div>
             </div>
 
-            <!-- إعدادات النظام -->
             <div class="card">
                 <div class="card-header">
                     <i class="fas fa-sliders-h"></i> إعدادات النظام
                 </div>
-                <div class="card-body" style="padding: 0.6rem 0.8rem;">
+                <div class="card-body card-body-compact">
                     <a href="{% url 'invoice:email_settings' %}" class="side-link">
                         <div class="side-link-icon ic-red"><i class="fas fa-envelope-open-text"></i></div>
                         <span class="side-link-name">إعدادات البريد</span>
@@ -1446,7 +1206,7 @@
                         </a>
                         <a href="{% url 'invoice:price_type_create' %}" class="side-add-btn"><i class="fas fa-plus"></i></a>
                     </div>
-                    <div style="border-top: 1px solid var(--aqua-1); margin: 0.4rem 0;"></div>
+                    <div class="side-divider"></div>
                     <a href="{% url 'accounts:system_logs' %}" class="side-link">
                         <div class="side-link-icon ic-gray"><i class="fas fa-file-alt"></i></div>
                         <span class="side-link-name">سجلات النظام</span>
@@ -1462,13 +1222,12 @@
                 </div>
             </div>
 
-            <!-- التعليقات والتفاعلات -->
             <div class="card">
                 <div class="card-header">
                     <i class="fas fa-comments"></i> التعليقات والتفاعلات
                     <span class="header-badge">جديد</span>
                 </div>
-                <div class="card-body" style="display: flex; flex-direction: column; gap: 0.4rem; padding: 0.6rem;">
+                <div class="comments-list">
                     <div class="comment-item">
                         <img src="https://i.pravatar.cc/40?img=1" alt="User" class="comment-avatar">
                         <div class="comment-body">
@@ -1502,7 +1261,7 @@
                             <div class="comment-time">منذ ساعة</div>
                         </div>
                     </div>
-                    <a href="#" style="display: block; text-align: center; padding: 0.3rem; font-size: 0.6rem; color: var(--aqua-4); text-decoration: none; border-top: 1px solid var(--aqua-1); margin-top: 0.2rem;">
+                    <a href="#" class="comments-view-all">
                         عرض كل التعليقات <i class="fas fa-arrow-left"></i>
                     </a>
                 </div>
@@ -1510,33 +1269,35 @@
         </div>
     </div>
 
-    <!-- ==================== ذيل الصفحة ==================== -->
     <div class="dash-footer">
         <i class="fas fa-code-branch"></i> {{ settings.company_name|default:"نظام إدارة المبيعات" }} — الإصدار 2.0
     </div>
 </div>
 
-<!-- حاوية الإشعارات -->
 <div class="toast-container" id="toastContainer"></div>
 {% endblock %}
 
 {% block extra_js %}
+{# ✅ json_script: فلتر Django مدمج يُنتج <script type="application/json"> بـ JSON صحيح #}
+{{ chart_labels|json_script:"chartLabels" }}
+{{ chart_values|json_script:"chartValues" }}
+{{ advanced_chart_data|json_script:"advancedChartData" }}
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // الرسم البياني الأساسي
-        const chartCanvas = document.getElementById('salesChart');
-        if (chartCanvas) {
-            const chartData = {
-                labels: {{ chart_labels|safe }},
-                values: {{ chart_values|safe }}
-            };
-            new Chart(chartCanvas, {
+
+        var salesChartCanvas = document.getElementById('salesChart');
+        if (salesChartCanvas) {
+            var chartLabels = JSON.parse(document.getElementById('chartLabels').textContent);
+            var chartValues = JSON.parse(document.getElementById('chartValues').textContent);
+
+            new Chart(salesChartCanvas, {
                 type: 'line',
                 data: {
-                    labels: chartData.labels,
+                    labels: chartLabels,
                     datasets: [{
                         label: 'المبيعات',
-                        data: chartData.values,
+                        data: chartValues,
                         borderColor: '#0097a7',
                         backgroundColor: 'rgba(0, 151, 167, 0.1)',
                         borderWidth: 2,
@@ -1560,18 +1321,18 @@
             });
         }
 
-        // الرسم البياني المتكامل
-        const advancedChartCanvas = document.getElementById('advancedChart');
-        if (advancedChartCanvas) {
-            const advancedChartData = {{ advanced_chart_data|safe }};
-            new Chart(advancedChartCanvas, {
+        var advancedCanvas = document.getElementById('advancedChart');
+        if (advancedCanvas) {
+            var advancedData = JSON.parse(document.getElementById('advancedChartData').textContent);
+
+            new Chart(advancedCanvas, {
                 type: 'line',
                 data: {
-                    labels: advancedChartData.labels,
+                    labels: advancedData.labels,
                     datasets: [
                         {
                             label: 'المبيعات',
-                            data: advancedChartData.sales,
+                            data: advancedData.sales,
                             type: 'bar',
                             backgroundColor: 'rgba(0, 151, 167, 0.6)',
                             borderColor: 'rgba(0, 151, 167, 1)',
@@ -1581,7 +1342,7 @@
                         },
                         {
                             label: 'صافي الربح',
-                            data: advancedChartData.profit,
+                            data: advancedData.profit,
                             type: 'line',
                             borderColor: '#00c853',
                             backgroundColor: 'transparent',
@@ -1597,7 +1358,7 @@
                         },
                         {
                             label: 'المصروفات',
-                            data: advancedChartData.expenses,
+                            data: advancedData.expenses,
                             type: 'line',
                             borderColor: '#ff1744',
                             backgroundColor: 'transparent',
@@ -1618,59 +1379,106 @@
                     maintainAspectRatio: false,
                     interaction: { mode: 'index', intersect: false },
                     plugins: {
-                        tooltip: { callbacks: { label: function(ctx) { return ctx.dataset.label + ': ' + ctx.raw.toLocaleString() + ' ل.س'; } } },
-                        legend: { position: 'top', labels: { font: { size: 9 }, usePointStyle: true, boxWidth: 6 } }
+                        tooltip: {
+                            callbacks: {
+                                label: function(ctx) {
+                                    return ctx.dataset.label + ': ' + ctx.raw.toLocaleString() + ' ل.س';
+                                }
+                            }
+                        },
+                        legend: {
+                            position: 'top',
+                            labels: { font: { size: 9 }, usePointStyle: true, boxWidth: 6 }
+                        }
                     },
                     scales: {
-                        y: { position: 'right', title: { display: true, text: 'المبيعات', font: { size: 8 } }, ticks: { font: { size: 8 }, callback: v => v.toLocaleString() }, grid: { color: '#e0e0e0' } },
-                        y1: { position: 'left', title: { display: true, text: 'الأرباح / المصروفات', font: { size: 8 } }, ticks: { font: { size: 8 }, callback: v => v.toLocaleString() }, grid: { display: false } },
+                        y: {
+                            position: 'right',
+                            title: { display: true, text: 'المبيعات', font: { size: 8 } },
+                            ticks: { font: { size: 8 }, callback: function(v) { return v.toLocaleString(); } },
+                            grid: { color: '#e0e0e0' }
+                        },
+                        y1: {
+                            position: 'left',
+                            title: { display: true, text: 'الأرباح / المصروفات', font: { size: 8 } },
+                            ticks: { font: { size: 8 }, callback: function(v) { return v.toLocaleString(); } },
+                            grid: { display: false }
+                        },
                         x: { ticks: { font: { size: 8 } }, grid: { display: false } }
                     }
                 }
             });
         }
 
-        // تبديل التبويبات
-        const tabs = document.querySelectorAll('.top-products-tab');
-        const quantityList = document.getElementById('top-products-quantity');
-        const valueList = document.getElementById('top-products-value');
-        if (tabs.length) {
-            tabs.forEach(tab => {
+        document.querySelectorAll('.progress-bar-fill').forEach(function(bar) {
+            var pct = bar.getAttribute('data-pct');
+            if (pct !== null) {
+                bar.style.width = pct + '%';
+            }
+        });
+
+        var tabs = document.querySelectorAll('.top-products-tab');
+        var quantityList = document.getElementById('top-products-quantity');
+        var valueList = document.getElementById('top-products-value');
+
+        if (tabs.length && quantityList && valueList) {
+            tabs.forEach(function(tab) {
                 tab.addEventListener('click', function() {
-                    tabs.forEach(t => {
-                        t.classList.remove('active');
-                        t.style.color = '#78909c';
-                        t.style.borderBottom = '2px solid transparent';
-                    });
+                    tabs.forEach(function(t) { t.classList.remove('active'); });
                     this.classList.add('active');
-                    this.style.color = 'var(--text-dark)';
-                    this.style.borderBottom = '2px solid var(--aqua-4)';
-                    const tabName = this.getAttribute('data-tab');
+
+                    var tabName = this.getAttribute('data-tab');
                     if (tabName === 'quantity') {
-                        quantityList.style.display = 'block';
-                        valueList.style.display = 'none';
+                        quantityList.classList.add('is-active');
+                        valueList.classList.remove('is-active');
                     } else {
-                        quantityList.style.display = 'none';
-                        valueList.style.display = 'block';
+                        quantityList.classList.remove('is-active');
+                        valueList.classList.add('is-active');
                     }
+
+                    var activeList = (tabName === 'quantity') ? quantityList : valueList;
+                    activeList.querySelectorAll('.progress-bar-fill').forEach(function(bar) {
+                        var pct = bar.getAttribute('data-pct');
+                        if (pct !== null) {
+                            bar.style.width = '0%';
+                            requestAnimationFrame(function() {
+                                bar.style.width = pct + '%';
+                            });
+                        }
+                    });
                 });
             });
         }
     });
 
-    function showToast(title, message, type = 'success') {
-        const container = document.getElementById('toastContainer');
-        let iconClass = 'fa-check-circle';
-        let bgColor = '#00897b';
+    function showToast(title, message, type) {
+        type = type || 'success';
+        var container = document.getElementById('toastContainer');
+        var iconClass = 'fa-check-circle';
+        var bgColor = '#00897b';
         if (type === 'error') { iconClass = 'fa-times-circle'; bgColor = '#e53935'; }
         else if (type === 'warning') { iconClass = 'fa-exclamation-circle'; bgColor = '#ffb300'; }
-        const toast = document.createElement('div');
-        toast.className = `custom-toast ${type}`;
-        toast.innerHTML = `<div class="toast-icon" style="background:${bgColor};"><i class="fas ${iconClass}"></i></div><div class="toast-content"><div class="toast-title">${title}</div><div class="toast-message">${message}</div></div><button class="toast-close"><i class="fas fa-times"></i></button>`;
-        toast.querySelector('.toast-close').addEventListener('click', () => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); });
+
+        var toast = document.createElement('div');
+        toast.className = 'custom-toast ' + type;
+        toast.innerHTML = '<div class="toast-icon" style="background:' + bgColor + ';"><i class="fas ' + iconClass + '"></i></div>' +
+            '<div class="toast-content"><div class="toast-title">' + title + '</div>' +
+            '<div class="toast-message">' + message + '</div></div>' +
+            '<button class="toast-close"><i class="fas fa-times"></i></button>';
+
+        toast.querySelector('.toast-close').addEventListener('click', function() {
+            toast.classList.remove('show');
+            setTimeout(function() { toast.remove(); }, 400);
+        });
+
         container.appendChild(toast);
-        setTimeout(() => toast.classList.add('show'), 10);
-        setTimeout(() => { if (toast.parentElement) { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); } }, 4000);
+        setTimeout(function() { toast.classList.add('show'); }, 10);
+        setTimeout(function() {
+            if (toast.parentElement) {
+                toast.classList.remove('show');
+                setTimeout(function() { toast.remove(); }, 400);
+            }
+        }, 4000);
     }
 </script>
-{% endblock %}444
+{% endblock %}
