@@ -188,14 +188,12 @@
 
         #navbarSupportedContent>ul>li { z-index: 1; }
 
-        /* ===== القوائم المنسدلة (تعديل التمركز) ===== */
+        /* ===== القوائم المنسدلة ===== */
         .menu-submenu {
             position: absolute;
             top: 100%;
-            /* التعديل: جعل القائمة في المنتصف تماماً */
             right: 50%;
             transform: translateX(50%);
-            
             min-width: 240px;
             background: white;
             border-radius: 0 0 4px 4px;
@@ -205,8 +203,7 @@
             padding: 6px 0;
             opacity: 0;
             visibility: hidden;
-            /* تعديل التحريك ليكون من الأعلى للأسفل فقط */
-            transform-origin: top center; 
+            transform-origin: top center;
             transform: translateX(50%) translateY(-6px);
             transition: all 0.25s ease;
             z-index: 1060;
@@ -216,8 +213,8 @@
         }
 
         #navbarSupportedContent li.has-submenu:hover>.menu-submenu {
-            opacity: 1; 
-            visibility: visible; 
+            opacity: 1;
+            visibility: visible;
             transform: translateX(50%) translateY(0);
         }
 
@@ -318,10 +315,8 @@
         .user-dropdown-menu {
             position: absolute;
             top: calc(100% + 10px);
-            /* التعديل: جعل القائمة في المنتصف بالنسبة للزر */
             left: 50%;
             transform: translateX(-50%);
-            
             min-width: 230px;
             background: white;
             border-radius: 4px;
@@ -329,17 +324,16 @@
             border: 1px solid var(--aqua-2);
             padding: 0;
             opacity: 0; visibility: hidden;
-            /* إضافة transform للانيميشن */
             transform-origin: top center;
             transform: translateX(-50%) scale(0.95) translateY(-4px);
             transition: all 0.2s ease;
             z-index: 1070;
             overflow: hidden;
         }
-        .user-dropdown-menu.show { 
-            opacity: 1; 
-            visibility: visible; 
-            transform: translateX(-50%) scale(1) translateY(0); 
+        .user-dropdown-menu.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) scale(1) translateY(0);
         }
 
         .user-dropdown-menu .ud-header {
@@ -387,17 +381,21 @@
         .sidebar {
             position: fixed;
             top: var(--navbar-height);
-            right: -280px;
+            right: 0;
             width: var(--sidebar-width);
             height: calc(100vh - var(--navbar-height));
             background-color: white;
             box-shadow: -2px 0 15px rgba(0, 150, 167, 0.08);
             z-index: 1020;
-            transition: right 0.3s ease;
+            transition: right 0.3s ease, width 0.3s ease;
             overflow-y: auto;
             overflow-x: hidden;
+            transform: translateX(100%);
+            right: 0;
         }
-        .sidebar.active { right: 0; }
+        .sidebar.active {
+            transform: translateX(0);
+        }
 
         .sidebar-login-bar {
             padding: 10px 16px;
@@ -408,6 +406,7 @@
             gap: 8px;
             font-size: 0.72rem;
             color: var(--text-dark);
+            flex-shrink: 0;
         }
         .sidebar-login-bar i { color: var(--aqua-4); font-size: 0.7rem; }
         .sidebar-login-bar .sl-label { opacity: 0.6; }
@@ -434,17 +433,17 @@
             border-radius: 0 3px 3px 0;
         }
 
-        .sidebar-icon { font-size: 0.95rem; width: 22px; text-align: center; margin-left: 10px; }
+        .sidebar-icon { font-size: 0.95rem; width: 22px; text-align: center; margin-left: 10px; flex-shrink: 0; }
         .sidebar-text { white-space: nowrap; }
-        .sidebar-arrow { margin-right: auto; transition: transform 0.3s ease; font-size: 0.65rem; color: #9ca3af; }
+        .sidebar-arrow { margin-right: auto; transition: transform 0.3s ease; font-size: 0.65rem; color: #9ca3af; flex-shrink: 0; }
         .sidebar-item.has-dropdown.active .sidebar-arrow { transform: rotate(180deg); color: var(--aqua-4); }
 
         .sidebar-dropdown {
             list-style: none; padding: 0; margin: 0;
-            max-height: 0; overflow: hidden; transition: max-height 0.3s ease;
+            max-height: 0; overflow: hidden; transition: max-height 0.35s ease;
             background-color: rgba(224, 247, 250, 0.3);
         }
-        .sidebar-item.has-dropdown.active .sidebar-dropdown { max-height: 500px; }
+        .sidebar-item.has-dropdown.active .sidebar-dropdown { max-height: 2000px; }
         .sidebar-dropdown .sidebar-link { padding-right: 50px; font-size: 0.8rem; }
 
         .sidebar-cart-count {
@@ -471,18 +470,15 @@
             transition: margin-right 0.3s ease;
             width: 100%;
         }
-        .main-content.sidebar-open { margin-right: var(--sidebar-width); }
 
         /* ========== الفوتر ========== */
         .footer {
             background: linear-gradient(135deg, var(--aqua-4) 0%, #006064 100%);
             color: var(--text-light);
             padding: 1.5rem 0;
-            margin-right: 0;
-            transition: margin-right 0.3s ease;
             width: 100%;
+            transition: margin-right 0.3s ease;
         }
-        .footer.sidebar-open { margin-right: var(--sidebar-width); }
         .footer-container { max-width: 1400px; margin: 0 auto; padding: 0 2rem; width: 100%; }
         .footer-logo { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 0.8rem; }
         .footer-logo .f-logo {
@@ -495,6 +491,7 @@
             justify-content: center;
             overflow: hidden;
             border: 1px solid rgba(255,255,255,0.3);
+            flex-shrink: 0;
         }
         .footer-logo .f-logo img { width: 100%; height: 100%; object-fit: contain; }
         .footer-logo .f-logo i { font-size: 1.2rem; }
@@ -565,7 +562,7 @@
         .stat-value { font-size: 1.6rem; font-weight: 700; margin-bottom: 2px; }
         .stat-label { color: #78909c; font-size: 0.8rem; }
 
-        /* ========== زر واتساب العائب (مصغر 50%) ========== */
+        /* ========== زر واتساب العائم ========== */
         .wa-float-container {
             position: fixed;
             bottom: 15px;
@@ -613,11 +610,7 @@
             text-decoration: none !important;
             color: white !important;
         }
-        .wa-float-btn svg {
-            width: 17px;
-            height: 17px;
-            fill: white;
-        }
+        .wa-float-btn svg { width: 17px; height: 17px; fill: white; }
         @keyframes wa-slideIn { to { opacity: 1; transform: translateX(0); } }
         @keyframes wa-fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes wa-pulse {
@@ -626,25 +619,176 @@
             100% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); }
         }
 
-        /* ========== استجابة ========== */
+        /* ================================================================
+           [RESPONSIVE] - استجابة كاملة لجميع قياسات الشاشات
+           ================================================================ */
+
+        /* --- شاشات كبيرة جداً: > 1400px --- */
+        @media (min-width: 1401px) {
+            .footer-container { padding: 0 3rem; }
+        }
+
+        /* --- شاشات كبيرة: 1201px - 1400px --- */
+        @media (max-width: 1400px) {
+            #navbarSupportedContent ul li a { padding: 18px 11px; font-size: 13px; }
+            .menu-submenu { min-width: 220px; }
+        }
+
+        /* --- شاشات متوسطة-كبيرة: 993px - 1200px --- */
         @media (max-width: 1200px) {
-            #navbarSupportedContent ul li a { padding: 18px 10px; font-size: 12.5px; }
+            #navbarSupportedContent ul li a { padding: 18px 9px; font-size: 12.5px; }
+            #navbarSupportedContent ul li a i.nav-icon { display: none; }
+            .menu-submenu { min-width: 200px; }
+            .menu-submenu li a { font-size: 0.78rem !important; padding: 8px 14px !important; }
+            .footer-container { padding: 0 1.5rem; }
         }
+
+        /* --- شاشات متوسطة (تابلت): 769px - 992px --- */
         @media (max-width: 992px) {
+            /* إخفاء القوائم العلوية */
             .navbar-center-section { display: none !important; }
-            .main-content.sidebar-open { margin-right: 0; }
-            .footer.sidebar-open { margin-right: 0; }
-        }
-        @media (max-width: 768px) {
-            .main-content { padding: 12px; }
-            .footer { padding: 1rem 0; }
+
+            /* الشريط الجانبي: عرض أوسع على التابلت */
+            .sidebar {
+                width: 300px;
+                max-width: 85vw;
+            }
+
+            /* الفوتر: عمودين بدل أربعة */
             .footer-container { padding: 0 1rem; }
-            .footer-logo { flex-direction: column; text-align: center; gap: 0.4rem; }
+            .footer-links h6 { font-size: 0.78rem; }
+            .footer-links a { font-size: 0.75rem; }
         }
+
+        /* --- شاشات صغيرة (موبايل كبير): 577px - 768px --- */
+        @media (max-width: 768px) {
+            :root { --navbar-height: 56px; }
+
+            .main-content { padding: 10px; padding-top: calc(var(--navbar-height) + 10px); }
+
+            .navbar-inner { padding: 0 10px; }
+            .navbar-right-section { gap: 8px; }
+            .logo-icon { width: 38px; height: 38px; }
+            .logo-icon i { font-size: 1rem; }
+
+            /* الشريط الجانبي: يمتلئ معظم الشاشة */
+            .sidebar {
+                width: 88vw;
+                max-width: 340px;
+            }
+
+            .sidebar-login-bar { padding: 8px 14px; font-size: 0.68rem; }
+            .sidebar-link { padding: 10px 14px; font-size: 0.82rem; }
+            .sidebar-icon { width: 20px; font-size: 0.88rem; margin-left: 8px; }
+            .sidebar-dropdown .sidebar-link { padding-right: 44px; font-size: 0.78rem; }
+            .sidebar-cart-count { font-size: 0.6rem; padding: 1px 5px; }
+
+            /* الفوتر */
+            .footer { padding: 1rem 0; }
+            .footer-container { padding: 0 0.8rem; }
+            .footer-logo { flex-direction: column; text-align: center; gap: 0.4rem; }
+            .footer-logo-text { font-size: 0.9rem; }
+            .footer-bottom { font-size: 0.65rem; }
+            .footer-bottom .row { flex-direction: column; gap: 0.3rem; }
+            .footer-bottom .col-md-6 { text-align: center !important; }
+
+            /* مكونات */
+            .card-header { padding: 0.5rem 0.8rem; font-size: 0.82rem; }
+            .card-body { padding: 0.8rem; }
+            .btn { font-size: 0.75rem; padding: 0.3rem 0.6rem; }
+            .table { font-size: 0.75rem; }
+            .form-control, .form-select { font-size: 0.78rem; }
+            .stat-card { padding: 0.8rem; }
+            .stat-icon { width: 40px; height: 40px; font-size: 1rem; }
+            .stat-value { font-size: 1.3rem; }
+        }
+
+        /* --- شاشات صغيرة جداً: <= 576px --- */
         @media (max-width: 576px) {
-            .main-content { padding: 8px; }
+            .main-content { padding: 6px; padding-top: calc(var(--navbar-height) + 8px); }
+
+            /* إخفاء اسم الشركة من الشريط العلوي */
             .navbar-logo span { display: none; }
+            .navbar-right-section { gap: 6px; }
+
+            /* تقليل حجم أزرار الشريط العلوي */
+            .nav-action-btn { width: 30px; height: 30px; font-size: 0.8rem; }
+            .nav-badge { min-width: 14px; height: 14px; font-size: 0.5rem; top: -3px; left: -3px; }
+            .user-dropdown-trigger { width: 30px; height: 30px; }
+
+            /* الشريط الجانبي: يأخذ معظم الشاشة */
+            .sidebar {
+                width: 92vw;
+                max-width: none;
+            }
+
+            .sidebar-link { padding: 9px 12px; font-size: 0.8rem; }
+            .sidebar-icon { width: 18px; font-size: 0.82rem; margin-left: 6px; }
+            .sidebar-dropdown .sidebar-link { padding-right: 38px; font-size: 0.75rem; }
+
+            /* الفوتر */
+            .footer-container { padding: 0 0.6rem; }
+            .footer-links h6 { font-size: 0.72rem; margin-bottom: 0.4rem; }
+            .footer-links a { font-size: 0.7rem; gap: 0.2rem; }
+            .footer-contact a { font-size: 0.65rem; }
+            .footer-contact i { width: 14px; font-size: 0.65rem; }
+
+            /* إخفاء رسالة واتساب */
             .wa-float-msg { display: none; }
+
+            /* مكونات */
+            .card { margin-bottom: 0.6rem; border-radius: 3px; }
+            .card-header { padding: 0.45rem 0.6rem; font-size: 0.78rem; gap: 0.3rem; }
+            .card-body { padding: 0.6rem; }
+            .btn { font-size: 0.7rem; padding: 0.25rem 0.5rem; border-radius: 3px; }
+            .table { font-size: 0.7rem; }
+            .table thead th { font-size: 0.7rem; padding: 0.4rem 0.3rem; }
+            .table td { padding: 0.35rem 0.3rem; }
+            .form-control, .form-select { font-size: 0.75rem; padding: 0.3rem 0.4rem; }
+            .form-label { font-size: 0.7rem; }
+            .alert { font-size: 0.78rem; padding: 0.5rem 0.7rem; }
+
+            .stat-card { padding: 0.6rem; border-radius: 3px; }
+            .stat-icon { width: 36px; height: 36px; font-size: 0.9rem; margin-bottom: 6px; }
+            .stat-value { font-size: 1.15rem; }
+            .stat-label { font-size: 0.7rem; }
+
+            /* تأمين الجداول من الخروج */
+            .table-responsive { margin: 0 -6px; }
+            .card .table-responsive { margin: -0.6rem; border-radius: 0 0 3px 3px; overflow: hidden; }
+        }
+
+        /* --- شاشات صغيرة جداً: <= 400px --- */
+        @media (max-width: 400px) {
+            :root { --navbar-height: 52px; }
+
+            .navbar-inner { padding: 0 6px; }
+            .navbar-right-section { gap: 4px; }
+            .logo-icon { width: 34px; height: 34px; border-radius: 3px; }
+            .logo-icon i { font-size: 0.85rem; }
+            .sidebar-toggle span { width: 14px; }
+
+            .main-content { padding: 4px; padding-top: calc(var(--navbar-height) + 6px); }
+
+            .sidebar-link { padding: 8px 10px; font-size: 0.78rem; }
+            .sidebar-icon { width: 16px; font-size: 0.78rem; margin-left: 5px; }
+            .sidebar-dropdown .sidebar-link { padding-right: 32px; font-size: 0.72rem; }
+            .sidebar-arrow { font-size: 0.55rem; }
+            .sidebar-cart-count { font-size: 0.55rem; padding: 1px 4px; }
+
+            .card { margin-bottom: 0.5rem; }
+            .card-header { font-size: 0.72rem; padding: 0.4rem 0.5rem; }
+            .card-body { padding: 0.5rem; }
+            .btn { font-size: 0.65rem; padding: 0.2rem 0.4rem; }
+            .table { font-size: 0.65rem; }
+            .table thead th { font-size: 0.65rem; }
+            .stat-card { padding: 0.5rem; }
+            .stat-icon { width: 32px; height: 32px; font-size: 0.8rem; }
+            .stat-value { font-size: 1rem; }
+            .stat-label { font-size: 0.65rem; }
+
+            .footer { padding: 0.6rem 0; }
+            .footer-bottom { font-size: 0.6rem; }
         }
     </style>
 
@@ -682,8 +826,7 @@
                         <li class="{% if request.resolver_match.url_name == 'index' %}active{% endif %}">
                             <a href="{% url 'index' %}"><i class="fas fa-home nav-icon"></i>الرئيسية</a>
                         </li>
-                        
-                        <!-- الفواتير -->
+
                         <li class="has-submenu {% if 'invoice' in request.resolver_match.url_name or 'purch' in request.resolver_match.url_name or 'sale' in request.resolver_match.url_name %}active{% endif %}">
                             <a href="#"><i class="fas fa-file-invoice nav-icon"></i>الفواتير</a>
                             <ul class="menu-submenu">
@@ -696,7 +839,6 @@
                             </ul>
                         </li>
 
-                        <!-- المنتجات -->
                         <li class="has-submenu {% if 'product' in request.resolver_match.url_name %}active{% endif %}">
                             <a href="#"><i class="fas fa-boxes nav-icon"></i>المنتجات</a>
                             <ul class="menu-submenu">
@@ -707,30 +849,26 @@
                             </ul>
                         </li>
 
-                        <!-- المتجر الإلكتروني -->
                         <li class="has-submenu {% if 'orders' in request.resolver_match.url_name or 'store' in request.resolver_match.url_name or 'checkout' in request.resolver_match.url_name or 'notification' in request.resolver_match.url_name %}active{% endif %}">
                             <a href="#"><i class="fas fa-store nav-icon"></i>المتجر الإلكتروني</a>
                             <ul class="menu-submenu">
                                 <li class="{% if request.resolver_match.url_name == 'orders_list' %}sub-active{% endif %}"><a href="{% url 'invoice:orders_list' %}"><i class="fas fa-inbox"></i>إدارة الطلبات</a></li>
                                 <li class="{% if request.resolver_match.url_name == 'admin_stock_notifications' %}sub-active{% endif %}"><a href="{% url 'invoice:admin_stock_notifications' %}"><i class="fas fa-bell"></i>تنبيهات المخزون</a></li>
                                 <li class="{% if request.resolver_match.url_name == 'notification_archive' %}sub-active{% endif %}"><a href="{% url 'invoice:notification_archive' %}"><i class="fas fa-history"></i>أرشيف الإشعارات</a></li>
-                                <li class="{% if request.resolver_match.url_name == 'control_store' %}sub-active{% endif %}"><a href="{% url 'invoice:control_store' %}"><i class="fas fa-sliders-h"></i>إدارة المتجر  </a></li>
+                                <li class="{% if request.resolver_match.url_name == 'control_store' %}sub-active{% endif %}"><a href="{% url 'invoice:control_store' %}"><i class="fas fa-sliders-h"></i>إدارة المتجر</a></li>
                                 <li class="{% if request.resolver_match.url_name == 'store_front' %}sub-active{% endif %}"><a href="{% url 'invoice:store_front' %}" target="_blank"><i class="fas fa-external-link-alt"></i>واجهة المتجر</a></li>
                                 <li class="{% if request.resolver_match.url_name == 'checkout' %}sub-active{% endif %}"><a href="{% url 'invoice:checkout' %}"><i class="fas fa-credit-card"></i>صفحة الدفع</a></li>
                             </ul>
                         </li>
 
-                        <!-- الصندوق -->
                         <li class="has-submenu {% if 'cash' in request.resolver_match.url_name %}active{% endif %}">
                             <a href="#"><i class="fas fa-wallet nav-icon"></i>الصندوق</a>
                             <ul class="menu-submenu">
-                               
-                                <li class="{% if request.resolver_match.url_name == 'cash_transaction_list' %}sub-active{% endif %}"><a href="{% url 'invoice:cash_transaction_list' %}"><i class="fas fa-exchange-alt"></i>حركة الصندوق </a></li>
+                                <li class="{% if request.resolver_match.url_name == 'cash_transaction_list' %}sub-active{% endif %}"><a href="{% url 'invoice:cash_transaction_list' %}"><i class="fas fa-exchange-alt"></i>حركة الصندوق</a></li>
                                 <li class="{% if request.resolver_match.url_name == 'cash_transaction_create' %}sub-active{% endif %}"><a href="{% url 'invoice:cash_transaction_create' %}"><i class="fas fa-hand-holding-usd"></i>حركة مالية</a></li>
                             </ul>
                         </li>
 
-                        <!-- التقارير -->
                         <li class="has-submenu {% if 'report' in request.resolver_match.url_name %}active{% endif %}">
                             <a href="#"><i class="fas fa-chart-bar nav-icon"></i>التقارير</a>
                             <ul class="menu-submenu">
@@ -758,7 +896,7 @@
                             </ul>
                         </li>
                         {% endif %}
-                        
+
                         <li class="has-submenu {% if 'currency' in request.resolver_match.url_name or 'payment_method' in request.resolver_match.url_name or 'shipping_company' in request.resolver_match.url_name or 'status' in request.resolver_match.url_name or 'price_type' in request.resolver_match.url_name or 'email' in request.resolver_match.url_name %}active{% endif %}">
                             <a href="#"><i class="fas fa-cogs nav-icon"></i>الإعدادات</a>
                             <ul class="menu-submenu">
@@ -770,7 +908,6 @@
                                 <li class="{% if request.resolver_match.url_name == 'price_type_list' %}sub-active{% endif %}"><a href="{% url 'invoice:price_type_list' %}"><i class="fas fa-tags"></i>أنواع الأسعار</a></li>
                             </ul>
                         </li>
-
                     </ul>
                 </div>
             </div>
@@ -837,7 +974,7 @@
                     <i class="fas fa-home sidebar-icon"></i><span class="sidebar-text">الرئيسية</span>
                 </a>
             </li>
-            
+
             <li class="sidebar-item has-dropdown {% if 'invoice' in request.resolver_match.url_name or 'purch' in request.resolver_match.url_name or 'sale' in request.resolver_match.url_name %}active{% endif %}">
                 <a href="#" class="sidebar-link">
                     <i class="fas fa-file-invoice sidebar-icon"></i><span class="sidebar-text">الفواتير</span>
@@ -875,10 +1012,9 @@
                     <li class="sidebar-item"><a href="{% url 'invoice:orders_list' %}" class="sidebar-link"><i class="fas fa-inbox sidebar-icon"></i><span class="sidebar-text">إدارة الطلبات</span></a></li>
                     <li class="sidebar-item"><a href="{% url 'invoice:admin_stock_notifications' %}" class="sidebar-link"><i class="fas fa-bell sidebar-icon"></i><span class="sidebar-text">تنبيهات المخزون</span></a></li>
                     <li class="sidebar-item"><a href="{% url 'invoice:notification_archive' %}" class="sidebar-link"><i class="fas fa-history sidebar-icon"></i><span class="sidebar-text">أرشيف الإشعارات</span></a></li>
-                    <li class="sidebar-item"><a href="{% url 'invoice:control_store' %}" class="sidebar-link"><i class="fas fa-sliders-h sidebar-icon"></i><span class="sidebar-text">إدارة المتجر  </span></a></li>
+                    <li class="sidebar-item"><a href="{% url 'invoice:control_store' %}" class="sidebar-link"><i class="fas fa-sliders-h sidebar-icon"></i><span class="sidebar-text">إدارة المتجر</span></a></li>
                     <li class="sidebar-item"><a href="{% url 'invoice:store_front' %}" class="sidebar-link" target="_blank"><i class="fas fa-external-link-alt sidebar-icon"></i><span class="sidebar-text">واجهة المتجر</span></a></li>
                     <li class="sidebar-item"><a href="{% url 'invoice:checkout' %}" class="sidebar-link"><i class="fas fa-credit-card sidebar-icon"></i><span class="sidebar-text">صفحة الدفع</span></a></li>
-
                     <li class="sidebar-item">
                         <a href="{% url 'invoice:cart_detail' %}" class="sidebar-link">
                             <i class="fas fa-shopping-cart sidebar-icon"></i><span class="sidebar-text">سلة التسوق</span>
@@ -887,19 +1023,8 @@
                             {% endif %}
                         </a>
                     </li>
-
-
                 </ul>
-
-                
-
-
-
-
-
             </li>
-
-           
 
             <li class="sidebar-item has-dropdown {% if 'cash' in request.resolver_match.url_name %}active{% endif %}">
                 <a href="#" class="sidebar-link">
@@ -907,8 +1032,7 @@
                     <i class="fas fa-chevron-left sidebar-arrow"></i>
                 </a>
                 <ul class="sidebar-dropdown">
-                
-                    <li class="sidebar-item"><a href="{% url 'invoice:cash_transaction_list' %}" class="sidebar-link"><i class="fas fa-exchange-alt sidebar-icon"></i><span class="sidebar-text">حركة الصندوق </span></a></li>
+                    <li class="sidebar-item"><a href="{% url 'invoice:cash_transaction_list' %}" class="sidebar-link"><i class="fas fa-exchange-alt sidebar-icon"></i><span class="sidebar-text">حركة الصندوق</span></a></li>
                     <li class="sidebar-item"><a href="{% url 'invoice:cash_transaction_create' %}" class="sidebar-link"><i class="fas fa-hand-holding-usd sidebar-icon"></i><span class="sidebar-text">حركة مالية</span></a></li>
                 </ul>
             </li>
@@ -996,7 +1120,6 @@
     <footer class="footer" id="footer">
         <div class="footer-container">
             <div class="row g-3">
-                <!-- العمود الأول: شعار الشركة ومعلومات عنها -->
                 <div class="col-lg-4 col-md-6">
                     <div class="footer-logo">
                         <div class="f-logo">
@@ -1034,57 +1157,30 @@
                         {% endif %}
                     </div>
                 </div>
-                
-                <!-- العمود الثاني: روابط سريعة -->
-                <div class="col-lg-2 col-md-6">
+
+                <div class="col-lg-2 col-md-6 col-6">
                     <div class="footer-links">
                         <h6>{{ company_settings.footer_quick_links_title|default:"روابط سريعة" }}</h6>
                         <ul>
-                            <li>
-                                <a href="{{ company_settings.quick_link_support|default:'#' }}" target="_blank">
-                                    <i class="fas fa-angle-left"></i> الدعم الفني
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ company_settings.quick_link_guide|default:'#' }}" target="_blank">
-                                    <i class="fas fa-angle-left"></i> دليل الاستخدام
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ company_settings.quick_link_faq|default:'#' }}" target="_blank">
-                                    <i class="fas fa-angle-left"></i> الأسئلة الشائعة
-                                </a>
-                            </li>
+                            <li><a href="{{ company_settings.quick_link_support|default:'#' }}" target="_blank"><i class="fas fa-angle-left"></i> الدعم الفني</a></li>
+                            <li><a href="{{ company_settings.quick_link_guide|default:'#' }}" target="_blank"><i class="fas fa-angle-left"></i> دليل الاستخدام</a></li>
+                            <li><a href="{{ company_settings.quick_link_faq|default:'#' }}" target="_blank"><i class="fas fa-angle-left"></i> الأسئلة الشائعة</a></li>
                         </ul>
                     </div>
                 </div>
-                
-                <!-- العمود الثالث: المميزات -->
-                <div class="col-lg-3 col-md-6">
+
+                <div class="col-lg-3 col-md-6 col-6">
                     <div class="footer-links">
                         <h6>{{ company_settings.footer_features_title|default:"المميزات" }}</h6>
                         <ul>
-                            <li>
-                                <a href="{{ company_settings.feature_invoices|default:'#' }}" target="_blank">
-                                    <i class="fas fa-angle-left"></i> إدارة الفواتير
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ company_settings.feature_inventory|default:'#' }}" target="_blank">
-                                    <i class="fas fa-angle-left"></i> إدارة المخزون
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ company_settings.feature_reports|default:'#' }}" target="_blank">
-                                    <i class="fas fa-angle-left"></i> التقارير الذكية
-                                </a>
-                            </li>
+                            <li><a href="{{ company_settings.feature_invoices|default:'#' }}" target="_blank"><i class="fas fa-angle-left"></i> إدارة الفواتير</a></li>
+                            <li><a href="{{ company_settings.feature_inventory|default:'#' }}" target="_blank"><i class="fas fa-angle-left"></i> إدارة المخزون</a></li>
+                            <li><a href="{{ company_settings.feature_reports|default:'#' }}" target="_blank"><i class="fas fa-angle-left"></i> التقارير الذكية</a></li>
                         </ul>
                     </div>
                 </div>
-                
-                <!-- العمود الرابع: تواصل معنا -->
-                <div class="col-lg-3 col-md-6">
+
+                <div class="col-lg-3 col-md-12">
                     <div class="footer-links">
                         <h6>{{ company_settings.footer_contact_title|default:"تواصل معنا" }}</h6>
                         <ul class="footer-contact">
@@ -1107,8 +1203,7 @@
                     </div>
                 </div>
             </div>
-            
-            <!-- أسفل الفوتر: حقوق النشر والإصدار -->
+
             <div class="footer-bottom">
                 <div class="row align-items-center">
                     <div class="col-md-6 text-md-start mb-1 mb-md-0">
@@ -1127,7 +1222,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        // ========== المحدد المتحرك ==========
         function animateSelector() {
             var tabs = $('#navbarSupportedContent');
             if (!tabs.length || tabs.is(':hidden')) return;
@@ -1154,7 +1248,6 @@
             animateSelector();
         });
 
-        // ========== الشريط الجانبي ==========
         document.addEventListener('DOMContentLoaded', function() {
             var menuToggle = document.getElementById('menuToggle');
             var sidebar = document.getElementById('sidebar');
@@ -1168,8 +1261,6 @@
 
             sidebar.classList.remove('active');
             sidebarOverlay.classList.remove('active');
-            mainContent.classList.remove('sidebar-open');
-            if(footer) footer.classList.remove('sidebar-open');
             if (menuToggle) menuToggle.classList.remove('active');
             var sidebarOpen = false;
 
@@ -1178,15 +1269,13 @@
                 if (open) {
                     sidebar.classList.add('active');
                     sidebarOverlay.classList.add('active');
-                    mainContent.classList.add('sidebar-open');
-                    if(footer) footer.classList.add('sidebar-open');
                     if (menuToggle) menuToggle.classList.add('active');
+                    document.body.style.overflow = 'hidden';
                 } else {
                     sidebar.classList.remove('active');
                     sidebarOverlay.classList.remove('active');
-                    mainContent.classList.remove('sidebar-open');
-                    if(footer) footer.classList.remove('sidebar-open');
                     if (menuToggle) menuToggle.classList.remove('active');
+                    document.body.style.overflow = '';
                 }
             }
 
@@ -1282,13 +1371,12 @@
 </div>
 {% endif %}
 
-<!-- ========== زر واتساب العائم (يظهر في جميع الصفحات ديناميكياً) ========== -->
 {% if company_settings.whatsapp_number %}
 <div class="wa-float-container">
     <div class="wa-float-msg">تواصل معنا 💬</div>
-    <a href="https://wa.me/{{ company_settings.whatsapp_number }}?text={% if company_settings.whatsapp_message %}{{ company_settings.whatsapp_message|urlencode }}{% else %}مرحباً{% endif %}" 
-       target="_blank" 
-       rel="nofollow noopener" 
+    <a href="https://wa.me/{{ company_settings.whatsapp_number }}?text={% if company_settings.whatsapp_message %}{{ company_settings.whatsapp_message|urlencode }}{% else %}مرحباً{% endif %}"
+       target="_blank"
+       rel="nofollow noopener"
        class="wa-float-btn">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
     </a>
@@ -1296,4 +1384,4 @@
 {% endif %}
 
 </body>
-</html>100/100
+</html>
