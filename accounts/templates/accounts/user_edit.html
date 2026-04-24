@@ -1,69 +1,34 @@
-{% extends 'base.html' %}
-{% load static %}
-
-{% block title %}{{ title }}{% endblock %}
-
-{% block content %}
-<div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 mb-0">{{ title }}</h1>
-        <a href="{% url 'accounts:user_list' %}" class="btn btn-secondary">
-            <i class="fas fa-arrow-right ms-2"></i>العودة للقائمة
-        </a>
-    </div>
-
-    <div class="card">
-        <div class="card-header">
-            <h5 class="mb-0">تحرير بيانات المستخدم: {{ user_to_edit.username }}</h5>
-        </div>
-        <div class="card-body">
-            <form method="post">
-                {% csrf_token %}
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        {{ form.username.label_tag }}
-                        {{ form.username }}
-                        {% if form.username.errors %}
-                            <div class="text-danger">{{ form.username.errors }}</div>
-                        {% endif %}
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        {{ form.email.label_tag }}
-                        {{ form.email }}
-                        {% if form.email.errors %}
-                            <div class="text-danger">{{ form.email.errors }}</div>
-                        {% endif %}
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        {{ form.first_name.label_tag }}
-                        {{ form.first_name }}
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        {{ form.last_name.label_tag }}
-                        {{ form.last_name }}
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <div class="form-check form-switch">
-                            {{ form.is_active }}
-                            {{ form.is_active.label_tag }}
-                        </div>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <div class="form-check form-switch">
-                            {{ form.is_staff }}
-                            {{ form.is_staff.label_tag }}
-                        </div>
-                    </div>
-                </div>
-                <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-save ms-2"></i>حفظ التغييرات
-                </button>
-            </form>
-        </div>
-    </div>
-</div>
-{% endblock %}
+@login_required
+@user_passes_test(is_staff_user)
+def user_edit_view(request, pk):
+    """تحرير بيانات مستخدم معين - يشمل جميع بيانات البروفايل"""
+    user = get_object_or_404(User, pk=pk)
+    
+    # الحصول على أو إنشاء البروفايل
+    try:
+        profile = user.profile
+    except Exception:
+        from .models import Profile
+        profile = Profile.objects.create(user=user)
+    
+    if request.method == 'POST':
+        form = UserUpdateForm(request.POST, instance=user)
+        profile_form = ProfileUpdateForm(request.POST, request.FILES, instance=profile)
+        
+        if form.is_valid() and profile_form.is_valid():
+            form.save()
+            profile_form.save()
+            messages.success(request, f'تم تحديث بيانات المستخدم "{user.username}" بنجاح.')
+            return redirect('accounts:user_list')
+    else:
+        form = UserUpdateForm(instance=user)
+        profile_form = ProfileUpdateForm(instance=profile)
+        
+    context = {
+        'form': form,
+        'profile_form': profile_form,
+        'user_to_edit': user,
+        'profile': profile,
+        'title': f'تحرير المستخدم: {user.username}'
+    }
+    return render(request, 'accounts/user_edit.html', context)

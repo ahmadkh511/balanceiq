@@ -41,6 +41,7 @@ class CustomUserCreationForm(UserCreationForm):
         return email
 
 
+
 class UserUpdateForm(forms.ModelForm):
     """
     نموذج لتحديث بيانات المستخدم الأساسية (بدون كلمة المرور).
@@ -247,6 +248,7 @@ class UserProfileUpdateForm(forms.ModelForm):
             instance.save()
         
         return instance
+
 
 
 class CustomPasswordResetForm(PasswordResetForm):

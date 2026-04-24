@@ -648,27 +648,43 @@ def user_list_view(request):
     }
     return render(request, 'accounts/user_list.html', context)
 
+
+
 @login_required
 @user_passes_test(is_staff_user)
 def user_edit_view(request, pk):
-    """تحرير بيانات مستخدم معين"""
+    """تحرير بيانات مستخدم معين - يشمل جميع بيانات البروفايل"""
     user = get_object_or_404(User, pk=pk)
+    
+    # الحصول على أو إنشاء البروفايل
+    try:
+        profile = user.profile
+    except Exception:
+        from .models import Profile
+        profile = Profile.objects.create(user=user)
     
     if request.method == 'POST':
         form = UserUpdateForm(request.POST, instance=user)
-        if form.is_valid():
+        profile_form = ProfileUpdateForm(request.POST, request.FILES, instance=profile)
+        
+        if form.is_valid() and profile_form.is_valid():
             form.save()
+            profile_form.save()
             messages.success(request, f'تم تحديث بيانات المستخدم "{user.username}" بنجاح.')
             return redirect('accounts:user_list')
     else:
         form = UserUpdateForm(instance=user)
+        profile_form = ProfileUpdateForm(instance=profile)
         
     context = {
         'form': form,
+        'profile_form': profile_form,
         'user_to_edit': user,
+        'profile': profile,
         'title': f'تحرير المستخدم: {user.username}'
     }
     return render(request, 'accounts/user_edit.html', context)
+
 
 # ============================================
 # إدارة الصلاحيات (permissions)
