@@ -515,6 +515,9 @@ class CustomPasswordResetView(SuccessMessageMixin, PasswordResetView):
 # ============================================
 # الملف الشخصي (profile)
 # ============================================
+
+
+
 @login_required
 def profile_view(request):
     """
@@ -536,6 +539,8 @@ def profile_view(request):
         'profile': profile
     }
     return render(request, 'accounts/profile.html', context)
+
+
 
 # ============================================
 # سجلات النظام (system logs)
@@ -653,34 +658,27 @@ def user_list_view(request):
 @login_required
 @user_passes_test(is_staff_user)
 def user_edit_view(request, pk):
-    """تحرير بيانات مستخدم معين - يشمل جميع بيانات البروفايل"""
+    """تحرير بيانات مستخدم معين"""
     user = get_object_or_404(User, pk=pk)
-    
-    # الحصول على أو إنشاء البروفايل
-    try:
-        profile = user.profile
-    except Exception:
-        from .models import Profile
-        profile = Profile.objects.create(user=user)
+    profile, created = Profile.objects.get_or_create(user=user)  # ← أضف هذه
     
     if request.method == 'POST':
         form = UserUpdateForm(request.POST, instance=user)
-        profile_form = ProfileUpdateForm(request.POST, request.FILES, instance=profile)
-        
-        if form.is_valid() and profile_form.is_valid():
+        profile_form = UserProfileUpdateForm(request.POST, request.FILES, instance=profile)  # ← أضف هذه
+        if form.is_valid() and profile_form.is_valid():  # ← عدّل هذا
             form.save()
-            profile_form.save()
+            profile_form.save()  # ← أضف هذه
             messages.success(request, f'تم تحديث بيانات المستخدم "{user.username}" بنجاح.')
             return redirect('accounts:user_list')
     else:
         form = UserUpdateForm(instance=user)
-        profile_form = ProfileUpdateForm(instance=profile)
+        profile_form = UserProfileUpdateForm(instance=profile)  # ← أضف هذه
         
     context = {
         'form': form,
-        'profile_form': profile_form,
+        'profile_form': profile_form,  # ← أضف هذه
         'user_to_edit': user,
-        'profile': profile,
+        'profile': profile,            # ← أضف هذه
         'title': f'تحرير المستخدم: {user.username}'
     }
     return render(request, 'accounts/user_edit.html', context)

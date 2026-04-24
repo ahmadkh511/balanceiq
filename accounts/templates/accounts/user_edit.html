@@ -1,34 +1,484 @@
-@login_required
-@user_passes_test(is_staff_user)
-def user_edit_view(request, pk):
-    """تحرير بيانات مستخدم معين - يشمل جميع بيانات البروفايل"""
-    user = get_object_or_404(User, pk=pk)
-    
-    # الحصول على أو إنشاء البروفايل
-    try:
-        profile = user.profile
-    except Exception:
-        from .models import Profile
-        profile = Profile.objects.create(user=user)
-    
-    if request.method == 'POST':
-        form = UserUpdateForm(request.POST, instance=user)
-        profile_form = ProfileUpdateForm(request.POST, request.FILES, instance=profile)
-        
-        if form.is_valid() and profile_form.is_valid():
-            form.save()
-            profile_form.save()
-            messages.success(request, f'تم تحديث بيانات المستخدم "{user.username}" بنجاح.')
-            return redirect('accounts:user_list')
-    else:
-        form = UserUpdateForm(instance=user)
-        profile_form = ProfileUpdateForm(instance=profile)
-        
-    context = {
-        'form': form,
-        'profile_form': profile_form,
-        'user_to_edit': user,
-        'profile': profile,
-        'title': f'تحرير المستخدم: {user.username}'
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --aqua-1: #e0f7fa;
+        --aqua-2: #b2ebf2;
+        --aqua-3: #4dd0e1;
+        --aqua-4: #0097a7;
+        --text-dark: #006064;
+        --shadow-sm: 0 2px 8px rgba(0, 150, 167, 0.08);
+        --shadow-md: 0 4px 12px rgba(0, 150, 167, 0.12);
     }
-    return render(request, 'accounts/user_edit.html', context)
+    .info-card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: var(--shadow-sm);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        overflow: hidden;
+        margin-bottom: 20px;
+    }
+    .info-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-md);
+    }
+    .info-card .card-header {
+        background: linear-gradient(135deg, var(--aqua-3) 0%, var(--aqua-4) 100%);
+        color: var(--text-dark);
+        font-weight: 600;
+        border-bottom: none;
+        padding: 15px 20px;
+    }
+    .info-card .card-header h5 {
+        color: var(--text-dark);
+        margin: 0;
+        font-size: 1.1rem;
+    }
+    .info-card .card-body { padding: 20px; }
+    .form-control, .form-select {
+        border-radius: 8px;
+        border: 1px solid var(--aqua-2);
+        padding: 0.5rem 0.75rem;
+        font-size: 0.9rem;
+        transition: all 0.2s;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: var(--aqua-3);
+        box-shadow: 0 0 0 3px rgba(77, 208, 225, 0.15);
+    }
+    .btn-primary {
+        background: linear-gradient(135deg, var(--aqua-4) 0%, var(--text-dark) 100%);
+        border: none;
+        color: white;
+        padding: 0.6rem 1.5rem;
+        border-radius: 8px;
+        transition: all 0.2s;
+    }
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+        color: white;
+    }
+    .btn-outline-secondary {
+        border: 1px solid var(--aqua-3);
+        color: var(--aqua-4);
+        border-radius: 8px;
+    }
+    .btn-outline-secondary:hover {
+        background: var(--aqua-1);
+        border-color: var(--aqua-4);
+        color: var(--text-dark);
+    }
+    .form-label {
+        font-weight: 500;
+        color: #495057;
+        margin-bottom: 5px;
+        font-size: 0.9rem;
+    }
+    .form-text {
+        font-size: 0.75rem;
+        color: #6c757d;
+        margin-top: 4px;
+    }
+    .page-header {
+        background: linear-gradient(135deg, var(--aqua-4) 0%, var(--text-dark) 100%);
+        color: white;
+        padding: 20px 30px;
+        border-radius: 15px;
+        margin-bottom: 25px;
+    }
+    .user-type-option {
+        padding: 12px;
+        border-radius: 10px;
+        transition: all 0.2s;
+        cursor: pointer;
+        border: 2px solid var(--aqua-2);
+        background: white;
+    }
+    .user-type-option:hover {
+        background-color: var(--aqua-1);
+        border-color: var(--aqua-3);
+    }
+    .user-type-option.selected {
+        background-color: var(--aqua-1);
+        border-color: var(--aqua-4);
+        box-shadow: var(--shadow-sm);
+    }
+    .user-type-option input[type="radio"] { cursor: pointer; }
+    .user-type-option label { cursor: pointer; margin: 0; font-weight: 500; }
+    .user-type-description {
+        font-size: 0.75rem;
+        color: #6c757d;
+        margin-top: 5px;
+        padding-right: 30px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- رأس الصفحة -->
+    <div class="page-header d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="h4 mb-1">
+                <i class="fas fa-user-edit me-2"></i>{{ title }}
+            </h1>
+            <p class="mb-0 opacity-75">تعديل جميع بيانات المستخدم: <strong>{{ user_to_edit.username }}</strong></p>
+        </div>
+        <a href="{% url 'accounts:user_list' %}" class="btn btn-light">
+            <i class="fas fa-arrow-right ms-2"></i>العودة للقائمة
+        </a>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="row">
+            <!-- العمود الأيسر: بيانات الحساب + الصورة + نوع المستخدم -->
+            <div class="col-lg-4">
+                <!-- بيانات حساب المستخدم -->
+                <div class="info-card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-user-cog me-2"></i>بيانات الحساب</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="{{ form.username.id_for_label }}" class="form-label">اسم المستخدم</label>
+                            {{ form.username }}
+                            {% if form.username.errors %}
+                                <div class="text-danger small mt-1">{{ form.username.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="mb-3">
+                            <label for="{{ form.email.id_for_label }}" class="form-label">البريد الإلكتروني</label>
+                            {{ form.email }}
+                            {% if form.email.errors %}
+                                <div class="text-danger small mt-1">{{ form.email.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <label for="{{ form.first_name.id_for_label }}" class="form-label">الاسم الأول</label>
+                                {{ form.first_name }}
+                            </div>
+                            <div class="col-6 mb-3">
+                                <label for="{{ form.last_name.id_for_label }}" class="form-label">الاسم الأخير</label>
+                                {{ form.last_name }}
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                {{ form.is_active }}
+                                <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                                    {{ form.is_active.label }}
+                                </label>
+                            </div>
+                        </div>
+                        <div class="mb-0">
+                            <div class="form-check form-switch">
+                                {{ form.is_staff }}
+                                <label class="form-check-label" for="{{ form.is_staff.id_for_label }}">
+                                    {{ form.is_staff.label }}
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- صورة الملف الشخصي -->
+                <div class="info-card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-camera me-2"></i>الصورة الشخصية</h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <img src="{% if profile.profile_picture %}{{ profile.profile_picture.url }}{% else %}https://via.placeholder.com/120x120?text=صورة{% endif %}" 
+                                 alt="صورة الملف الشخصي" 
+                                 id="avatar-preview"
+                                 class="rounded-circle"
+                                 style="width: 120px; height: 120px; object-fit: cover; border: 3px solid var(--aqua-2);">
+                        </div>
+                        <div>
+                            <label for="{{ profile_form.profile_picture.id_for_label }}" class="form-label">اختر صورة جديدة</label>
+                            {{ profile_form.profile_picture }}
+                            <div class="form-text">يُفضل أن تكون الصورة مربعة بحجم لا يتجاوز 2 ميجابايت</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- نوع المستخدم -->
+                <div class="info-card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-users me-2"></i>نوع المستخدم</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="user-type-option mb-2" data-type="customer" onclick="selectUserType('customer')">
+                            <div class="d-flex align-items-center">
+                                <input type="radio" name="user_type" id="user_type_customer" value="customer">
+                                <label for="user_type_customer" class="me-2">
+                                    <i class="fas fa-user-check text-success me-1"></i> زبون
+                                </label>
+                            </div>
+                            <div class="user-type-description">عملاء الشراء والبيع</div>
+                        </div>
+                        <div class="user-type-option mb-2" data-type="supplier" onclick="selectUserType('supplier')">
+                            <div class="d-flex align-items-center">
+                                <input type="radio" name="user_type" id="user_type_supplier" value="supplier">
+                                <label for="user_type_supplier" class="me-2">
+                                    <i class="fas fa-truck text-primary me-1"></i> مورد
+                                </label>
+                            </div>
+                            <div class="user-type-description">توريد المنتجات والخدمات</div>
+                        </div>
+                        <div class="user-type-option" data-type="partner" onclick="selectUserType('partner')">
+                            <div class="d-flex align-items-center">
+                                <input type="radio" name="user_type" id="user_type_partner" value="partner">
+                                <label for="user_type_partner" class="me-2">
+                                    <i class="fas fa-handshake text-warning me-1"></i> مشترك
+                                </label>
+                            </div>
+                            <div class="user-type-description">شراكة وتعاون مشترك</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- العمود الأيمن: جميع حقول الملف الشخصي -->
+            <div class="col-lg-8">
+
+                <!-- المعلومات الأساسية -->
+                <div class="info-card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-id-card me-2"></i>المعلومات الأساسية</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ profile_form.full_name.id_for_label }}" class="form-label">الاسم الكامل</label>
+                                {{ profile_form.full_name }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ profile_form.phone_number.id_for_label }}" class="form-label">رقم الهاتف</label>
+                                {{ profile_form.phone_number }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ profile_form.birth_date.id_for_label }}" class="form-label">تاريخ الميلاد</label>
+                                {{ profile_form.birth_date }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ profile_form.gender.id_for_label }}" class="form-label">الجنس</label>
+                                {{ profile_form.gender }}
+                            </div>
+                            <div class="col-12 mb-0">
+                                <label for="{{ profile_form.bio.id_for_label }}" class="form-label">نبذة شخصية</label>
+                                {{ profile_form.bio }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- معلومات العمل -->
+                <div class="info-card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-briefcase me-2"></i>معلومات العمل</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ profile_form.job_title.id_for_label }}" class="form-label">الوظيفة</label>
+                                {{ profile_form.job_title }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ profile_form.company.id_for_label }}" class="form-label">الشركة</label>
+                                {{ profile_form.company }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ profile_form.experience_years.id_for_label }}" class="form-label">سنوات الخبرة</label>
+                                {{ profile_form.experience_years }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ profile_form.education_level.id_for_label }}" class="form-label">المستوى التعليمي</label>
+                                {{ profile_form.education_level }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ profile_form.university_major.id_for_label }}" class="form-label">التخصص الجامعي</label>
+                                {{ profile_form.university_major }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ profile_form.skills.id_for_label }}" class="form-label">المهارات</label>
+                                {{ profile_form.skills }}
+                                <div class="form-text">افصل بين المهارات بفاصلة</div>
+                            </div>
+                            <div class="col-md-6 mb-0">
+                                <label for="{{ profile_form.languages.id_for_label }}" class="form-label">اللغات</label>
+                                {{ profile_form.languages }}
+                                <div class="form-text">افصل بين اللغات بفاصلة</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- معلومات الاتصال والعنوان -->
+                <div class="info-card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-map-marker-alt me-2"></i>معلومات الاتصال والعنوان</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label for="{{ profile_form.website_display.id_for_label }}" class="form-label">الموقع الإلكتروني</label>
+                                {{ profile_form.website_display }}
+                                <div class="form-text">أدخل اسم الموقع فقط (مثال: google.com)</div>
+                                {% if profile_form.website_display.errors %}
+                                    <div class="text-danger small">{{ profile_form.website_display.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label for="{{ profile_form.address.id_for_label }}" class="form-label">العنوان الكامل</label>
+                                {{ profile_form.address }}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ profile_form.city.id_for_label }}" class="form-label">المدينة</label>
+                                {{ profile_form.city }}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ profile_form.country.id_for_label }}" class="form-label">البلد</label>
+                                {{ profile_form.country }}
+                            </div>
+                            <div class="col-md-4 mb-0">
+                                <label for="{{ profile_form.postal_code.id_for_label }}" class="form-label">الرمز البريدي</label>
+                                {{ profile_form.postal_code }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- التواصل الاجتماعي -->
+                <div class="info-card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-share-alt me-2"></i>التواصل الاجتماعي</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ profile_form.facebook.id_for_label }}" class="form-label">
+                                    <i class="fab fa-facebook text-primary me-1"></i> فيسبوك
+                                </label>
+                                {{ profile_form.facebook }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ profile_form.twitter.id_for_label }}" class="form-label">
+                                    <i class="fab fa-twitter text-info me-1"></i> تويتر
+                                </label>
+                                {{ profile_form.twitter }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ profile_form.instagram.id_for_label }}" class="form-label">
+                                    <i class="fab fa-instagram text-danger me-1"></i> انستغرام
+                                </label>
+                                {{ profile_form.instagram }}
+                            </div>
+                            <div class="col-md-6 mb-0">
+                                <label for="{{ profile_form.linkedin.id_for_label }}" class="form-label">
+                                    <i class="fab fa-linkedin text-primary me-1"></i> لينكدإن
+                                </label>
+                                {{ profile_form.linkedin }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- الإعدادات -->
+                <div class="info-card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-cog me-2"></i>الإعدادات</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-check form-switch mb-3">
+                                    {{ profile_form.is_public }}
+                                    <label class="form-check-label" for="{{ profile_form.is_public.id_for_label }}">
+                                        {{ profile_form.is_public.label }}
+                                    </label>
+                                    <div class="form-text">جعل الملف الشخصي عاماً للجميع</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check form-switch mb-0">
+                                    {{ profile_form.email_notifications }}
+                                    <label class="form-check-label" for="{{ profile_form.email_notifications.id_for_label }}">
+                                        {{ profile_form.email_notifications.label }}
+                                    </label>
+                                    <div class="form-text">استلام إشعارات عبر البريد الإلكتروني</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- أزرار الحفظ -->
+                <div class="d-flex justify-content-between mt-3 mb-4">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-save me-2"></i>حفظ جميع التغييرات
+                    </button>
+                    <a href="{% url 'accounts:user_list' %}" class="btn btn-outline-secondary btn-lg">
+                        <i class="fas fa-times me-2"></i>إلغاء
+                    </a>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+function selectUserType(type) {
+    const radio = document.getElementById(`user_type_${type}`);
+    if (radio) radio.checked = true;
+    document.querySelectorAll('.user-type-option').forEach(option => {
+        option.classList.remove('selected');
+        if (option.getAttribute('data-type') === type) {
+            option.classList.add('selected');
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // استعادة نوع المستخدم
+    const savedType = '{{ profile.user_type|default:"" }}';
+    if (savedType) {
+        selectUserType(savedType);
+    }
+    
+    // معاينة الصورة
+    const profilePictureInput = document.getElementById('{{ profile_form.profile_picture.id_for_label }}');
+    const avatarPreview = document.getElementById('avatar-preview');
+    
+    if (profilePictureInput && avatarPreview) {
+        profilePictureInput.addEventListener('change', function(e) {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    avatarPreview.src = e.target.result;
+                }
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+    }
+});
+</script>
+{% endblock %}
