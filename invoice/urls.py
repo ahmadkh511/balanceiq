@@ -101,13 +101,13 @@ urlpatterns = [
     path('sales/create/', views.sale_create, name='sale_create'),
     path('sale/<slug:slug>/', views.sale_detail, name='sale_detail'),
     path('sale/edit/<slug:slug>/', views.sale_edit, name='sale_edit'),
-    
+    # ✅ الترتيب الصحيح
     # ================ مرتجع المبيعات ================
+    path('sale-return/list/', views.sale_return_list, name='sale_return_list'),  # ← أولاً
     path('sale-return/create/<slug:sale_slug>/', views.sale_return_create, name='sale_return_create'),
-    path('sale-return/<slug:slug>/', views.sale_return_detail, name='sale_return_detail'),
+    path('sale-return/<slug:slug>/', views.sale_return_detail, name='sale_return_detail'),  # ← بعد الثوابت
     path('sale-return/update/<slug:slug>/', views.sale_return_update, name='sale_return_update'),
     path('sale-return/delete/<slug:slug>/', views.sale_return_delete, name='sale_return_delete'),
-    path('sale-return/list/', views.sale_return_list, name='sale_return_list'),
     
     # APIs للمرتجعات
     path('get-sale-items-for-return/<int:sale_id>/', views.get_sale_items_for_return, name='get_sale_items_for_return'),

@@ -3582,7 +3582,7 @@ def sale_return_list(request):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     
-    return render(request, 'invoice/sale_return/sale_return_list.html', {
+    return render(request, 'invoice/sale/sale_return_list.html', {
         'page_obj': page_obj,
         'search_query': search_query,
         'start_date': start_date,

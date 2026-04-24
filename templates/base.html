@@ -27,6 +27,7 @@
             --shadow-md: 0 4px 12px rgba(0, 150, 167, 0.12);
             --sidebar-width: 280px;
             --navbar-height: 60px;
+            --navbar-gutter: 0.5rem;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -43,7 +44,6 @@
             font-size: 0.9rem;
         }
 
-        /* ========== زر هامبرغر ========== */
         .sidebar-toggle span {
             display: block; width: 18px; height: 2px;
             background-color: rgba(255,255,255,0.6); border-radius: 2px; transition: all 0.3s ease;
@@ -53,260 +53,146 @@
         .sidebar-toggle.active span:nth-child(2) { opacity: 0; }
         .sidebar-toggle.active span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
 
-        /* ========== شريط التنقل العلوي ========== */
+        /* ========== الشريط العلوي ========== */
         .navbar-mainbg {
-            background: linear-gradient(135deg, var(--aqua-4) 0%, #006064 100%);
-            height: var(--navbar-height);
+            background: transparent;
+            height: calc(var(--navbar-height) + var(--navbar-gutter));
+            padding-top: var(--navbar-gutter);
+            padding-left: var(--navbar-gutter);
+            padding-right: var(--navbar-gutter);
             position: fixed; top: 0; left: 0; right: 0;
             z-index: 1030;
-            box-shadow: 0 2px 12px rgba(0, 96, 100, 0.2);
         }
 
         .navbar-inner {
-            max-width: 100%;
+            max-width: 1400px;
+            width: 100%;
             margin: 0 auto;
-            padding: 0 16px;
-            height: 100%;
+            padding: 0 1rem;
+            height: var(--navbar-height);
             display: flex;
             align-items: center;
             justify-content: space-between;
+            background: linear-gradient(135deg, var(--aqua-4) 0%, #006064 100%);
+            border-radius: 12px;
+            box-shadow: var(--shadow-md);
+            /* بدون overflow:hidden حتى تظهر القوائم المنسدلة بحرية */
         }
 
-        .navbar-right-section {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex-shrink: 0;
-        }
+        .navbar-right-section { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
 
         .navbar-logo {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            text-decoration: none;
-            color: var(--text-light);
-            font-weight: 700;
-            font-size: 0.95rem;
+            display: flex; align-items: center; gap: 8px;
+            text-decoration: none; color: var(--text-light); font-weight: 700; font-size: 0.95rem;
         }
         .navbar-logo:hover { color: var(--text-light); }
 
         .logo-icon {
-            width: 45px;
-            height: 45px;
+            width: 45px; height: 45px;
             background: rgba(255,255,255,0.2);
             border: 1px solid rgba(255,255,255,0.3);
             border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden; flex-shrink: 0;
         }
         .logo-icon i { color: var(--text-light); font-size: 1.2rem; }
         .logo-icon img { width: 100%; height: 100%; object-fit: contain; }
 
-        /* -- القسم الأوسط: القوائم -- */
-        .navbar-center-section {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            overflow: visible;
-        }
-
-        #navbarSupportedContent {
-            position: relative;
-            overflow: visible;
-        }
-
-        #navbarSupportedContent ul {
-            padding: 0; margin: 0;
-            list-style: none;
-            display: flex;
-            align-items: stretch;
-        }
-
-        #navbarSupportedContent li {
-            float: right;
-            position: relative;
-        }
+        .navbar-center-section { flex: 1; display: flex; justify-content: center; overflow: visible; }
+        #navbarSupportedContent { position: relative; overflow: visible; }
+        #navbarSupportedContent ul { padding: 0; margin: 0; list-style: none; display: flex; align-items: stretch; }
+        #navbarSupportedContent li { float: right; position: relative; }
 
         #navbarSupportedContent ul li a {
-            color: rgba(255,255,255,0.7);
-            text-decoration: none;
-            font-size: 13.5px;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 18px 14px;
-            position: relative;
-            transition: color 0.3s ease;
-            white-space: nowrap;
-            gap: 5px;
+            color: rgba(255,255,255,0.7); text-decoration: none; font-size: 13.5px;
+            font-weight: 500; display: flex; align-items: center; justify-content: center;
+            padding: 18px 14px; position: relative; transition: color 0.3s ease;
+            white-space: nowrap; gap: 5px;
         }
-
         #navbarSupportedContent ul li a i.nav-icon { font-size: 0.8rem; margin: 0; }
+        #navbarSupportedContent>ul>li.active>a { color: var(--aqua-4); font-weight: 600; }
+        #navbarSupportedContent>ul>li:hover>a { color: rgba(255,255,255,0.95); }
 
-        #navbarSupportedContent>ul>li.active>a {
-            color: var(--aqua-4);
-            font-weight: 600;
-        }
-
-        #navbarSupportedContent>ul>li:hover>a {
-            color: rgba(255,255,255,0.95);
-        }
-
-        /* سهم القوائم المنسدلة */
         #navbarSupportedContent ul li.has-submenu>a:not(:only-child):after {
-            content: "\f107";
-            font-family: "Font Awesome 5 Free";
-            font-weight: 900;
-            font-size: 10px;
-            margin-right: 2px;
-            transition: transform 0.3s ease;
+            content: "\f107"; font-family: "Font Awesome 5 Free"; font-weight: 900;
+            font-size: 10px; margin-right: 2px; transition: transform 0.3s ease;
         }
         #navbarSupportedContent>ul>li.has-submenu:hover>a:not(:only-child):after,
-        #navbarSupportedContent>ul>li.has-submenu.active>a:not(:only-child):after {
-            transform: rotate(180deg);
-        }
+        #navbarSupportedContent>ul>li.has-submenu.active>a:not(:only-child):after { transform: rotate(180deg); }
 
-        /* ===== المحدد المتحرك ===== */
         .hori-selector {
-            display: inline-block;
-            position: absolute;
-            height: 100%;
-            top: 0;
-            left: 0;
-            transition-duration: 0.6s;
-            transition-timing-function: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            display: inline-block; position: absolute; height: 100%; top: 0; left: 0;
+            transition-duration: 0.6s; transition-timing-function: cubic-bezier(0.68, -0.55, 0.265, 1.55);
             background-color: rgba(255, 255, 255, 0.95);
-            border-top-left-radius: 10px;
-            border-top-right-radius: 10px;
-            margin-top: 8px;
-            z-index: 0;
+            border-top-left-radius: 10px; border-top-right-radius: 10px;
+            margin-top: 8px; z-index: 0;
         }
-
         #navbarSupportedContent>ul>li { z-index: 1; }
 
-        /* ===== القوائم المنسدلة ===== */
+        /* ===== القوائم المنسدلة — position:absolute تعمل بحرية بدون overflow:hidden ===== */
         .menu-submenu {
             position: absolute;
             top: 100%;
             right: 50%;
-            transform: translateX(50%);
-            min-width: 240px;
-            background: white;
-            border-radius: 0 0 4px 4px;
-            box-shadow: var(--shadow-md);
-            border: 1px solid var(--aqua-2);
-            border-top: 3px solid var(--aqua-3);
-            padding: 6px 0;
-            opacity: 0;
-            visibility: hidden;
-            transform-origin: top center;
             transform: translateX(50%) translateY(-6px);
+            min-width: 240px; background: white; border-radius: 0 0 12px 12px;
+            box-shadow: var(--shadow-md); border: 1px solid var(--aqua-2);
+            border-top: 3px solid var(--aqua-3); padding: 6px 0;
+            opacity: 0; visibility: hidden;
             transition: all 0.25s ease;
             z-index: 1060;
-            max-height: 80vh;
-            overflow-y: auto;
-            text-align: right;
+            max-height: 80vh; overflow-y: auto; text-align: right;
         }
-
         #navbarSupportedContent li.has-submenu:hover>.menu-submenu {
-            opacity: 1;
-            visibility: visible;
+            opacity: 1; visibility: visible;
             transform: translateX(50%) translateY(0);
         }
-
         .menu-submenu li { float: none !important; }
-
         .menu-submenu li a {
-            color: var(--text-dark) !important;
-            padding: 9px 18px 9px 14px !important;
-            font-size: 0.82rem !important;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            transition: all 0.15s ease;
+            color: var(--text-dark) !important; padding: 9px 18px 9px 14px !important;
+            font-size: 0.82rem !important; display: flex; align-items: center;
+            gap: 10px; transition: all 0.15s ease;
         }
-
         .menu-submenu li a i {
-            color: #9ca3af; font-size: 0.78rem;
-            width: 18px; text-align: center;
-            margin: 0 !important;
-            transition: color 0.15s ease;
+            color: #9ca3af; font-size: 0.78rem; width: 18px; text-align: center;
+            margin: 0 !important; transition: color 0.15s ease;
         }
-
-        .menu-submenu li a:hover {
-            background-color: var(--aqua-1) !important;
-            color: var(--aqua-4) !important;
-        }
+        .menu-submenu li a:hover { background-color: var(--aqua-1) !important; color: var(--aqua-4) !important; }
         .menu-submenu li a:hover i { color: var(--aqua-4) !important; }
-
-        .menu-submenu li.sub-active a {
-            background-color: var(--aqua-1) !important;
-            color: var(--aqua-4) !important;
-            font-weight: 600;
-        }
+        .menu-submenu li.sub-active a { background-color: var(--aqua-1) !important; color: var(--aqua-4) !important; font-weight: 600; }
         .menu-submenu li.sub-active a i { color: var(--aqua-4) !important; }
 
-        /* -- القسم الأيسر -- */
-        .navbar-left-section {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            flex-shrink: 0;
-        }
+        .navbar-left-section { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
 
         .nav-action-btn {
-            position: relative;
-            width: 34px; height: 34px;
-            border-radius: 4px;
+            position: relative; width: 34px; height: 34px; border-radius: 4px;
             display: flex; align-items: center; justify-content: center;
-            background: rgba(255,255,255,0.1);
-            color: rgba(255,255,255,0.75);
-            border: 1px solid rgba(255,255,255,0.15);
-            cursor: pointer;
-            transition: all 0.2s ease;
-            text-decoration: none;
-            font-size: 0.88rem;
+            background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.75);
+            border: 1px solid rgba(255,255,255,0.15); cursor: pointer;
+            transition: all 0.2s ease; text-decoration: none; font-size: 0.88rem;
         }
-        .nav-action-btn:hover {
-            background: rgba(255,255,255,0.2);
-            color: var(--text-light);
-            border-color: rgba(255,255,255,0.3);
-        }
+        .nav-action-btn:hover { background: rgba(255,255,255,0.2); color: var(--text-light); border-color: rgba(255,255,255,0.3); }
 
         .nav-badge {
-            position: absolute;
-            top: -4px; left: -4px;
-            min-width: 16px; height: 16px;
-            border-radius: 4px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 0.55rem; font-weight: 700;
-            padding: 0 3px;
-            border: 2px solid var(--aqua-4);
+            position: absolute; top: -4px; left: -4px; min-width: 16px; height: 16px;
+            border-radius: 4px; display: flex; align-items: center; justify-content: center;
+            font-size: 0.55rem; font-weight: 700; padding: 0 3px; border: 2px solid var(--aqua-4);
         }
         .nav-badge.green { background: #00897b; color: white; }
         .nav-badge.red { background: #e53935; color: white; animation: badgePulse 2s infinite; }
-
         @keyframes badgePulse {
             0% { box-shadow: 0 0 0 0 rgba(229,57,53,0.5); }
             70% { box-shadow: 0 0 0 6px rgba(229,57,53,0); }
             100% { box-shadow: 0 0 0 0 rgba(229,57,53,0); }
         }
 
-        /* Dropdown المستخدم */
+        /* ===== قائمة المستخدم — position:absolute من العنصر الأب مباشرة ===== */
         .user-dropdown { position: relative; }
         .user-dropdown-trigger {
             display: flex; align-items: center; justify-content: center;
-            width: 34px; height: 34px;
-            border-radius: 4px;
-            border: 2px solid rgba(255,255,255,0.4);
-            background: rgba(255,255,255,0.15);
-            cursor: pointer;
-            overflow: hidden;
-            transition: all 0.2s ease;
+            width: 34px; height: 34px; border-radius: 4px;
+            border: 2px solid rgba(255,255,255,0.4); background: rgba(255,255,255,0.15);
+            cursor: pointer; overflow: hidden; transition: all 0.2s ease;
         }
         .user-dropdown-trigger:hover { border-color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.25); }
         .user-dropdown-trigger img { width: 100%; height: 100%; object-fit: cover; }
@@ -316,219 +202,104 @@
             position: absolute;
             top: calc(100% + 10px);
             left: 50%;
-            transform: translateX(-50%);
-            min-width: 230px;
-            background: white;
-            border-radius: 4px;
-            box-shadow: var(--shadow-md);
-            border: 1px solid var(--aqua-2);
-            padding: 0;
-            opacity: 0; visibility: hidden;
-            transform-origin: top center;
             transform: translateX(-50%) scale(0.95) translateY(-4px);
-            transition: all 0.2s ease;
-            z-index: 1070;
-            overflow: hidden;
+            min-width: 230px; background: white; border-radius: 12px;
+            box-shadow: var(--shadow-md); border: 1px solid var(--aqua-2);
+            padding: 0; opacity: 0; visibility: hidden;
+            transform-origin: top center;
+            transition: all 0.2s ease; z-index: 1070; overflow: hidden;
         }
         .user-dropdown-menu.show {
-            opacity: 1;
-            visibility: visible;
+            opacity: 1; visibility: visible;
             transform: translateX(-50%) scale(1) translateY(0);
         }
-
-        .user-dropdown-menu .ud-header {
-            padding: 12px 16px;
-            background: linear-gradient(135deg, var(--aqua-4) 0%, #006064 100%);
-            color: var(--text-light);
-        }
+        .user-dropdown-menu .ud-header { padding: 12px 16px; background: linear-gradient(135deg, var(--aqua-4) 0%, #006064 100%); color: var(--text-light); }
         .user-dropdown-menu .ud-name { font-size: 0.88rem; font-weight: 600; margin: 0; }
         .user-dropdown-menu .ud-role { font-size: 0.72rem; opacity: 0.8; margin: 2px 0 0; }
-
-        .user-dropdown-menu .ud-login-info {
-            padding: 8px 16px;
-            background: var(--aqua-1);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.72rem;
-            color: var(--text-dark);
-            border-bottom: 1px solid var(--aqua-2);
-        }
+        .user-dropdown-menu .ud-login-info { padding: 8px 16px; background: var(--aqua-1); display: flex; align-items: center; gap: 8px; font-size: 0.72rem; color: var(--text-dark); border-bottom: 1px solid var(--aqua-2); }
         .user-dropdown-menu .ud-login-info i { color: var(--aqua-4); font-size: 0.7rem; }
         .user-dropdown-menu .ud-login-info span { opacity: 0.75; }
-
         .user-dropdown-menu .ud-links { padding: 6px 0; }
-
-        .user-dropdown-menu a,
-        .user-dropdown-menu button {
-            display: flex; align-items: center; gap: 10px;
-            width: 100%; padding: 9px 16px;
-            font-size: 0.82rem; color: var(--text-dark);
-            text-decoration: none; background: none;
-            border: none; cursor: pointer;
-            transition: all 0.15s ease;
+        .user-dropdown-menu a, .user-dropdown-menu button {
+            display: flex; align-items: center; gap: 10px; width: 100%; padding: 9px 16px;
+            font-size: 0.82rem; color: var(--text-dark); text-decoration: none; background: none;
+            border: none; cursor: pointer; transition: all 0.15s ease;
             font-family: 'Tajawal', sans-serif; text-align: right;
         }
-        .user-dropdown-menu a:hover,
-        .user-dropdown-menu button:hover { background: var(--aqua-1); color: var(--aqua-4); }
-        .user-dropdown-menu a i,
-        .user-dropdown-menu button i { color: #9ca3af; width: 16px; text-align: center; transition: color 0.15s ease; }
-        .user-dropdown-menu a:hover i,
-        .user-dropdown-menu button:hover i { color: var(--aqua-4); }
+        .user-dropdown-menu a:hover, .user-dropdown-menu button:hover { background: var(--aqua-1); color: var(--aqua-4); }
+        .user-dropdown-menu a i, .user-dropdown-menu button i { color: #9ca3af; width: 16px; text-align: center; transition: color 0.15s ease; }
+        .user-dropdown-menu a:hover i, .user-dropdown-menu button:hover i { color: var(--aqua-4); }
         .user-dropdown-menu hr { margin: 0; border-color: var(--aqua-2); }
 
         /* ========== الشريط الجانبي ========== */
         .sidebar {
-            position: fixed;
-            top: var(--navbar-height);
-            right: 0;
-            width: var(--sidebar-width);
-            height: calc(100vh - var(--navbar-height));
-            background-color: white;
-            box-shadow: -2px 0 15px rgba(0, 150, 167, 0.08);
-            z-index: 1020;
-            transition: right 0.3s ease, width 0.3s ease;
-            overflow-y: auto;
-            overflow-x: hidden;
-            transform: translateX(100%);
-            right: 0;
+            position: fixed; top: calc(var(--navbar-height) + var(--navbar-gutter));
+            right: 0; width: var(--sidebar-width);
+            height: calc(100vh - var(--navbar-height) - var(--navbar-gutter));
+            background-color: white; box-shadow: -2px 0 15px rgba(0, 150, 167, 0.08);
+            z-index: 1020; transition: right 0.3s ease, width 0.3s ease;
+            overflow-y: auto; overflow-x: hidden; transform: translateX(100%); right: 0;
         }
-        .sidebar.active {
-            transform: translateX(0);
-        }
+        .sidebar.active { transform: translateX(0); }
 
-        .sidebar-login-bar {
-            padding: 10px 16px;
-            background: var(--aqua-1);
-            border-bottom: 1px solid var(--aqua-2);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.72rem;
-            color: var(--text-dark);
-            flex-shrink: 0;
-        }
+        .sidebar-login-bar { padding: 10px 16px; background: var(--aqua-1); border-bottom: 1px solid var(--aqua-2); display: flex; align-items: center; gap: 8px; font-size: 0.72rem; color: var(--text-dark); flex-shrink: 0; }
         .sidebar-login-bar i { color: var(--aqua-4); font-size: 0.7rem; }
         .sidebar-login-bar .sl-label { opacity: 0.6; }
         .sidebar-login-bar .sl-value { font-weight: 600; }
 
         .sidebar-menu { list-style: none; padding: 8px 0; margin: 0; }
         .sidebar-item { position: relative; }
-
-        .sidebar-link {
-            display: flex; align-items: center;
-            padding: 11px 18px;
-            color: var(--text-dark);
-            text-decoration: none;
-            transition: all 0.2s ease;
-            font-weight: 500; font-size: 0.85rem;
-            position: relative;
-        }
+        .sidebar-link { display: flex; align-items: center; padding: 11px 18px; color: var(--text-dark); text-decoration: none; transition: all 0.2s ease; font-weight: 500; font-size: 0.85rem; position: relative; }
         .sidebar-link:hover { background-color: var(--aqua-1); color: var(--aqua-4); }
         .sidebar-link.active { background-color: var(--aqua-1); color: var(--aqua-4); font-weight: 600; }
-        .sidebar-link.active::before {
-            content: ''; position: absolute;
-            right: 0; top: 0; bottom: 0; width: 3px;
-            background: linear-gradient(180deg, var(--aqua-3), var(--aqua-4));
-            border-radius: 0 3px 3px 0;
-        }
-
+        .sidebar-link.active::before { content: ''; position: absolute; right: 0; top: 0; bottom: 0; width: 3px; background: linear-gradient(180deg, var(--aqua-3), var(--aqua-4)); border-radius: 0 3px 3px 0; }
         .sidebar-icon { font-size: 0.95rem; width: 22px; text-align: center; margin-left: 10px; flex-shrink: 0; }
         .sidebar-text { white-space: nowrap; }
         .sidebar-arrow { margin-right: auto; transition: transform 0.3s ease; font-size: 0.65rem; color: #9ca3af; flex-shrink: 0; }
         .sidebar-item.has-dropdown.active .sidebar-arrow { transform: rotate(180deg); color: var(--aqua-4); }
-
-        .sidebar-dropdown {
-            list-style: none; padding: 0; margin: 0;
-            max-height: 0; overflow: hidden; transition: max-height 0.35s ease;
-            background-color: rgba(224, 247, 250, 0.3);
-        }
+        .sidebar-dropdown { list-style: none; padding: 0; margin: 0; max-height: 0; overflow: hidden; transition: max-height 0.35s ease; background-color: rgba(224, 247, 250, 0.3); }
         .sidebar-item.has-dropdown.active .sidebar-dropdown { max-height: 2000px; }
         .sidebar-dropdown .sidebar-link { padding-right: 50px; font-size: 0.8rem; }
+        .sidebar-cart-count { background: #00897b; color: white; font-size: 0.65rem; padding: 2px 7px; border-radius: 4px; margin-right: auto; font-weight: 700; }
 
-        .sidebar-cart-count {
-            background: #00897b; color: white;
-            font-size: 0.65rem; padding: 2px 7px;
-            border-radius: 4px; margin-right: auto; font-weight: 700;
-        }
-
-        .sidebar-overlay {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background-color: rgba(0, 96, 100, 0.3); z-index: 1015;
-            display: none; opacity: 0; transition: opacity 0.3s ease;
-            backdrop-filter: blur(2px);
-        }
+        .sidebar-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 96, 100, 0.3); z-index: 1015; display: none; opacity: 0; transition: opacity 0.3s ease; backdrop-filter: blur(2px); }
         .sidebar-overlay.active { display: block; opacity: 1; }
 
         /* ========== المحتوى الرئيسي ========== */
         .main-content {
-            margin-right: 0;
-            padding-top: calc(var(--navbar-height) + 16px);
-            padding-bottom: 16px;
-            padding-left: 16px; padding-right: 16px;
-            min-height: calc(100vh - var(--navbar-height));
-            transition: margin-right 0.3s ease;
-            width: 100%;
+            max-width: 1400px; width: 100%; margin: 0 auto;
+            padding: 0.75rem 0.5rem;
+            padding-top: calc(var(--navbar-height) + var(--navbar-gutter) + 0.75rem);
+            min-height: calc(100vh - var(--navbar-height) - var(--navbar-gutter));
         }
 
         /* ========== الفوتر ========== */
-        .footer {
+        .footer { background: transparent; color: var(--text-light); padding: 0.5rem; width: 100%; }
+        .footer-container {
+            max-width: 1400px; width: 100%; margin: 0 auto;
             background: linear-gradient(135deg, var(--aqua-4) 0%, #006064 100%);
-            color: var(--text-light);
-            padding: 1.5rem 0;
-            width: 100%;
-            transition: margin-right 0.3s ease;
+            border-radius: 12px; padding: 1rem; box-shadow: var(--shadow-md); overflow: hidden;
         }
-        .footer-container { max-width: 1400px; margin: 0 auto; padding: 0 2rem; width: 100%; }
         .footer-logo { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 0.8rem; }
-        .footer-logo .f-logo {
-            width: 45px;
-            height: 45px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            border: 1px solid rgba(255,255,255,0.3);
-            flex-shrink: 0;
-        }
+        .footer-logo .f-logo { width: 45px; height: 45px; background: rgba(255,255,255,0.2); border-radius: 4px; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px solid rgba(255,255,255,0.3); flex-shrink: 0; }
         .footer-logo .f-logo img { width: 100%; height: 100%; object-fit: contain; }
         .footer-logo .f-logo i { font-size: 1.2rem; }
         .footer-logo-text { font-size: 1rem; font-weight: 700; }
         .footer-links h6 { color: var(--aqua-2); margin-bottom: 0.6rem; font-weight: 600; font-size: 0.82rem; }
         .footer-links ul { list-style: none; padding: 0; }
         .footer-links li { margin-bottom: 0.2rem; }
-        .footer-links a {
-            color: rgba(255,255,255,0.65); text-decoration: none;
-            transition: all 0.2s ease; display: flex;
-            align-items: center; gap: 0.4rem; font-size: 0.8rem;
-        }
-        .footer-links a:hover { color: var(--text-light); transform: translateX(4px); }
+        .footer-links a { color: rgba(255,255,255,0.65); text-decoration: none; transition: all 0.2s ease; display: flex; align-items: center; gap: 0.4rem; font-size: 0.8rem; }
+        .footer-links a:hover { color: var(--text-light); }
         .footer-contact i { width: 18px; color: var(--aqua-3); font-size: 0.75rem; }
-        .footer-bottom {
-            border-top: 1px solid rgba(255,255,255,0.15);
-            padding-top: 0.8rem; margin-top: 0.8rem;
-            text-align: center; color: rgba(255,255,255,0.5); font-size: 0.72rem;
-        }
+        .footer-bottom { border-top: 1px solid rgba(255,255,255,0.15); padding-top: 0.8rem; margin-top: 0.8rem; text-align: center; color: rgba(255,255,255,0.5); font-size: 0.72rem; }
         .social-links { display: flex; gap: 0.4rem; margin-top: 0.6rem; }
-        .social-links a {
-            width: 28px; height: 28px; border-radius: 4px;
-            background: rgba(255,255,255,0.1); display: flex;
-            align-items: center; justify-content: center; transition: all 0.2s ease;
-            color: rgba(255,255,255,0.7);
-        }
-        .social-links a:hover { background: rgba(255,255,255,0.2); color: white; transform: translateY(-2px); }
+        .social-links a { width: 28px; height: 28px; border-radius: 4px; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; color: rgba(255,255,255,0.7); }
+        .social-links a:hover { background: rgba(255,255,255,0.2); color: white; }
 
         /* ========== مكونات عامة ========== */
-        .card { border: none; border-radius: 4px; box-shadow: var(--shadow-sm); margin-bottom: 1rem; overflow: hidden; }
+        .card { border: none; border-radius: 12px; box-shadow: var(--shadow-sm); margin-bottom: 1rem; overflow: hidden; }
         .card:hover { box-shadow: var(--shadow-md); }
-        .card-header {
-            background: linear-gradient(135deg, var(--aqua-4) 0%, #006064 100%);
-            color: var(--text-light); padding: 0.6rem 1rem;
-            font-weight: 600; font-size: 0.9rem;
-            display: flex; align-items: center; gap: 0.5rem;
-        }
+        .card-header { background: linear-gradient(135deg, var(--aqua-4) 0%, #006064 100%); color: var(--text-light); padding: 0.6rem 1rem; font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem; }
         .card-body { padding: 1rem; }
 
         .btn { border-radius: 4px; padding: 0.35rem 0.7rem; font-weight: 600; font-size: 0.8rem; border: none; transition: all 0.2s; display: inline-flex; align-items: center; gap: 0.3rem; }
@@ -551,9 +322,9 @@
         .alert { border-radius: 4px; border: none; padding: 0.6rem 1rem; margin-bottom: 1rem; font-size: 0.85rem; }
         .required-field::after { content: " *"; color: #d32f2f; }
 
-        .stat-card { background: white; border-radius: 4px; padding: 1rem; box-shadow: var(--shadow-sm); transition: all 0.2s ease; height: 100%; }
+        .stat-card { background: white; border-radius: 12px; padding: 1rem; box-shadow: var(--shadow-sm); transition: all 0.2s ease; height: 100%; }
         .stat-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
-        .stat-icon { width: 48px; height: 48px; border-radius: 4px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; font-size: 1.2rem; color: white; }
+        .stat-icon { width: 48px; height: 48px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; font-size: 1.2rem; color: white; }
         .stat-icon.primary { background: linear-gradient(135deg, var(--aqua-3), var(--aqua-4)); }
         .stat-icon.success { background: linear-gradient(135deg, #00897b, #00695c); }
         .stat-icon.warning { background: linear-gradient(135deg, #ffb300, #ff8f00); }
@@ -562,137 +333,55 @@
         .stat-value { font-size: 1.6rem; font-weight: 700; margin-bottom: 2px; }
         .stat-label { color: #78909c; font-size: 0.8rem; }
 
-        /* ========== زر واتساب العائم ========== */
-        .wa-float-container {
-            position: fixed;
-            bottom: 15px;
-            left: 15px;
-            z-index: 99999;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            animation: wa-fadeIn 0.5s ease-out forwards;
-        }
-        .wa-float-msg {
-            background: white;
-            color: #333;
-            padding: 5px 9px;
-            border-radius: 5px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            font-family: 'Tajawal', sans-serif;
-            font-size: 11px;
-            font-weight: 600;
-            white-space: nowrap;
-            opacity: 0;
-            transform: translateX(-20px);
-            animation: wa-slideIn 0.5s 0.3s ease-out forwards;
-            border: 1px solid #f0f0f0;
-        }
-        .wa-float-btn {
-            width: 30px;
-            height: 30px;
-            background-color: #25D366;
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 10px rgba(37, 211, 102, 0.4);
-            text-decoration: none !important;
-            transition: all 0.3s ease;
-            animation: wa-pulse 2s infinite;
-            border: none;
-        }
-        .wa-float-btn:hover {
-            background-color: #128C7E;
-            transform: scale(1.1);
-            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.6);
-            text-decoration: none !important;
-            color: white !important;
-        }
+        .wa-float-container { position: fixed; bottom: 15px; left: 15px; z-index: 99999; display: flex; align-items: center; gap: 6px; animation: wa-fadeIn 0.5s ease-out forwards; }
+        .wa-float-msg { background: white; color: #333; padding: 5px 9px; border-radius: 5px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); font-family: 'Tajawal', sans-serif; font-size: 11px; font-weight: 600; white-space: nowrap; opacity: 0; transform: translateX(-20px); animation: wa-slideIn 0.5s 0.3s ease-out forwards; border: 1px solid #f0f0f0; }
+        .wa-float-btn { width: 30px; height: 30px; background-color: #25D366; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 10px rgba(37, 211, 102, 0.4); text-decoration: none !important; transition: all 0.3s ease; animation: wa-pulse 2s infinite; border: none; }
+        .wa-float-btn:hover { background-color: #128C7E; transform: scale(1.1); box-shadow: 0 4px 15px rgba(37, 211, 102, 0.6); text-decoration: none !important; color: white !important; }
         .wa-float-btn svg { width: 17px; height: 17px; fill: white; }
         @keyframes wa-slideIn { to { opacity: 1; transform: translateX(0); } }
         @keyframes wa-fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes wa-pulse {
-            0% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.6); }
-            70% { box-shadow: 0 0 0 10px rgba(37, 211, 102, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); }
-        }
+        @keyframes wa-pulse { 0% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.6); } 70% { box-shadow: 0 0 0 10px rgba(37, 211, 102, 0); } 100% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); } }
 
-        /* ================================================================
-           [RESPONSIVE] - استجابة كاملة لجميع قياسات الشاشات
-           ================================================================ */
+        /* ========== RESPONSIVE ========== */
+        @media (min-width: 1401px) { .navbar-inner { padding: 0 1.5rem; } }
 
-        /* --- شاشات كبيرة جداً: > 1400px --- */
-        @media (min-width: 1401px) {
-            .footer-container { padding: 0 3rem; }
-        }
-
-        /* --- شاشات كبيرة: 1201px - 1400px --- */
         @media (max-width: 1400px) {
             #navbarSupportedContent ul li a { padding: 18px 11px; font-size: 13px; }
             .menu-submenu { min-width: 220px; }
         }
 
-        /* --- شاشات متوسطة-كبيرة: 993px - 1200px --- */
         @media (max-width: 1200px) {
             #navbarSupportedContent ul li a { padding: 18px 9px; font-size: 12.5px; }
             #navbarSupportedContent ul li a i.nav-icon { display: none; }
             .menu-submenu { min-width: 200px; }
             .menu-submenu li a { font-size: 0.78rem !important; padding: 8px 14px !important; }
-            .footer-container { padding: 0 1.5rem; }
         }
 
-        /* --- شاشات متوسطة (تابلت): 769px - 992px --- */
         @media (max-width: 992px) {
-            /* إخفاء القوائم العلوية */
             .navbar-center-section { display: none !important; }
-
-            /* الشريط الجانبي: عرض أوسع على التابلت */
-            .sidebar {
-                width: 300px;
-                max-width: 85vw;
-            }
-
-            /* الفوتر: عمودين بدل أربعة */
-            .footer-container { padding: 0 1rem; }
-            .footer-links h6 { font-size: 0.78rem; }
-            .footer-links a { font-size: 0.75rem; }
+            .sidebar { width: 300px; max-width: 85vw; }
         }
 
-        /* --- شاشات صغيرة (موبايل كبير): 577px - 768px --- */
         @media (max-width: 768px) {
-            :root { --navbar-height: 56px; }
-
-            .main-content { padding: 10px; padding-top: calc(var(--navbar-height) + 10px); }
-
-            .navbar-inner { padding: 0 10px; }
+            :root { --navbar-height: 56px; --navbar-gutter: 0.25rem; }
+            .main-content { padding: 0.5rem; padding-top: calc(var(--navbar-height) + var(--navbar-gutter) + 0.5rem); }
+            .navbar-inner { padding: 0 0.75rem; }
             .navbar-right-section { gap: 8px; }
             .logo-icon { width: 38px; height: 38px; }
             .logo-icon i { font-size: 1rem; }
-
-            /* الشريط الجانبي: يمتلئ معظم الشاشة */
-            .sidebar {
-                width: 88vw;
-                max-width: 340px;
-            }
-
+            .sidebar { width: 88vw; max-width: 340px; }
             .sidebar-login-bar { padding: 8px 14px; font-size: 0.68rem; }
             .sidebar-link { padding: 10px 14px; font-size: 0.82rem; }
             .sidebar-icon { width: 20px; font-size: 0.88rem; margin-left: 8px; }
             .sidebar-dropdown .sidebar-link { padding-right: 44px; font-size: 0.78rem; }
             .sidebar-cart-count { font-size: 0.6rem; padding: 1px 5px; }
-
-            /* الفوتر */
-            .footer { padding: 1rem 0; }
-            .footer-container { padding: 0 0.8rem; }
+            .footer { padding: 0.25rem; }
+            .footer-container { padding: 0.75rem; }
             .footer-logo { flex-direction: column; text-align: center; gap: 0.4rem; }
             .footer-logo-text { font-size: 0.9rem; }
             .footer-bottom { font-size: 0.65rem; }
             .footer-bottom .row { flex-direction: column; gap: 0.3rem; }
             .footer-bottom .col-md-6 { text-align: center !important; }
-
-            /* مكونات */
             .card-header { padding: 0.5rem 0.8rem; font-size: 0.82rem; }
             .card-body { padding: 0.8rem; }
             .btn { font-size: 0.75rem; padding: 0.3rem 0.6rem; }
@@ -703,41 +392,27 @@
             .stat-value { font-size: 1.3rem; }
         }
 
-        /* --- شاشات صغيرة جداً: <= 576px --- */
         @media (max-width: 576px) {
-            .main-content { padding: 6px; padding-top: calc(var(--navbar-height) + 8px); }
-
-            /* إخفاء اسم الشركة من الشريط العلوي */
+            :root { --navbar-gutter: 0.5rem; }
+            .main-content { padding: 0.5rem; padding-top: calc(var(--navbar-height) + var(--navbar-gutter) + 0.5rem); }
+            .navbar-inner { padding: 0 0.65rem; border-radius: 10px; }
             .navbar-logo span { display: none; }
             .navbar-right-section { gap: 6px; }
-
-            /* تقليل حجم أزرار الشريط العلوي */
             .nav-action-btn { width: 30px; height: 30px; font-size: 0.8rem; }
             .nav-badge { min-width: 14px; height: 14px; font-size: 0.5rem; top: -3px; left: -3px; }
             .user-dropdown-trigger { width: 30px; height: 30px; }
-
-            /* الشريط الجانبي: يأخذ معظم الشاشة */
-            .sidebar {
-                width: 92vw;
-                max-width: none;
-            }
-
+            .sidebar { width: 92vw; max-width: none; }
             .sidebar-link { padding: 9px 12px; font-size: 0.8rem; }
             .sidebar-icon { width: 18px; font-size: 0.82rem; margin-left: 6px; }
             .sidebar-dropdown .sidebar-link { padding-right: 38px; font-size: 0.75rem; }
-
-            /* الفوتر */
-            .footer-container { padding: 0 0.6rem; }
+            .footer { padding: 0.5rem; }
+            .footer-container { padding: 0.5rem; }
             .footer-links h6 { font-size: 0.72rem; margin-bottom: 0.4rem; }
             .footer-links a { font-size: 0.7rem; gap: 0.2rem; }
             .footer-contact a { font-size: 0.65rem; }
             .footer-contact i { width: 14px; font-size: 0.65rem; }
-
-            /* إخفاء رسالة واتساب */
             .wa-float-msg { display: none; }
-
-            /* مكونات */
-            .card { margin-bottom: 0.6rem; border-radius: 3px; }
+            .card { margin-bottom: 0.6rem; border-radius: 10px; }
             .card-header { padding: 0.45rem 0.6rem; font-size: 0.78rem; gap: 0.3rem; }
             .card-body { padding: 0.6rem; }
             .btn { font-size: 0.7rem; padding: 0.25rem 0.5rem; border-radius: 3px; }
@@ -747,47 +422,39 @@
             .form-control, .form-select { font-size: 0.75rem; padding: 0.3rem 0.4rem; }
             .form-label { font-size: 0.7rem; }
             .alert { font-size: 0.78rem; padding: 0.5rem 0.7rem; }
-
-            .stat-card { padding: 0.6rem; border-radius: 3px; }
+            .stat-card { padding: 0.6rem; border-radius: 10px; }
             .stat-icon { width: 36px; height: 36px; font-size: 0.9rem; margin-bottom: 6px; }
             .stat-value { font-size: 1.15rem; }
             .stat-label { font-size: 0.7rem; }
-
-            /* تأمين الجداول من الخروج */
-            .table-responsive { margin: 0 -6px; }
-            .card .table-responsive { margin: -0.6rem; border-radius: 0 0 3px 3px; overflow: hidden; }
+            .table-responsive { margin: 0 -0.5rem; }
+            .card .table-responsive { margin: -0.6rem; border-radius: 0 0 10px 10px; overflow: hidden; }
         }
 
-        /* --- شاشات صغيرة جداً: <= 400px --- */
         @media (max-width: 400px) {
-            :root { --navbar-height: 52px; }
-
-            .navbar-inner { padding: 0 6px; }
+            :root { --navbar-height: 52px; --navbar-gutter: 0.375rem; }
+            .navbar-inner { padding: 0 0.5rem; border-radius: 8px; }
             .navbar-right-section { gap: 4px; }
             .logo-icon { width: 34px; height: 34px; border-radius: 3px; }
             .logo-icon i { font-size: 0.85rem; }
             .sidebar-toggle span { width: 14px; }
-
-            .main-content { padding: 4px; padding-top: calc(var(--navbar-height) + 6px); }
-
+            .main-content { padding: 0.375rem; padding-top: calc(var(--navbar-height) + var(--navbar-gutter) + 0.375rem); }
             .sidebar-link { padding: 8px 10px; font-size: 0.78rem; }
             .sidebar-icon { width: 16px; font-size: 0.78rem; margin-left: 5px; }
             .sidebar-dropdown .sidebar-link { padding-right: 32px; font-size: 0.72rem; }
             .sidebar-arrow { font-size: 0.55rem; }
             .sidebar-cart-count { font-size: 0.55rem; padding: 1px 4px; }
-
-            .card { margin-bottom: 0.5rem; }
+            .card { margin-bottom: 0.5rem; border-radius: 8px; }
             .card-header { font-size: 0.72rem; padding: 0.4rem 0.5rem; }
             .card-body { padding: 0.5rem; }
             .btn { font-size: 0.65rem; padding: 0.2rem 0.4rem; }
             .table { font-size: 0.65rem; }
             .table thead th { font-size: 0.65rem; }
-            .stat-card { padding: 0.5rem; }
+            .stat-card { padding: 0.5rem; border-radius: 8px; }
             .stat-icon { width: 32px; height: 32px; font-size: 0.8rem; }
             .stat-value { font-size: 1rem; }
             .stat-label { font-size: 0.65rem; }
-
-            .footer { padding: 0.6rem 0; }
+            .footer { padding: 0.375rem; }
+            .footer-container { padding: 0.5rem; }
             .footer-bottom { font-size: 0.6rem; }
         }
     </style>
@@ -797,10 +464,8 @@
 <body>
     {% if user.is_authenticated %}
 
-    <!-- ========== الشريط العلوي ========== -->
     <nav class="navbar-mainbg">
         <div class="navbar-inner">
-
             <div class="navbar-right-section">
                 <button type="button" id="menuToggle" class="sidebar-toggle tw-relative tw-inline-flex tw-items-center tw-justify-center tw-rounded tw-p-2 tw-cursor-pointer tw-border-0" style="gap:3px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);" aria-label="القائمة">
                     <span></span><span></span><span></span>
@@ -826,7 +491,6 @@
                         <li class="{% if request.resolver_match.url_name == 'index' %}active{% endif %}">
                             <a href="{% url 'index' %}"><i class="fas fa-home nav-icon"></i>الرئيسية</a>
                         </li>
-
                         <li class="has-submenu {% if 'invoice' in request.resolver_match.url_name or 'purch' in request.resolver_match.url_name or 'sale' in request.resolver_match.url_name %}active{% endif %}">
                             <a href="#"><i class="fas fa-file-invoice nav-icon"></i>الفواتير</a>
                             <ul class="menu-submenu">
@@ -835,10 +499,9 @@
                                 <li class="{% if request.resolver_match.url_name == 'sale_create' %}sub-active{% endif %}"><a href="{% url 'invoice:sale_create' %}"><i class="fas fa-plus-circle"></i>إنشاء فاتورة بيع</a></li>
                                 <li class="{% if request.resolver_match.url_name == 'sale_list' %}sub-active{% endif %}"><a href="{% url 'invoice:sale_list' %}"><i class="fas fa-list"></i>قائمة فواتير المبيعات</a></li>
                                 <li class="{% if request.resolver_match.url_name == 'purchase_return_list' %}sub-active{% endif %}"><a href="{% url 'invoice:purchase_return_list' %}"><i class="fas fa-undo"></i>مرتجعات المشتريات</a></li>
-                                <li class="{% if request.resolver_match.url_name == 'sale_return_list' %}sub-active{% endif %}"><a href="{% url 'invoice:sale_return_list' %}"><i class="fas fa-receipt"></i>مرتجعات المبيعات</a></li>
+                                <li class="{% if request.resolver_match.url_name == 'sale_return_list' %}sub-active{% endif %}"><a href="{% url 'invoice:sale_return_list' %}"><i class="fas fa-receipt"></i>مرتجعات 555المبيعات</a></li>
                             </ul>
                         </li>
-
                         <li class="has-submenu {% if 'product' in request.resolver_match.url_name %}active{% endif %}">
                             <a href="#"><i class="fas fa-boxes nav-icon"></i>المنتجات</a>
                             <ul class="menu-submenu">
@@ -848,7 +511,6 @@
                                 <li class="{% if request.resolver_match.url_name == 'product_bulk_update' %}sub-active{% endif %}"><a href="{% url 'invoice:product_bulk_update' %}"><i class="fas fa-tags"></i>نظام التسعير</a></li>
                             </ul>
                         </li>
-
                         <li class="has-submenu {% if 'orders' in request.resolver_match.url_name or 'store' in request.resolver_match.url_name or 'checkout' in request.resolver_match.url_name or 'notification' in request.resolver_match.url_name %}active{% endif %}">
                             <a href="#"><i class="fas fa-store nav-icon"></i>المتجر الإلكتروني</a>
                             <ul class="menu-submenu">
@@ -860,7 +522,6 @@
                                 <li class="{% if request.resolver_match.url_name == 'checkout' %}sub-active{% endif %}"><a href="{% url 'invoice:checkout' %}"><i class="fas fa-credit-card"></i>صفحة الدفع</a></li>
                             </ul>
                         </li>
-
                         <li class="has-submenu {% if 'cash' in request.resolver_match.url_name %}active{% endif %}">
                             <a href="#"><i class="fas fa-wallet nav-icon"></i>الصندوق</a>
                             <ul class="menu-submenu">
@@ -868,7 +529,6 @@
                                 <li class="{% if request.resolver_match.url_name == 'cash_transaction_create' %}sub-active{% endif %}"><a href="{% url 'invoice:cash_transaction_create' %}"><i class="fas fa-hand-holding-usd"></i>حركة مالية</a></li>
                             </ul>
                         </li>
-
                         <li class="has-submenu {% if 'report' in request.resolver_match.url_name %}active{% endif %}">
                             <a href="#"><i class="fas fa-chart-bar nav-icon"></i>التقارير</a>
                             <ul class="menu-submenu">
@@ -883,7 +543,6 @@
                                 <li class="{% if request.resolver_match.url_name == 'statement_report' %}sub-active{% endif %}"><a href="{% url 'invoice:statement_report' %}"><i class="fas fa-file-alt"></i>كشف حساب</a></li>
                             </ul>
                         </li>
-
                         {% if user.is_staff %}
                         <li class="has-submenu {% if 'user' in request.resolver_match.url_name or 'register' in request.resolver_match.url_name or 'permissions' in request.resolver_match.url_name %}active{% endif %}">
                             <a href="#"><i class="fas fa-users-cog nav-icon"></i>المستخدمين</a>
@@ -896,7 +555,6 @@
                             </ul>
                         </li>
                         {% endif %}
-
                         <li class="has-submenu {% if 'currency' in request.resolver_match.url_name or 'payment_method' in request.resolver_match.url_name or 'shipping_company' in request.resolver_match.url_name or 'status' in request.resolver_match.url_name or 'price_type' in request.resolver_match.url_name or 'email' in request.resolver_match.url_name %}active{% endif %}">
                             <a href="#"><i class="fas fa-cogs nav-icon"></i>الإعدادات</a>
                             <ul class="menu-submenu">
@@ -961,7 +619,6 @@
         </div>
     </nav>
 
-    <!-- ========== الشريط الجانبي ========== -->
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-login-bar">
             <i class="fas fa-clock"></i>
@@ -974,7 +631,6 @@
                     <i class="fas fa-home sidebar-icon"></i><span class="sidebar-text">الرئيسية</span>
                 </a>
             </li>
-
             <li class="sidebar-item has-dropdown {% if 'invoice' in request.resolver_match.url_name or 'purch' in request.resolver_match.url_name or 'sale' in request.resolver_match.url_name %}active{% endif %}">
                 <a href="#" class="sidebar-link">
                     <i class="fas fa-file-invoice sidebar-icon"></i><span class="sidebar-text">الفواتير</span>
@@ -989,7 +645,6 @@
                     <li class="sidebar-item"><a href="{% url 'invoice:sale_return_list' %}" class="sidebar-link"><i class="fas fa-receipt sidebar-icon"></i><span class="sidebar-text">مرتجعات المبيعات</span></a></li>
                 </ul>
             </li>
-
             <li class="sidebar-item has-dropdown {% if 'product' in request.resolver_match.url_name %}active{% endif %}">
                 <a href="#" class="sidebar-link">
                     <i class="fas fa-boxes sidebar-icon"></i><span class="sidebar-text">المنتجات</span>
@@ -1002,7 +657,6 @@
                     <li class="sidebar-item"><a href="{% url 'invoice:product_bulk_update' %}" class="sidebar-link"><i class="fas fa-tags sidebar-icon"></i><span class="sidebar-text">نظام التسعير</span></a></li>
                 </ul>
             </li>
-
             <li class="sidebar-item has-dropdown {% if 'orders' in request.resolver_match.url_name or 'store' in request.resolver_match.url_name or 'checkout' in request.resolver_match.url_name or 'notification' in request.resolver_match.url_name %}active{% endif %}">
                 <a href="#" class="sidebar-link">
                     <i class="fas fa-store sidebar-icon"></i><span class="sidebar-text">المتجر الإلكتروني</span>
@@ -1025,7 +679,6 @@
                     </li>
                 </ul>
             </li>
-
             <li class="sidebar-item has-dropdown {% if 'cash' in request.resolver_match.url_name %}active{% endif %}">
                 <a href="#" class="sidebar-link">
                     <i class="fas fa-wallet sidebar-icon"></i><span class="sidebar-text">الصندوق</span>
@@ -1036,7 +689,6 @@
                     <li class="sidebar-item"><a href="{% url 'invoice:cash_transaction_create' %}" class="sidebar-link"><i class="fas fa-hand-holding-usd sidebar-icon"></i><span class="sidebar-text">حركة مالية</span></a></li>
                 </ul>
             </li>
-
             <li class="sidebar-item has-dropdown {% if 'report' in request.resolver_match.url_name %}active{% endif %}">
                 <a href="#" class="sidebar-link">
                     <i class="fas fa-chart-bar sidebar-icon"></i><span class="sidebar-text">التقارير</span>
@@ -1054,7 +706,6 @@
                     <li class="sidebar-item"><a href="{% url 'invoice:statement_report' %}" class="sidebar-link"><i class="fas fa-file-alt sidebar-icon"></i><span class="sidebar-text">كشف حساب</span></a></li>
                 </ul>
             </li>
-
             {% if user.is_staff %}
             <li class="sidebar-item has-dropdown {% if 'user' in request.resolver_match.url_name or 'register' in request.resolver_match.url_name or 'permissions' in request.resolver_match.url_name %}active{% endif %}">
                 <a href="#" class="sidebar-link">
@@ -1070,7 +721,6 @@
                 </ul>
             </li>
             {% endif %}
-
             <li class="sidebar-item has-dropdown {% if 'currency' in request.resolver_match.url_name or 'payment_method' in request.resolver_match.url_name or 'shipping_company' in request.resolver_match.url_name or 'status' in request.resolver_match.url_name or 'price_type' in request.resolver_match.url_name or 'email' in request.resolver_match.url_name %}active{% endif %}">
                 <a href="#" class="sidebar-link">
                     <i class="fas fa-cogs sidebar-icon"></i><span class="sidebar-text">الإعدادات</span>
@@ -1085,7 +735,6 @@
                     <li class="sidebar-item"><a href="{% url 'invoice:price_type_list' %}" class="sidebar-link"><i class="fas fa-tags sidebar-icon"></i><span class="sidebar-text">أنواع الأسعار</span></a></li>
                 </ul>
             </li>
-
             <li class="sidebar-item">
                 <a href="{% url 'accounts:system_logs' %}" class="sidebar-link {% if request.resolver_match.url_name == 'system_logs' %}active{% endif %}">
                     <i class="fas fa-file-alt sidebar-icon"></i><span class="sidebar-text">سجلات النظام</span>
@@ -1097,7 +746,6 @@
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
     {% endif %}
 
-    <!-- ========== المحتوى الرئيسي ========== -->
     <main class="main-content" id="mainContent">
         {% if messages %}
             <div class="alert-container">
@@ -1116,7 +764,6 @@
     </main>
 
     {% if user.is_authenticated %}
-    <!-- ========== الفوتر ========== -->
     <footer class="footer" id="footer">
         <div class="footer-container">
             <div class="row g-3">
@@ -1157,7 +804,6 @@
                         {% endif %}
                     </div>
                 </div>
-
                 <div class="col-lg-2 col-md-6 col-6">
                     <div class="footer-links">
                         <h6>{{ company_settings.footer_quick_links_title|default:"روابط سريعة" }}</h6>
@@ -1168,7 +814,6 @@
                         </ul>
                     </div>
                 </div>
-
                 <div class="col-lg-3 col-md-6 col-6">
                     <div class="footer-links">
                         <h6>{{ company_settings.footer_features_title|default:"المميزات" }}</h6>
@@ -1179,7 +824,6 @@
                         </ul>
                     </div>
                 </div>
-
                 <div class="col-lg-3 col-md-12">
                     <div class="footer-links">
                         <h6>{{ company_settings.footer_contact_title|default:"تواصل معنا" }}</h6>
@@ -1203,7 +847,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="footer-bottom">
                 <div class="row align-items-center">
                     <div class="col-md-6 text-md-start mb-1 mb-md-0">
@@ -1231,10 +874,8 @@
             var w = activeItem.outerWidth();
             var pos = activeItem.position();
             $(".hori-selector").css({
-                "top": pos.top + "px",
-                "left": pos.left + "px",
-                "height": h + "px",
-                "width": w + "px"
+                "top": pos.top + "px", "left": pos.left + "px",
+                "height": h + "px", "width": w + "px"
             });
         }
 
@@ -1244,7 +885,7 @@
         $("#navbarSupportedContent").on("click", "> ul > li", function(e) {
             if ($(this).hasClass('has-submenu')) return;
             $('#navbarSupportedContent > ul > li').removeClass("active");
-            $(this).addClass('active');
+            $(this).addClass("active");
             animateSelector();
         });
 
@@ -1252,8 +893,6 @@
             var menuToggle = document.getElementById('menuToggle');
             var sidebar = document.getElementById('sidebar');
             var sidebarOverlay = document.getElementById('sidebarOverlay');
-            var mainContent = document.getElementById('mainContent');
-            var footer = document.getElementById('footer');
             var userMenuBtn = document.getElementById('userMenuBtn');
             var userDropdown = document.getElementById('userDropdown');
 
@@ -1362,26 +1001,24 @@
     {% block extra_js %}{% endblock %}
 
     {% if show_force_change %}
-<div style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(220, 53, 69, 0.95); z-index: 9999999; display: flex; justify-content: center; align-items: center;">
-    <div style="background: #fff; padding: 40px; border-radius: 15px; max-width: 500px; width: 90%; text-align: center; box-shadow: 0 0 30px #000;">
-        <h2 style="color: #dc3545; margin-bottom: 20px;">⚠️ تنبيه أمني خطير!</h2>
-        <p style="margin: 20px 0; font-size: 1.2rem;">كلمة مرورك لا تزال مؤقتة. يجب تغييرها الآن لاستخدام النظام.</p>
-        <a href="{% url 'accounts:change_password' %}" class="btn btn-danger btn-lg w-100 mt-3">تغيير كلمة المرور الآن</a>
+    <div style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(220, 53, 69, 0.95); z-index: 9999999; display: flex; justify-content: center; align-items: center;">
+        <div style="background: #fff; padding: 40px; border-radius: 15px; max-width: 500px; width: 90%; text-align: center; box-shadow: 0 0 30px #000;">
+            <h2 style="color: #dc3545; margin-bottom: 20px;">⚠️ تنبيه أمني خطير!</h2>
+            <p style="margin: 20px 0; font-size: 1.2rem;">كلمة مرورك لا تزال مؤقتة. يجب تغييرها الآن لاستخدام النظام.</p>
+            <a href="{% url 'accounts:change_password' %}" class="btn btn-danger btn-lg w-100 mt-3">تغيير كلمة المرور الآن</a>
+        </div>
     </div>
-</div>
-{% endif %}
+    {% endif %}
 
-{% if company_settings.whatsapp_number %}
-<div class="wa-float-container">
-    <div class="wa-float-msg">تواصل معنا 💬</div>
-    <a href="https://wa.me/{{ company_settings.whatsapp_number }}?text={% if company_settings.whatsapp_message %}{{ company_settings.whatsapp_message|urlencode }}{% else %}مرحباً{% endif %}"
-       target="_blank"
-       rel="nofollow noopener"
-       class="wa-float-btn">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-    </a>
-</div>
-{% endif %}
+    {% if company_settings.whatsapp_number %}
+    <div class="wa-float-container">
+        <div class="wa-float-msg">تواصل معنا 💬</div>
+        <a href="https://wa.me/{{ company_settings.whatsapp_number }}?text={% if company_settings.whatsapp_message %}{{ company_settings.whatsapp_message|urlencode }}{% else %}مرحباً{% endif %}"
+           target="_blank" rel="nofollow noopener" class="wa-float-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        </a>
+    </div>
+    {% endif %}
 
 </body>
-</html>222
+</html>
