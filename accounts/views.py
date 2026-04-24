@@ -655,33 +655,45 @@ def user_list_view(request):
 
 
 
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+from django.contrib import messages
+# تأكد من استيراد is_staff_user من ملف permissions أو utils الخاص بك
+# from .utils import is_staff_user 
+
 @login_required
 @user_passes_test(is_staff_user)
 def user_edit_view(request, pk):
     """تحرير بيانات مستخدم معين"""
     user = get_object_or_404(User, pk=pk)
-    profile, created = Profile.objects.get_or_create(user=user)  # ← أضف هذه
+    profile, created = Profile.objects.get_or_create(user=user)
     
     if request.method == 'POST':
         form = UserUpdateForm(request.POST, instance=user)
-        profile_form = UserProfileUpdateForm(request.POST, request.FILES, instance=profile)  # ← أضف هذه
-        if form.is_valid() and profile_form.is_valid():  # ← عدّل هذا
+        # تمرير is_admin=True لتفعيل حقول (زبون/مورد) وإخفاء حقول الاسم
+        profile_form = UserProfileUpdateForm(request.POST, request.FILES, instance=profile, is_admin=True)
+        
+        if form.is_valid() and profile_form.is_valid():
             form.save()
-            profile_form.save()  # ← أضف هذه
+            profile_form.save()
             messages.success(request, f'تم تحديث بيانات المستخدم "{user.username}" بنجاح.')
             return redirect('accounts:user_list')
     else:
         form = UserUpdateForm(instance=user)
-        profile_form = UserProfileUpdateForm(instance=profile)  # ← أضف هذه
+        # تمرير is_admin=True هنا أيضاً عند عرض الصفحة لأول مرة
+        profile_form = UserProfileUpdateForm(instance=profile, is_admin=True)
         
     context = {
         'form': form,
-        'profile_form': profile_form,  # ← أضف هذه
+        'profile_form': profile_form,
         'user_to_edit': user,
-        'profile': profile,            # ← أضف هذه
+        'profile': profile,
         'title': f'تحرير المستخدم: {user.username}'
     }
     return render(request, 'accounts/user_edit.html', context)
+
+
 
 
 # ============================================

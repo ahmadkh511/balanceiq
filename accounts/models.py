@@ -1,12 +1,45 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+from django.db import models
+from django.contrib.auth.models import User
+
+# ==========================================
+# الخيارات المتكررة (توضع خارج الكلاس لتكون أنظف)
+# ==========================================
+GENDER_CHOICES = [
+    ('M', 'ذكر'),
+    ('F', 'أنثى'),
+    ('O', 'آخر'),
+]
+
+EDUCATION_LEVEL_CHOICES = [
+    ('HS', 'ثانوي'),
+    ('DIP', 'دبلوم'),
+    ('BAC', 'بكالوريوس'),
+    ('MAS', 'ماجستير'),
+    ('PHD', 'دكتوراه'),
+    ('OTH', 'أخرى'),
+]
 
 
 class Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name="المستخدم")
+    # ==========================================
+    # 1. العلاقة الأساسية ونوع المستخدم
+    # ==========================================
+    user = models.OneToOneField(
+        User, 
+        on_delete=models.CASCADE, 
+        verbose_name="المستخدم",
+        related_name="profile" # يسهل الوصول من خلال user.profile
+    )
     
-    # شعار الشركة (يتم التحكم فيه من قبل المدير فقط)
+    is_customer = models.BooleanField(default=True, verbose_name="زبون")
+    is_supplier = models.BooleanField(default=False, verbose_name="مورد")
+
+    # ==========================================
+    # 2. الصور والشعارات
+    # ==========================================
     logo = models.ImageField(
         upload_to='company_logos/', 
         blank=True, 
@@ -14,41 +47,28 @@ class Profile(models.Model):
         verbose_name="شعار الشركة"
     )
     
-    # صورة الملف الشخصي (صورة Avatar خاصة بالمستخدم)
     profile_picture = models.ImageField(
         upload_to='profile_pics/', 
         blank=True, 
         null=True, 
         verbose_name="صورة الملف الشخصي"
     )
-    
-    # الاسم الكامل
-    full_name = models.CharField(
-        max_length=100, 
-        blank=True, 
-        verbose_name="الاسم الكامل"
-    )
-    
-    # رقم الهاتف
+
+    # ==========================================
+    # 3. المعلومات الشخصية الأساسية
+    # ==========================================
     phone_number = models.CharField(
         max_length=20, 
         blank=True, 
         verbose_name="رقم الهاتف"
     )
     
-    # تاريخ الميلاد
     birth_date = models.DateField(
         null=True, 
         blank=True, 
         verbose_name="تاريخ الميلاد"
     )
     
-    # الجنس
-    GENDER_CHOICES = [
-        ('M', 'ذكر'),
-        ('F', 'أنثى'),
-        ('O', 'آخر'),
-    ]
     gender = models.CharField(
         max_length=1, 
         choices=GENDER_CHOICES, 
@@ -56,104 +76,78 @@ class Profile(models.Model):
         verbose_name="الجنس"
     )
     
-    # العنوان
+    bio = models.TextField(
+        max_length=500, 
+        blank=True, 
+        verbose_name="نبذة شخصية"
+    )
+
+    # ==========================================
+    # 4. معلومات الاتصال والعنوان
+    # ==========================================
     address = models.TextField(
         blank=True, 
         verbose_name="العنوان"
     )
     
-    # المدينة
     city = models.CharField(
         max_length=50, 
         blank=True, 
         verbose_name="المدينة"
     )
     
-    # البلد
     country = models.CharField(
         max_length=50, 
         blank=True, 
         verbose_name="البلد"
     )
     
-    # الرمز البريدي
     postal_code = models.CharField(
         max_length=20, 
         blank=True, 
         verbose_name="الرمز البريدي"
     )
     
-    # نبذة شخصية
-    bio = models.TextField(
-        max_length=500, 
-        blank=True, 
-        verbose_name="نبذة شخصية"
-    )
-    
-    # الموقع الإلكتروني
     website = models.URLField(
         blank=True, 
         verbose_name="الموقع الإلكتروني"
     )
-    
-    # حسابات التواصل الاجتماعي
-    facebook = models.URLField(
-        blank=True, 
-        verbose_name="فيسبوك"
-    )
-    
-    twitter = models.URLField(
-        blank=True, 
-        verbose_name="تويتر"
-    )
-    
-    instagram = models.URLField(
-        blank=True, 
-        verbose_name="انستغرام"
-    )
-    
-    linkedin = models.URLField(
-        blank=True, 
-        verbose_name="لينكدإن"
-    )
-    
-    # المهارات
-    skills = models.CharField(
-        max_length=200, 
-        blank=True, 
-        verbose_name="المهارات"
-    )
-    
-    # الوظيفة
+
+    # ==========================================
+    # 5. حسابات التواصل الاجتماعي
+    # ==========================================
+    facebook = models.URLField(blank=True, verbose_name="فيسبوك")
+    twitter = models.URLField(blank=True, verbose_name="تويتر")
+    instagram = models.URLField(blank=True, verbose_name="انستغرام")
+    linkedin = models.URLField(blank=True, verbose_name="لينكدإن")
+
+    # ==========================================
+    # 6. معلومات العمل والتعليم
+    # ==========================================
     job_title = models.CharField(
         max_length=100, 
         blank=True, 
         verbose_name="الوظيفة"
     )
     
-    # الشركة
     company = models.CharField(
         max_length=100, 
         blank=True, 
         verbose_name="الشركة"
     )
     
-    # سنة الخبرة
+    skills = models.CharField(
+        max_length=200, 
+        blank=True, 
+        verbose_name="المهارات"
+    )
+    
     experience_years = models.PositiveIntegerField(
         null=True, 
         blank=True, 
         verbose_name="سنوات الخبرة"
     )
     
-    # مستوى التعليم
-    EDUCATION_LEVEL_CHOICES = [
-        ('HS', 'ثانوي'),
-        ('DIP', 'دبلوم'),
-        ('BAC', 'بكالوريوس'),
-        ('MAS', 'ماجستير'),
-        ('PHD', 'دكتوراه'),
-        ('OTH', 'أخرى'),
-    ]
     education_level = models.CharField(
         max_length=3, 
         choices=EDUCATION_LEVEL_CHOICES, 
@@ -161,52 +155,53 @@ class Profile(models.Model):
         verbose_name="مستوى التعليم"
     )
     
-    # تخصص الجامعة
     university_major = models.CharField(
         max_length=100, 
         blank=True, 
         verbose_name="التخصص الجامعي"
     )
     
-    # اللغات
     languages = models.CharField(
         max_length=200, 
         blank=True, 
         verbose_name="اللغات"
     )
-    
-    # هل الملف الشخصي عام
+
+    # ==========================================
+    # 7. الإعدادات
+    # ==========================================
     is_public = models.BooleanField(
         default=True, 
         verbose_name="هل الملف الشخصي عام؟"
     )
     
-    # هل يريد تلقي الإشعارات عبر البريد الإلكتروني
     email_notifications = models.BooleanField(
         default=True, 
         verbose_name="تلقي إشعارات البريد الإلكتروني"
     )
-    
-    # تاريخ إنشاء الملف الشخصي
+
+    # ==========================================
+    # 8. التواريخ التلقائية
+    # ==========================================
     created_at = models.DateTimeField(
         auto_now_add=True, 
         verbose_name="تاريخ الإنشاء"
     )
     
-    # تاريخ تحديث الملف الشخصي
     updated_at = models.DateTimeField(
         auto_now=True, 
         verbose_name="تاريخ التحديث"
     )
 
+    # ==========================================
+    # الدوال والتحويلات النصية
+    # ==========================================
     def __str__(self):
         return f'ملف {self.user.username} الشخصي'
 
     class Meta:
         verbose_name = "الملف الشخصي"
         verbose_name_plural = "الملفات الشخصية"
-
-
 
 class CompanySettings(models.Model):
     # ========== الحقول الأساسية ==========

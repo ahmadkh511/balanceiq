@@ -41,19 +41,34 @@ class CustomUserCreationForm(UserCreationForm):
         return email
 
 
+from django import forms
+from django.contrib.auth.models import User
+from urllib.parse import urlparse
+from django.core.exceptions import ValidationError
+from .models import Profile
 
+
+
+from django import forms
+from django.contrib.auth.models import User
+from urllib.parse import urlparse
+from django.core.exceptions import ValidationError
+from .models import Profile
+
+
+# ==========================================
+# 1. نموذج تحديث بيانات Django User المدمج
+# (يُستخدم من قبل الموظفين Admin لتعديل بيانات الحساب والصلاحيات)
+# ==========================================
 class UserUpdateForm(forms.ModelForm):
-    """
-    نموذج لتحديث بيانات المستخدم الأساسية (بدون كلمة المرور).
-    """
     class Meta:
         model = User
         fields = ['username', 'email', 'first_name', 'last_name', 'is_active', 'is_staff']
         widgets = {
             'username': forms.TextInput(attrs={'class': 'form-control'}),
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
-            'first_name': forms.TextInput(attrs={'class': 'form-control'}),
-            'last_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'first_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'الاسم الأول'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'الاسم الأخير'}),
             'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'is_staff': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
@@ -65,30 +80,39 @@ class UserUpdateForm(forms.ModelForm):
             'is_active': 'حساب نشط',
             'is_staff': 'موظف (صلاحيات إدارية)',
         }
-    
+
     def clean_email(self):
-        """
-        التحقق من أن البريد الإلكتروني غير مستخدم من قبل (باستثناء المستخدم الحالي).
-        """
         email = self.cleaned_data.get('email')
         username = self.cleaned_data.get('username')
-        
-        # التحقق من وجود بريد إلكتروني مكرر (باستثناء المستخدم الحالي)
         if email and User.objects.filter(email__iexact=email).exclude(username=username).exists():
             raise forms.ValidationError("هذا البريد الإلكتروني مستخدم من قبل مستخدم آخر.")
         return email
 
 
+# ==========================================
+# 2. نموذج تحديث بيانات Profile
+# (يُستخدم للمستخدم العادي لتعديل بريفاه، والموظف لتعديل بقية البيانات)
+# ==========================================
 class UserProfileUpdateForm(forms.ModelForm):
-    """
-    نموذج للمستخدم لتحديث بياناته الشخصية.
-    """
-    # === تعديل حقل الموقع الإلكتروني ===
-    # نستخدم CharField بدلاً من URLField للسماح بإدخال النص العادي
+    # --- حقول إضافية من نموذج User (لأننا أزلنا full_name من Profile) ---
+    first_name = forms.CharField(
+        max_length=30,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'الاسم الأول'}),
+        label='الاسم الأول'
+    )
+    last_name = forms.CharField(
+        max_length=30,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'الاسم الأخير'}),
+        label='الاسم الأخير'
+    )
+
+    # --- حقل وهمي لمعالجة الرابط ---
     website_display = forms.CharField(
         label="الموقع الإلكتروني",
         required=False,
-        widget=forms.TextInput(attrs={ # تم التغيير إلى TextInput
+        widget=forms.TextInput(attrs={
             'class': 'form-control',
             'placeholder': 'مثال: google.com أو a1syria.com'
         })
@@ -97,157 +121,108 @@ class UserProfileUpdateForm(forms.ModelForm):
     class Meta:
         model = Profile
         fields = [
-            'profile_picture', 'full_name', 'phone_number', 'birth_date', 'gender',
+            # تم إزالة full_name و user_type
+            'is_customer', 'is_supplier', 'profile_picture', 'phone_number', 'birth_date', 'gender',
             'address', 'city', 'country', 'postal_code', 'bio', 
             'facebook', 'twitter', 'instagram', 'linkedin', 'skills', 
             'job_title', 'company', 'experience_years', 'education_level',
             'university_major', 'languages', 'is_public', 'email_notifications',
         ]
         widgets = {
-            'profile_picture': forms.FileInput(attrs={
-                'class': 'form-control',
-                'accept': 'image/*'
-            }),
-            'full_name': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'الاسم الكامل'
-            }),
-            'phone_number': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'رقم الهاتف'
-            }),
-            'birth_date': forms.DateInput(attrs={
-                'class': 'form-control',
-                'type': 'date'
-            }),
-            'gender': forms.Select(attrs={
-                'class': 'form-control'
-            }),
-            'address': forms.Textarea(attrs={
-                'class': 'form-control',
-                'rows': 3,
-                'placeholder': 'العنوان'
-            }),
-            'city': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'المدينة'
-            }),
-            'country': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'البلد'
-            }),
-            'postal_code': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'الرمز البريدي'
-            }),
-            'bio': forms.Textarea(attrs={
-                'class': 'form-control',
-                'rows': 4,
-                'placeholder': 'نبذة شخصية'
-            }),
-            'facebook': forms.URLInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'رابط فيسبوك'
-            }),
-            'twitter': forms.URLInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'رابط تويتر'
-            }),
-            'instagram': forms.URLInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'رابط انستغرام'
-            }),
-            'linkedin': forms.URLInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'رابط لينكدإن'
-            }),
-            'skills': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'المهارات (افصل بينها بفاصلة)'
-            }),
-            'job_title': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'الوظيفة'
-            }),
-            'company': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'الشركة'
-            }),
-            'experience_years': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'min': 0,
-                'placeholder': 'سنوات الخبرة'
-            }),
-            'education_level': forms.Select(attrs={
-                'class': 'form-control'
-            }),
-            'university_major': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'التخصص الجامعي'
-            }),
-            'languages': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'اللغات (افصل بينها بفاصلة)'
-            }),
-            'is_public': forms.CheckboxInput(attrs={
-                'class': 'form-check-input'
-            }),
-            'email_notifications': forms.CheckboxInput(attrs={
-                'class': 'form-check-input'
-            }),
+            'is_customer': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'is_supplier': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'profile_picture': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
+            'phone_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'رقم الهاتف'}),
+            'birth_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'gender': forms.Select(attrs={'class': 'form-select'}),
+            'address': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'العنوان'}),
+            'city': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'المدينة'}),
+            'country': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'البلد'}),
+            'postal_code': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'الرمز البريدي'}),
+            'bio': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'نبذة شخصية'}),
+            'facebook': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'رابط فيسبوك'}),
+            'twitter': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'رابط تويتر'}),
+            'instagram': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'رابط انستغرام'}),
+            'linkedin': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'رابط لينكدإن'}),
+            'skills': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'المهارات (افصل بينها بفاصلة)'}),
+            'job_title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'الوظيفة'}),
+            'company': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'الشركة'}),
+            'experience_years': forms.NumberInput(attrs={'class': 'form-control', 'min': 0, 'placeholder': 'سنوات الخبرة'}),
+            'education_level': forms.Select(attrs={'class': 'form-select'}),
+            'university_major': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'التخصص الجامعي'}),
+            'languages': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'اللغات (افصل بينها بفاصلة)'}),
+            'is_public': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'email_notifications': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, is_admin=False, **kwargs):
         super().__init__(*args, **kwargs)
+        
+        # ==========================================
+        # ذكاء الفورم: تعديل الحقول بناءً على من يفتح الصفحة
+        # ==========================================
+        if not is_admin:
+            # إذا كان المستخدم العادي: إخفاء خيارات (زبون/مورد)
+            self.fields.pop('is_customer', None)
+            self.fields.pop('is_supplier', None)
+        else:
+            # إذا كان الادمن: إخفاء حقول الاسم (لأنها موجودة في UserUpdateForm لتجنب التضارب)
+            self.fields.pop('first_name', None)
+            self.fields.pop('last_name', None)
+
         if self.instance and self.instance.pk:
+            # تعبئة حقول الاسم من نموذج User المرتبط بالبروفايل
+            if self.instance.user and 'first_name' in self.fields:
+                self.fields['first_name'].initial = self.instance.user.first_name
+                self.fields['last_name'].initial = self.instance.user.last_name
+            
+            # تعبئة حقل الموقع الإلكتروني المخصص (بعد إزالة https://)
             if self.instance.website:
-                self.fields['website_display'].initial = self.instance.website.replace('https://', '')
+                self.fields['website_display'].initial = self.instance.website.replace('https://', '').replace('http://', '')
 
     def clean_website_display(self):
-        """
-        دالة تحقق مخصصة (custom clean method) لحقل الموقع الإلكتروني.
-        تسمح بإدخال اسم النطاق فقط وتتحقق من صحته.
-        """
+        """التحقق من صحة الرابط المدخل"""
         website = self.cleaned_data.get('website_display', '').strip()
         if not website:
-            return '' # إذا كان الحقل فارغاً، لا تفعل شيئاً
-
-        # تحقق مما إذا كان الرابط يحتوي على بروتوكول
-        if not website.startswith(('http://', 'https://')):
-            # إذا لم يكن كذلك، أضف https:// مؤقتاً للتحقق
-            test_url = 'https://' + website
-        else:
-            test_url = website
-
-        # استخدم urlparse لتحليل الرابط
+            return ''
+        
+        test_url = 'https://' + website if not website.startswith(('http://', 'https://')) else website
         try:
             parsed = urlparse(test_url)
-            # تحقق من وجود اسم نطاق (netloc) وأنه لا يحتوي على مسافات
             if not parsed.netloc or ' ' in website:
                 raise ValidationError('الرجاء إدخال رابط موقع إلكتروني صالح، مثل example.com')
         except ValueError:
             raise ValidationError('الرجاء إدخال رابط موقع إلكتروني صالح.')
-
-        return website # أعد القيمة الأصلية (بدون https)
+        return website
 
     def save(self, commit=True):
         instance = super().save(commit=False)
         
-        website_val = self.cleaned_data.get('website_display', '').strip()
+        # 1. تحديث الاسم في نموذج User المدمج (فقط إذا كانت الحقول موجودة، أي للمستخدم العادي)
+        if 'first_name' in self.fields:
+            user = instance.user
+            user.first_name = self.cleaned_data.get('first_name', '')
+            user.last_name = self.cleaned_data.get('last_name', '')
+            if commit:
+                user.save()
         
+        # 2. معالجة الرابط وحفظه في نموذج Profile
+        website_val = self.cleaned_data.get('website_display', '').strip()
         if website_val:
-            # أضف https:// فقط إذا لم يكن موجوداً
-            if not website_val.startswith('http'):
-                instance.website = 'https://' + website_val
-            else:
-                instance.website = website_val
+            instance.website = 'https://' + website_val if not website_val.startswith('http') else website_val
         else:
             instance.website = ''
         
+        # 3. الحفظ النهائي
         if commit:
             instance.save()
-        
+            
         return instance
+
+
+
+
+
 
 
 

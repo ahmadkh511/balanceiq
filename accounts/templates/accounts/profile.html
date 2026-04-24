@@ -5,219 +5,37 @@
 
 {% block extra_css %}
 <style>
-    /* أنماط دليل التصميم - Aqua Design System */
     :root {
-        --aqua-1: #e0f7fa;
-        --aqua-2: #b2ebf2;
-        --aqua-3: #4dd0e1;
-        --aqua-4: #0097a7;
-        --text-dark: #006064;
-        --text-light: #ffffff;
-        --shadow-sm: 0 2px 8px rgba(0, 150, 167, 0.08);
-        --shadow-md: 0 4px 12px rgba(0, 150, 167, 0.12);
+        --aqua-1: #e0f7fa; --aqua-2: #b2ebf2; --aqua-3: #4dd0e1; --aqua-4: #0097a7;
+        --text-dark: #006064; --shadow-sm: 0 2px 8px rgba(0, 150, 167, 0.1); --shadow-md: 0 8px 20px rgba(0, 150, 167, 0.15);
     }
-
-    /* الأنماط الأصلية مع تعديل لتتوافق مع نظام الألوان الجديد */
-    .profile-header {
-        background: linear-gradient(135deg, var(--aqua-4) 0%, var(--text-dark) 100%);
-        color: white;
-        padding: 40px 0;
-        border-radius: 15px;
-        margin-bottom: 30px;
-        box-shadow: var(--shadow-md);
-    }
-    .profile-avatar-container {
-        position: relative;
-        display: inline-block;
-    }
-    .profile-avatar {
-        width: 150px;
-        height: 150px;
-        border-radius: 50%;
-        border: 5px solid rgba(255,255,255,0.3);
-        box-shadow: var(--shadow-sm);
-        transition: transform 0.3s ease;
-    }
-    .profile-avatar:hover {
-        transform: scale(1.05);
-    }
-    .profile-info h2 {
-        margin: 0;
-        font-weight: 700;
-    }
-    .profile-info p {
-        margin: 5px 0;
-        opacity: 0.9;
-    }
-    .profile-stats .stat-item {
-        text-align: center;
-        padding: 20px;
-        background: rgba(255,255,255,0.1);
-        border-radius: 10px;
-        transition: background 0.3s ease;
-    }
-    .profile-stats .stat-item:hover {
-        background: rgba(255,255,255,0.2);
-    }
-    .profile-stats .stat-number {
-        font-size: 1.8rem;
-        font-weight: 700;
-    }
-    .profile-stats .stat-label {
-        font-size: 0.9rem;
-        opacity: 0.8;
-    }
-    .info-card {
-        border: none;
-        border-radius: 15px;
-        box-shadow: var(--shadow-sm);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        overflow: hidden;
-    }
-    .info-card:hover {
-        transform: translateY(-5px);
-        box-shadow: var(--shadow-md);
-    }
-    .info-card .card-header {
-        background: linear-gradient(135deg, var(--aqua-3) 0%, var(--aqua-4) 100%);
-        color: var(--text-dark);
-        font-weight: 600;
-        border-bottom: none;
-    }
-    .info-card .card-header h5 {
-        color: var(--text-dark);
-        margin: 0;
-    }
-    .info-list {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-    }
-    .info-list li {
-        padding: 12px 0;
-        border-bottom: 1px solid var(--aqua-1);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-    .info-list li:last-child {
-        border-bottom: none;
-    }
-    .info-list .label {
-        font-weight: 500;
-        color: #6c757d;
-        display: flex;
-        align-items: center;
-    }
-    .info-list .label i {
-        margin-left: 10px;
-        width: 20px;
-        text-align: center;
-        color: var(--aqua-4);
-    }
-    .info-list .value {
-        color: var(--text-dark);
-        text-align: left;
-    }
-    .form-section .section-title {
-        font-size: 1.2rem;
-        font-weight: 600;
-        color: var(--aqua-4);
-        margin-bottom: 20px;
-        padding-bottom: 10px;
-        border-bottom: 2px solid var(--aqua-2);
-    }
-    .form-control, .form-select {
-        border-radius: 4px;
-        border: 1px solid var(--aqua-2);
-        padding: 0.35rem 0.5rem;
-        font-size: 0.9rem;
-        transition: all 0.2s;
-    }
-    .form-control:focus, .form-select:focus {
-        border-color: var(--aqua-3);
-        box-shadow: 0 0 0 2px rgba(77, 208, 225, 0.2);
-    }
-    .btn-primary {
-        background: linear-gradient(135deg, var(--aqua-4) 0%, var(--text-dark) 100%);
-        border: none;
-        color: white;
-        padding: 0.5rem 1.5rem;
-        border-radius: 4px;
-        transition: all 0.2s;
-    }
-    .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-md);
-    }
-    .btn-outline-secondary {
-        border: 1px solid var(--aqua-3);
-        color: var(--aqua-4);
-    }
-    .btn-outline-secondary:hover {
-        background: var(--aqua-1);
-        border-color: var(--aqua-4);
-    }
-    
-    /* أنماط نوع المستخدم */
-    .user-type-badge {
-        display: inline-block;
-        padding: 0.25rem 0.75rem;
-        border-radius: 20px;
-        font-size: 0.8rem;
-        font-weight: 500;
-        background-color: var(--aqua-2);
-        color: var(--text-dark);
-    }
-    .user-type-badge i {
-        margin-left: 5px;
-    }
-    .required-field::after {
-        content: " *";
-        color: #d32f2f;
-    }
-    .form-text {
-        font-size: 0.75rem;
-        color: #6c757d;
-        margin-top: 0.25rem;
-    }
-    .user-type-option {
-        padding: 0.5rem;
-        border-radius: 8px;
-        transition: all 0.2s;
-        cursor: pointer;
-        border: 1px solid var(--aqua-2);
-        background: white;
-    }
-    .user-type-option:hover {
-        background-color: var(--aqua-1);
-        border-color: var(--aqua-4);
-    }
-    .user-type-option.selected {
-        background-color: var(--aqua-1);
-        border-color: var(--aqua-4);
-        box-shadow: var(--shadow-sm);
-    }
-    .user-type-option input[type="radio"] {
-        margin-left: 10px;
-        cursor: pointer;
-    }
-    .user-type-option label {
-        cursor: pointer;
-        margin: 0;
-        font-weight: 500;
-        flex: 1;
-    }
-    .user-type-option i {
-        width: 25px;
-        color: var(--aqua-4);
-    }
-    .user-type-description {
-        font-size: 0.7rem;
-        color: #6c757d;
-        margin-right: 35px;
-        margin-top: 5px;
-    }
+    .profile-header { background: linear-gradient(135deg, var(--aqua-4) 0%, var(--text-dark) 100%); color: white; padding: 40px 20px; border-radius: 16px; margin-bottom: 30px; box-shadow: var(--shadow-md); }
+    .profile-avatar { width: 150px; height: 150px; border-radius: 50%; border: 5px solid rgba(255,255,255,0.3); box-shadow: 0 4px 15px rgba(0,0,0,0.2); object-fit: cover; transition: transform 0.3s ease; }
+    .profile-avatar:hover { transform: scale(1.05); }
+    .info-card { border: none; border-radius: 16px; box-shadow: var(--shadow-sm); transition: all 0.3s ease; overflow: hidden; margin-bottom: 24px; background: #fff; }
+    .info-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+    .info-card .card-header { background: linear-gradient(135deg, var(--aqua-3) 0%, var(--aqua-4) 100%); color: white; font-weight: 600; padding: 14px 20px; border-bottom: none; }
+    .info-card .card-header h5 { margin: 0; font-size: 1.05rem; }
+    .info-card .card-body { padding: 20px; }
+    .info-list { list-style: none; padding: 0; margin: 0; }
+    .info-list li { padding: 12px 0; border-bottom: 1px solid var(--aqua-1); display: flex; justify-content: space-between; align-items: center; }
+    .info-list li:last-child { border-bottom: none; }
+    .info-list .label { font-weight: 500; color: #6c757d; display: flex; align-items: center; gap: 8px; }
+    .info-list .label i { color: var(--aqua-4); width: 18px; text-align: center; }
+    .info-list .value { color: var(--text-dark); text-align: left; font-size: 0.95rem; }
+    .stat-item { text-align: center; padding: 20px; background: var(--aqua-4); border-radius: 12px; color: white; box-shadow: var(--shadow-sm); }
+    .stat-number { font-size: 1.5rem; font-weight: 700; display: block; }
+    .stat-label { font-size: 0.85rem; opacity: 0.9; }
+    .form-control, .form-select { border-radius: 8px; border: 1px solid var(--aqua-2); padding: 10px 14px; font-size: 0.95rem; transition: all 0.2s; background-color: #fff; }
+    .form-control:focus, .form-select:focus { border-color: var(--aqua-4); box-shadow: 0 0 0 3px rgba(0, 151, 167, 0.15); }
+    .form-label { font-weight: 500; color: #495057; margin-bottom: 6px; font-size: 0.9rem; }
+    .form-text { font-size: 0.8rem; color: #6c757d; margin-top: 4px; }
+    .section-title { font-size: 1.1rem; font-weight: 600; color: var(--aqua-4); margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid var(--aqua-1); }
+    .user-type-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 500; background-color: var(--aqua-1); color: var(--text-dark); }
+    .btn-primary { background: linear-gradient(135deg, var(--aqua-4) 0%, var(--text-dark) 100%); border: none; color: white; padding: 10px 24px; border-radius: 8px; font-weight: 500; transition: all 0.2s; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); color: white; }
+    .btn-outline-secondary { border: 1px solid var(--aqua-3); color: var(--aqua-4); border-radius: 8px; }
+    .btn-outline-secondary:hover { background: var(--aqua-1); border-color: var(--aqua-4); color: var(--text-dark); }
 </style>
 {% endblock %}
 
@@ -226,172 +44,103 @@
     <div class="row">
         <!-- العمود الأيسر: عرض المعلومات -->
         <div class="col-lg-4">
-            <!-- رأس الملف الشخصي -->
             <div class="profile-header text-center">
-                <div class="profile-avatar-container">
-                    <img src="{% if profile.profile_picture %}{{ profile.profile_picture.url }}{% else %}https://via.placeholder.com/150{% endif %}" alt="صورة الملف الشخصي" class="profile-avatar">
-                </div>
-                <div class="profile-info mt-3">
-                    <h2>{{ profile.full_name|default:user.username }}</h2>
-                    <p>{{ profile.job_title|default:"لا توجد وظيفة" }}</p>
-                    <p><i class="fas fa-building"></i> {{ profile.company|default:"لا توجد شركة" }}</p>
+                <img src="{% if profile.profile_picture %}{{ profile.profile_picture.url }}{% else %}{% static 'images/default_avatar.png' %}{% endif %}" 
+                     alt="صورة الملف الشخصي" class="profile-avatar" id="avatar-preview-main">
+                <div class="mt-3">
+                    <h2 class="h4 mb-1">{{ user.get_full_name|default:user.username }}</h2>
+                    <p class="mb-0 opacity-75">{{ profile.job_title|default:"لا توجد وظيفة" }}</p>
+                    <p class="mb-0 opacity-75"><i class="fas fa-building me-1"></i>{{ profile.company|default:"لا توجد شركة" }}</p>
                 </div>
             </div>
 
-            <!-- إحصائيات سريعة -->
-            <div class="row profile-stats text-white mb-4">
+            <div class="row g-2 mb-4">
                 <div class="col-6">
                     <div class="stat-item">
-                        <div class="stat-number">{{ profile.experience_years|default:0 }}</div>
-                        <div class="stat-label">سنة خبرة</div>
+                        <span class="stat-number">{{ profile.experience_years|default:0 }}</span>
+                        <span class="stat-label">سنة خبرة</span>
                     </div>
                 </div>
                 <div class="col-6">
                     <div class="stat-item">
-                        <div class="stat-number">{{ profile.get_education_level_display|default:"N/A" }}</div>
-                        <div class="stat-label">المستوى التعليمي</div>
+                        <span class="stat-number" style="font-size: 1rem;">{{ profile.get_education_level_display|default:"N/A" }}</span>
+                        <span class="stat-label">التعليم</span>
                     </div>
                 </div>
             </div>
 
-            <!-- معلومات الاتصال -->
-            <div class="card info-card mb-4">
-                <div class="card-header">
-                    <h5><i class="fas fa-phone-alt me-2"></i>معلومات الاتصال</h5>
-                </div>
+            <div class="card info-card">
+                <div class="card-header"><h5><i class="fas fa-phone-alt me-2"></i>معلومات الاتصال</h5></div>
                 <div class="card-body">
                     <ul class="info-list">
+                        <li><span class="label"><i class="fas fa-envelope"></i> البريد</span><span class="value">{{ user.email }}</span></li>
+                        <li><span class="label"><i class="fas fa-mobile-alt"></i> الهاتف</span><span class="value">{{ profile.phone_number|default:"-" }}</span></li>
                         <li>
-                            <span class="label"><i class="fas fa-envelope"></i> البريد الإلكتروني</span>
-                            <span class="value">{{ user.email }}</span>
-                        </li>
-                        <li>
-                            <span class="label"><i class="fas fa-mobile-alt"></i> الهاتف</span>
-                            <span class="value">{{ profile.phone_number|default:"غير محدد" }}</span>
-                        </li>
-                        <li>
-                            <span class="label"><i class="fas fa-globe"></i> الموقع الإلكتروني</span>
-                            <span class="value">
-                                {% if profile.website %}
-                                    <a href="{{ profile.website }}" target="_blank">{{ profile.website }}</a>
-                                {% else %}
-                                    غير محدد
-                                {% endif %}
-                            </span>
+                            <span class="label"><i class="fas fa-globe"></i> الموقع</span>
+                            <span class="value">{% if profile.website %}<a href="{{ profile.website }}" target="_blank" style="color:var(--aqua-4)">{{ profile.website }}</a>{% else %}-{% endif %}</span>
                         </li>
                     </ul>
                 </div>
             </div>
 
-            <!-- معلومات أساسية مع عرض نوع المستخدم (يتم تحديثها بواسطة JavaScript) -->
-            <div class="card info-card mb-4">
-                <div class="card-header">
-                    <h5><i class="fas fa-user me-2"></i>معلومات أساسية</h5>
-                </div>
+            <div class="card info-card">
+                <div class="card-header"><h5><i class="fas fa-user me-2"></i>معلومات أساسية</h5></div>
                 <div class="card-body">
                     <ul class="info-list">
-                        <li id="user-type-display-item">
-                            <span class="label"><i class="fas fa-users"></i> نوع المستخدم</span>
-                            <span class="value" id="user-type-value">
+                        <li>
+                            <span class="label"><i class="fas fa-users"></i> النوع</span>
+                            <span class="value">
+                                <!-- تم التعديل: قراءة النوع ديناميكياً من قاعدة البيانات بدون اعتماد على الجافاسكريبت -->
                                 <span class="user-type-badge">
-                                    <i class="fas fa-question-circle"></i> غير محدد
+                                    {% if profile.is_customer and profile.is_supplier %}
+                                        <i class="fas fa-user-check me-1"></i> زبون و <i class="fas fa-truck me-1"></i> مورد
+                                    {% elif profile.is_supplier %}
+                                        <i class="fas fa-truck me-1"></i> مورد
+                                    {% else %}
+                                        <i class="fas fa-user-check me-1"></i> زبون
+                                    {% endif %}
                                 </span>
                             </span>
                         </li>
-                        <li>
-                            <span class="label"><i class="fas fa-birthday-cake"></i> تاريخ الميلاد</span>
-                            <span class="value">{{ profile.birth_date|date:"Y-m-d"|default:"غير محدد" }}</span>
-                        </li>
-                        <li>
-                            <span class="label"><i class="fas fa-venus-mars"></i> الجنس</span>
-                            <span class="value">{{ profile.get_gender_display|default:"غير محدد" }}</span>
-                        </li>
-                        <li>
-                            <span class="label"><i class="fas fa-map-marker-alt"></i> الموقع</span>
-                            <span class="value">{{ profile.city|default:"-" }}, {{ profile.country|default:"-" }}</span>
-                        </li>
+                        <li><span class="label"><i class="fas fa-birthday-cake"></i> الميلاد</span><span class="value">{{ profile.birth_date|date:"Y-m-d"|default:"-" }}</span></li>
+                        <li><span class="label"><i class="fas fa-map-marker-alt"></i> الموقع</span><span class="value">{{ profile.city|default:"-" }}, {{ profile.country|default:"-" }}</span></li>
                     </ul>
                 </div>
             </div>
         </div>
 
-        <!-- العمود الأيمن: النماذج مع إضافة حقل نوع المستخدم -->
+        <!-- العمود الأيمن: النموذج -->
         <div class="col-lg-8">
             <div class="card info-card">
-                <div class="card-header">
-                    <h5><i class="fas fa-edit me-2"></i>تحديث الملف الشخصي</h5>
-                </div>
+                <div class="card-header"><h5><i class="fas fa-edit me-2"></i>تحديث الملف الشخصي</h5></div>
                 <div class="card-body">
                     {% if messages %}
                         {% for message in messages %}
-                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                            {{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">{{ message }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
                         {% endfor %}
                     {% endif %}
 
                     <form method="post" enctype="multipart/form-data" id="profile-form">
                         {% csrf_token %}
 
-                        <!-- قسم المعلومات الأساسية مع إضافة حقل نوع المستخدم -->
                         <div class="form-section">
                             <h6 class="section-title">المعلومات الأساسية</h6>
                             
-                            <!-- حقل نوع المستخدم - تصميم مخصص حسب دليل التصميم -->
-                            <div class="mb-4">
-                                <label class="form-label required-field">
-                                    <i class="fas fa-users"></i> نوع المستخدم
-                                </label>
-                                <div class="row g-2">
-                                    <div class="col-md-4">
-                                        <div class="user-type-option" data-type="customer" onclick="selectUserType('customer')">
-                                            <div class="d-flex align-items-center">
-                                                <input type="radio" name="user_type" id="user_type_customer" value="customer">
-                                                <label for="user_type_customer" class="me-2">
-                                                    <i class="fas fa-user-check text-success"></i> زبون
-                                                </label>
-                                            </div>
-                                            <div class="user-type-description">
-                                                عملاء الشراء والبيع
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="user-type-option" data-type="supplier" onclick="selectUserType('supplier')">
-                                            <div class="d-flex align-items-center">
-                                                <input type="radio" name="user_type" id="user_type_supplier" value="supplier">
-                                                <label for="user_type_supplier" class="me-2">
-                                                    <i class="fas fa-truck text-primary"></i> مورد
-                                                </label>
-                                            </div>
-                                            <div class="user-type-description">
-                                                توريد المنتجات والخدمات
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="user-type-option" data-type="partner" onclick="selectUserType('partner')">
-                                            <div class="d-flex align-items-center">
-                                                <input type="radio" name="user_type" id="user_type_partner" value="partner">
-                                                <label for="user_type_partner" class="me-2">
-                                                    <i class="fas fa-handshake text-warning"></i> مشترك
-                                                </label>
-                                            </div>
-                                            <div class="user-type-description">
-                                                شراكة وتعاون مشترك
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="form-text">اختر نوع الحساب المناسب لك لتخصيص تجربتك في المنصة.</div>
-                            </div>
-
+                            <!-- حقول الاسم -->
                             <div class="row">
                                 <div class="col-md-6 mb-3">
-                                    <label for="{{ form.full_name.id_for_label }}" class="form-label">الاسم الكامل</label>
-                                    {{ form.full_name }}
+                                    <label for="{{ form.first_name.id_for_label }}" class="form-label">الاسم الأول</label>
+                                    {{ form.first_name }}
                                 </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.last_name.id_for_label }}" class="form-label">الاسم الأخير</label>
+                                    {{ form.last_name }}
+                                </div>
+                            </div>
+
+                            <!-- تم حذف قسم نوع الحساب بالكامل من هنا لتحسين تجربة المستخدم العادي -->
+
+                            <div class="row mt-3">
                                 <div class="col-md-6 mb-3">
                                     <label for="{{ form.phone_number.id_for_label }}" class="form-label">رقم الهاتف</label>
                                     {{ form.phone_number }}
@@ -407,116 +156,57 @@
                             </div>
                         </div>
 
-                        <!-- باقي الأقسام كما هي -->
                         <div class="form-section">
                             <h6 class="section-title">معلومات العمل</h6>
                             <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="{{ form.job_title.id_for_label }}" class="form-label">الوظيفة</label>
-                                    {{ form.job_title }}
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="{{ form.company.id_for_label }}" class="form-label">الشركة</label>
-                                    {{ form.company }}
-                                </div>
-                                <div class="col-md-12 mb-3">
-                                    <label for="{{ form.skills.id_for_label }}" class="form-label">المهارات</label>
-                                    {{ form.skills }}
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="{{ form.experience_years.id_for_label }}" class="form-label">سنوات الخبرة</label>
-                                    {{ form.experience_years }}
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="{{ form.education_level.id_for_label }}" class="form-label">المستوى التعليمي</label>
-                                    {{ form.education_level }}
-                                </div>
+                                <div class="col-md-6 mb-3">{{ form.job_title }}</div>
+                                <div class="col-md-6 mb-3">{{ form.company }}</div>
+                                <div class="col-md-6 mb-3">{{ form.skills }}</div>
+                                <div class="col-md-6 mb-3">{{ form.experience_years }}</div>
+                                <div class="col-md-6 mb-3">{{ form.education_level }}</div>
+                                <div class="col-md-6 mb-3">{{ form.university_major }}</div>
+                                <div class="col-md-6 mb-3">{{ form.languages }}</div>
                             </div>
                         </div>
 
                         <div class="form-section">
-                            <h6 class="section-title">معلومات الاتصال</h6>
+                            <h6 class="section-title">معلومات الاتصال والعنوان</h6>
                             <div class="row">
-                                <div class="col-md-12 mb-3">
-                                    <label for="{{ form.website_display.id_for_label }}" class="form-label">الموقع الإلكتروني</label>
+                                <div class="col-12 mb-3">
                                     {{ form.website_display }}
-                                    <div class="form-text">أدخل اسم الموقع فقط (مثال: google.com).</div>
+                                    <div class="form-text">أدخل اسم الموقع فقط (مثال: google.com)</div>
                                 </div>
-                                <div class="col-md-12 mb-3">
-                                    <label for="{{ form.address.id_for_label }}" class="form-label">العنوان الكامل</label>
-                                    {{ form.address }}
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="{{ form.city.id_for_label }}" class="form-label">المدينة</label>
-                                    {{ form.city }}
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="{{ form.country.id_for_label }}" class="form-label">البلد</label>
-                                    {{ form.country }}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-section">
-                            <h6 class="section-title">معلومات إضافية</h6>
-                            <div class="row">
-                                <div class="col-md-12 mb-3">
-                                    <label for="{{ form.bio.id_for_label }}" class="form-label">نبذة شخصية</label>
-                                    {{ form.bio }}
-                                </div>
-                                <div class="col-md-12 mb-3">
-                                    <label for="{{ form.profile_picture.id_for_label }}" class="form-label">صورة الملف الشخصي</label>
-                                    {{ form.profile_picture }}
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <div class="form-check form-switch">
-                                        {{ form.is_public }}
-                                        <label class="form-check-label" for="{{ form.is_public.id_for_label }}">
-                                            {{ form.is_public.label }}
-                                        </label>
-                                    </div>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <div class="form-check form-switch">
-                                        {{ form.email_notifications }}
-                                        <label class="form-check-label" for="{{ form.email_notifications.id_for_label }}">
-                                            {{ form.email_notifications.label }}
-                                        </label>
-                                    </div>
-                                </div>
+                                <div class="col-12 mb-3">{{ form.address }}</div>
+                                <div class="col-md-4 mb-3">{{ form.city }}</div>
+                                <div class="col-md-4 mb-3">{{ form.country }}</div>
+                                <div class="col-md-4 mb-3">{{ form.postal_code }}</div>
                             </div>
                         </div>
 
                         <div class="form-section">
                             <h6 class="section-title">التواصل الاجتماعي</h6>
                             <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="{{ form.facebook.id_for_label }}" class="form-label">فيسبوك</label>
-                                    {{ form.facebook }}
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="{{ form.twitter.id_for_label }}" class="form-label">تويتر</label>
-                                    {{ form.twitter }}
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="{{ form.instagram.id_for_label }}" class="form-label">انستغرام</label>
-                                    {{ form.instagram }}
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="{{ form.linkedin.id_for_label }}" class="form-label">لينكدإن</label>
-                                    {{ form.linkedin }}
-                                </div>
+                                <div class="col-md-6 mb-3">{{ form.facebook }}</div>
+                                <div class="col-md-6 mb-3">{{ form.twitter }}</div>
+                                <div class="col-md-6 mb-3">{{ form.instagram }}</div>
+                                <div class="col-md-6 mb-3">{{ form.linkedin }}</div>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <h6 class="section-title">إعدادات إضافية</h6>
+                            <div class="row">
+                                <div class="col-12 mb-3">{{ form.bio }}</div>
+                                <div class="col-12 mb-3">{{ form.profile_picture }}</div>
+                                <div class="col-md-6 mb-3"><div class="form-check form-switch">{{ form.is_public }} <label class="form-check-label" for="{{ form.is_public.id_for_label }}">{{ form.is_public.label }}</label></div></div>
+                                <div class="col-md-6 mb-3"><div class="form-check form-switch">{{ form.email_notifications }} <label class="form-check-label" for="{{ form.email_notifications.id_for_label }}">{{ form.email_notifications.label }}</label></div></div>
                             </div>
                         </div>
 
                         <hr>
                         <div class="d-flex justify-content-between">
-                            <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="fas fa-save me-2"></i>حفظ التغييرات
-                            </button>
-                            <a href="{% url 'index' %}" class="btn btn-outline-secondary btn-lg">
-                                <i class="fas fa-arrow-left me-2"></i>عودة للرئيسية
-                            </a>
+                            <button type="submit" class="btn btn-primary btn-lg"><i class="fas fa-save me-2"></i>حفظ التغييرات</button>
+                            <a href="{% url 'index' %}" class="btn btn-outline-secondary btn-lg"><i class="fas fa-arrow-left me-2"></i>عودة</a>
                         </div>
                     </form>
                 </div>
@@ -526,124 +216,16 @@
 </div>
 
 <script>
-// دالة لتحديث عرض نوع المستخدم في الجانب الأيسر
-function updateUserTypeDisplay(userType) {
-    const displaySpan = document.getElementById('user-type-value');
-    if (!displaySpan) return;
-    
-    let icon = '';
-    let text = '';
-    let colorClass = '';
-    
-    switch(userType) {
-        case 'customer':
-            icon = '<i class="fas fa-user-check"></i>';
-            text = 'زبون';
-            break;
-        case 'supplier':
-            icon = '<i class="fas fa-truck"></i>';
-            text = 'مورد';
-            break;
-        case 'partner':
-            icon = '<i class="fas fa-handshake"></i>';
-            text = 'مشترك';
-            break;
-        default:
-            icon = '<i class="fas fa-question-circle"></i>';
-            text = 'غير محدد';
-    }
-    
-    displaySpan.innerHTML = `<span class="user-type-badge">${icon} ${text}</span>`;
-}
-
-// دالة لتحديد نوع المستخدم
-function selectUserType(type) {
-    // تحديث الراديو بوتن
-    const radio = document.getElementById(`user_type_${type}`);
-    if (radio) {
-        radio.checked = true;
-    }
-    
-    // تحديث المظهر المرئي للخيارات
-    const options = document.querySelectorAll('.user-type-option');
-    options.forEach(option => {
-        option.classList.remove('selected');
-        if (option.getAttribute('data-type') === type) {
-            option.classList.add('selected');
-        }
-    });
-    
-    // تحديث العرض في الجانب الأيسر فوراً
-    updateUserTypeDisplay(type);
-    
-    // حفظ الاختيار في localStorage
-    localStorage.setItem('selectedUserType', type);
-}
-
-// دالة لاستعادة الاختيار المحفوظ
-function loadSavedUserType() {
-    const savedType = localStorage.getItem('selectedUserType');
-    if (savedType) {
-        // تحديث الراديو المحدد
-        const radio = document.getElementById(`user_type_${savedType}`);
-        if (radio) {
-            radio.checked = true;
-        }
-        
-        // تحديث المظهر المرئي
-        const options = document.querySelectorAll('.user-type-option');
-        options.forEach(option => {
-            option.classList.remove('selected');
-            if (option.getAttribute('data-type') === savedType) {
-                option.classList.add('selected');
-            }
-        });
-        
-        // تحديث العرض
-        updateUserTypeDisplay(savedType);
-    }
-}
-
 document.addEventListener('DOMContentLoaded', function() {
-    // إضافة كلاس Bootstrap لجميع حقول النماذج تلقائياً
-    const inputs = document.querySelectorAll('input:not([type="checkbox"]):not([type="radio"]), textarea, select');
-    inputs.forEach(input => {
-        input.classList.add('form-control');
-    });
-    
-    // إضافة كلاس form-select لحقول select
-    const selects = document.querySelectorAll('select');
-    selects.forEach(select => {
-        select.classList.add('form-select');
-    });
-    
-    // استعادة نوع المستخدم المحفوظ
-    loadSavedUserType();
-    
-    // معاينة الصورة
-    const profilePictureInput = document.getElementById('{{ form.profile_picture.id_for_label }}');
-    const profileAvatarImg = document.querySelector('.profile-avatar');
-    
-    if (profilePictureInput && profileAvatarImg) {
-        profilePictureInput.addEventListener('change', function(e) {
+    // معاينة الصورة فقط (تم إزالة أكواد نوع المستخدم لأنها أصبحت تُقرأ من قاعدة البيانات)
+    const input = document.querySelector('input[type="file"]');
+    const img = document.getElementById('avatar-preview-main');
+    if (input && img) {
+        input.addEventListener('change', function(e) {
             if (this.files && this.files[0]) {
                 const reader = new FileReader();
-                reader.onload = function(e) {
-                    profileAvatarImg.src = e.target.result;
-                }
+                reader.onload = e => img.src = e.target.result;
                 reader.readAsDataURL(this.files[0]);
-            }
-        });
-    }
-    
-    // عند حفظ النموذج، نضمن أن قيمة user_type تُرسل مع البيانات
-    const form = document.getElementById('profile-form');
-    if (form) {
-        form.addEventListener('submit', function(e) {
-            const selectedRadio = document.querySelector('input[name="user_type"]:checked');
-            if (selectedRadio) {
-                // التأكد من وجود الحقل في البيانات المرسلة
-                console.log('سيتم حفظ نوع المستخدم:', selectedRadio.value);
             }
         });
     }
