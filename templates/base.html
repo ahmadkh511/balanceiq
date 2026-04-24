@@ -499,7 +499,7 @@
                                 <li class="{% if request.resolver_match.url_name == 'sale_create' %}sub-active{% endif %}"><a href="{% url 'invoice:sale_create' %}"><i class="fas fa-plus-circle"></i>إنشاء فاتورة بيع</a></li>
                                 <li class="{% if request.resolver_match.url_name == 'sale_list' %}sub-active{% endif %}"><a href="{% url 'invoice:sale_list' %}"><i class="fas fa-list"></i>قائمة فواتير المبيعات</a></li>
                                 <li class="{% if request.resolver_match.url_name == 'purchase_return_list' %}sub-active{% endif %}"><a href="{% url 'invoice:purchase_return_list' %}"><i class="fas fa-undo"></i>مرتجعات المشتريات</a></li>
-                                <li class="{% if request.resolver_match.url_name == 'sale_return_list' %}sub-active{% endif %}"><a href="{% url 'invoice:sale_return_list' %}"><i class="fas fa-receipt"></i>مرتجعات 555المبيعات</a></li>
+                                <li class="{% if request.resolver_match.url_name == 'sale_return_list' %}sub-active{% endif %}"><a href="{% url 'invoice:sale_return_list' %}"><i class="fas fa-receipt"></i>مرتجعات المبيعات</a></li>
                             </ul>
                         </li>
                         <li class="has-submenu {% if 'product' in request.resolver_match.url_name %}active{% endif %}">
