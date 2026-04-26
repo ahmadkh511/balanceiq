@@ -85,11 +85,10 @@ WSGI_APPLICATION = 'balanceIQ.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'accounting_db',
-        'USER': 'root',
-        # كلمة المرور تُقرأ من ملف .env، وإذا كانت فارغة محلياً تمر فارغة
-        'PASSWORD': os.getenv('DB_PASSWORD', ''),
-        'HOST': '127.0.0.1',
+        'NAME': 'wcom$accounting_db', 
+        'USER': 'wcom',
+        'PASSWORD': 'asd_asd_1234',
+        'HOST': 'wcom.mysql.pythonanywhere-services.com',
         'PORT': '3306',
         'OPTIONS': {
             'charset': 'utf8mb4',
