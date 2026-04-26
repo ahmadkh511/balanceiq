@@ -82,11 +82,10 @@ WSGI_APPLICATION = 'balanceIQ.wsgi.application'
 # ==========================================
 # 6. قاعدة البيانات
 # ==========================================
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'test1',
+        'NAME': 'accounting_db',
         'USER': 'root',
         # كلمة المرور تُقرأ من ملف .env، وإذا كانت فارغة محلياً تمر فارغة
         'PASSWORD': os.getenv('DB_PASSWORD', ''),
@@ -97,7 +96,6 @@ DATABASES = {
         }
     }
 }
-
 
 
 # ==========================================
