@@ -82,10 +82,10 @@ WSGI_APPLICATION = 'balanceIQ.wsgi.application'
 # ==========================================
 # 6. قاعدة البيانات
 # ==========================================
-DATABASES = {
+DDATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'wcom$accounting_db', 
+        'NAME': 'wcom$accountingdb', 
         'USER': 'wcom',
         'PASSWORD': 'asd_asd_1234',
         'HOST': 'wcom.mysql.pythonanywhere-services.com',
@@ -95,7 +95,6 @@ DATABASES = {
         }
     }
 }
-
 
 # ==========================================
 # 7. التحقق من صحة كلمات المرور
