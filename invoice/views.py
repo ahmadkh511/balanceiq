@@ -5097,6 +5097,7 @@ def store_front(request):
 #  سلة التسوق (API & Pages)
 # ===============================================
 
+
 def add_to_cart(request):
     """إضافة منتج للسلة (AJAX)"""
     if request.method != 'POST':
@@ -5198,8 +5199,12 @@ def checkout_view(request):
     return render(request, 'invoice/store/checkout.html', {'cart': cart, 'title': 'إتمام الشراء'})
 
 
+
+from django.db import transaction
+from django.db.models import F
+
 def place_order_view(request):
-    """تأكيد الطلب وإنشاءه في قاعدة البيانات"""
+    """تأكيد الطلب وإنشاءه في قاعدة البيانات (النسخة المحصنة)"""
     if request.method != 'POST':
         return redirect('invoice:store_front')
     
@@ -5208,33 +5213,62 @@ def place_order_view(request):
         return JsonResponse({'success': False, 'message': 'السلة فارغة'}, status=400)
 
     try:
-        order = WebsiteOrder.objects.create(
-            user=request.user if request.user.is_authenticated else None,
-            full_name=request.POST.get('full_name'),
-            phone=request.POST.get('phone'),
-            address=request.POST.get('address'),
-            notes=request.POST.get('notes', ''),
-            total_amount=cart.total_price,
-            status='new'
-        )
+        # 1. بدء المعاملة الآمنة (Transaction)
+        with transaction.atomic():
+            
+            # 2. قفل المنتجات الموجودة في السلة لمنع أي شخص آخر من شرائها في نفس الثانية
+            product_ids = cart.items.values_list('product_id', flat=True)
+            products = Product.objects.select_for_update().filter(id__in=product_ids)
+            
+            # 3. التحقق من توفر المخزون قبل إنشاء الطلب
+            for item in cart.items.all():
+                # جلب المنتج المقفل من قاعدة البيانات
+                product = products.get(id=item.product.id)
+                
+                if product.current_stock_quantity < item.quantity:
+                    # إذا لم يكن المخزون كافياً، يتم إلغاء العملية بالكامل
+                    raise ValueError(f'المنتج "{product.product_name}" غير متوفر بالكمية المطلوبة. المتاح: {product.current_stock_quantity}')
 
-        for item in cart.items.all():
-            WebsiteOrderItem.objects.create(
-                order=order,
-                product=item.product,
-                product_name=item.product.product_name,
-                price=get_product_price(item.product),
-                quantity=item.quantity
+            # 4. إذا وصلنا هنا، فالمخزون متوفر، نقوم بإنشاء الطلب
+            order = WebsiteOrder.objects.create(
+                user=request.user if request.user.is_authenticated else None,
+                full_name=request.POST.get('full_name'),
+                phone=request.POST.get('phone'),
+                address=request.POST.get('address'),
+                notes=request.POST.get('notes', ''),
+                total_amount=cart.total_price,
+                status='new'
             )
 
-        cart.items.all().delete()
-        return JsonResponse({
-            'success': True,
-            'message': f'تم استلام طلبك! رقم الطلب: #{order.id}',
-            'order_id': order.id
-        })
+            # 5. إنشاء عناصر الطلب وخصم المخزون (آمناً لأن المنتجات مقفلة)
+            for item in cart.items.all():
+                WebsiteOrderItem.objects.create(
+                    order=order,
+                    product=item.product,
+                    product_name=item.product.product_name,
+                    price=get_product_price(item.product),
+                    quantity=item.quantity
+                )
+                # خصم المخزون فوراً
+                item.product.current_stock_quantity = F('current_stock_quantity') - item.quantity
+                item.product.save(update_fields=['current_stock_quantity'])
+
+            # 6. تفريغ السلة
+            cart.items.all().delete()
+            
+            return JsonResponse({
+                'success': True,
+                'message': f'تم استلام طلبك! رقم الطلب: #{order.id}',
+                'order_id': order.id
+            })
+            
+    except ValueError as e:
+        # في حالة عدم توفر المخزون، نرجع رسالة خطأ واضحة للعميل
+        return JsonResponse({'success': False, 'message': str(e)}, status=400)
     except Exception as e:
-        return JsonResponse({'success': False, 'message': str(e)}, status=500)
+        return JsonResponse({'success': False, 'message': 'حدث خطأ أثناء معالجة الطلب، يرجى المحاولة مرة أخرى.'}, status=500)
+
+
 
 
 # ===============================================
@@ -5579,7 +5613,8 @@ def convert_order_to_invoice(request, order_id):
                     unit_price=item.price
                 )
                 sale_item.save()
-                sale_item.update_product_stock()
+                # تم تعطيل خصم المخزون لأنه يتم الآن آلياً عند الشراء من المتجر لمنع الخصم المزدوج
+                # sale_item.update_product_stock()
 
             sale.calculate_and_save_totals()
             
@@ -5603,8 +5638,6 @@ def convert_order_to_invoice(request, order_id):
     except Exception as e:
         messages.error(request, f'حدث خطأ أثناء التحويل: {str(e)}')
         return redirect('invoice:order_detail', order_id=order.id)
-
-
 
 #=====
 
